@@ -14,40 +14,47 @@ A CEO strategy game built on real company data. You take over a struggling Fortu
 | Nike | Resetting a slowing brand |
 | Kraft Heinz | Reviving mature food brands |
 
-Every starting number (revenue, margin, cash, debt, capital spending, dividends, headcount) comes from the company's SEC filings. Links to the filings appear inside the game.
+Every starting number (revenue, margin, cash, debt, capital spending, dividends, headcount) comes from the company's SEC filings, with links to the filings inside the game.
 
 ## How it works
 
-- **Quarterly decisions.** Each quarter brings briefings with options across finance, operations, strategy and people. Effects land over the following quarters, so earlier choices come back to you.
-- **Scored against the real playbook.** A "ghost" plays the same scenario using what the real leadership actually did. Your value index starts at 100 and is compared with theirs.
-- **Your leadership team.** Five fictional executives advise you. Overrule them and they lose trust; take their advice and they gain it. Low trust can mean resignations.
-- **Stakeholders.** Investors, brand, employees, customers, regulators and execution each have a meter that moves with your choices.
+- **Quarterly decisions** across finance, operations, strategy and people. Effects land over later quarters, so earlier choices come back to you.
+- **Scored against the real playbook.** A "ghost" plays the same scenario using what the real leadership announced. Your value index starts at 100 and is compared with theirs.
+- **Your leadership team.** Five fictional executives advise you. Overrule them and they lose trust; take their advice and they gain it.
 - **Earnings calls.** Answer analysts with confidence, candor or deflection. Overpromising has a cost.
-- **Three difficulties.**
-  - **Easy:** plain-language explanations of every number, with hints.
-  - **Medium:** standard financial terms and fewer hints.
-  - **Hard:** every number, no hints, and the board can fire you.
-- **Luck is separated from skill.** The debrief replays your decisions without random noise so you can see how much was the dice and how much was your judgment.
+- **Three difficulties.** Guided (plain English, 8 quarters), Standard (12 quarters), Hot Seat (16 quarters, full numbers, one bad board quarter ends it).
+- **Luck is separated from skill.** The debrief replays your choices without random noise.
 
-## Running it locally
+The real leadership's choices come from public reporting. The size of each choice's effect is modeled, so the comparison is "what would the real decisions have produced in this simulation", not a prediction of what actually would have happened.
 
-The whole game is one static file with no dependencies and no backend.
+## Leaderboard, sharing and analytics
+
+- **Share card.** The debrief makes an image (and copyable text) with your result.
+- **Leaderboard.** One board per company and seat. Posting sends your choices to the server, which replays them through the same deterministic engine and computes the score itself, so numbers cannot be typed in. Ranked by points ahead of the real playbook. Only completed games are ranked. Rewinds used are self-reported.
+- **Analytics.** Anonymous counts only: which company and difficulty were picked, how far games got, completions, shares. A random ID kept in the browser counts unique players. No names, emails or IP addresses are stored. Browsers with Do Not Track on are not counted. A one-hour abuse limit uses a scrambled form of the connection address that is not kept.
+- **Stats dashboard** at `/stats`, protected by a key only you know. It also lets you remove leaderboard entries.
+
+## Project layout
 
 ```
-open index.html
+src/        engine.js (simulation + data), ui.js (screens), shell.html (styles), photos.css, stats.html
+api/        serverless functions: event, score, leaderboard, stats, admin (+ _replay.js, _lib.js)
+dev/        local dev server with an in-memory database, and a replay self-test
+build.js    assembles src/ into public/index.html (the single-file game)
 ```
 
-Progress is saved in your browser's local storage. Nothing is sent anywhere.
+Run locally: `node build.js && node dev/server.js`, then open http://localhost:3000. The dev server uses an in-memory stand-in for the database. `node dev/replay-test.js` checks that the server replay matches the browser engine exactly.
+
+Deploying (Vercel, Upstash Redis for storage): see [SETUP.md](SETUP.md).
 
 ## Data and sources
 
 - Financials: SEC EDGAR filings (10-K and 10-Q) via the SEC's XBRL data.
 - Workforce, layoff and site information: company filings and public reporting, linked from inside the game.
-- Decision outcomes are modeled. The real leadership's choices are based on public reporting, but the effects of each choice in the game are a simulation, not a prediction.
 
 ## Photo credits
 
-Photos are from Wikimedia Commons and credited in the game as well.
+Photos are from Wikimedia Commons and credited in the game and on share cards.
 
 | Company | Subject | Photographer | License |
 |---|---|---|---|
@@ -59,4 +66,4 @@ Photos are from Wikimedia Commons and credited in the game as well.
 
 ## Disclaimer
 
-Pseudo CEO is an educational game. It is not affiliated with or endorsed by any of the companies shown. The executives and advisors in the game are fictional. Nothing here is financial advice.
+Educational game. Not affiliated with or endorsed by any company shown. The executives and advisors are fictional. Nothing here is financial advice.

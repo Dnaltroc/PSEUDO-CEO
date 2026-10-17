@@ -1,0 +1,8 @@
+{
+  "name": "pseudo-ceo",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Pseudo CEO: a CEO strategy game on real SEC filing data.",
+  "scripts": { "build": "node build.js" },
+  "engines": { "node": ">=18" }
+}
