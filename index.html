@@ -1715,7 +1715,7 @@ function renderHome(){
   h+='</div></section>';
   h+='<section class="section stack tight"><h3 class="h3">'+c.name+' right now</h3><p class="body">'+esc(c.pitch)+'</p><ul class="facts">'+c.facts.map(f=>'<li>'+esc(f[0])+' '+ext(f[1],'Source')+'</li>').join('')+'</ul>'+sourcesBlock(c)+'</section>';
   h+=filingsTable(c,false);
-  h+='<section class="stack tight"><div class="step"><span class="n">02</span><h2 class="h3">Choose your seat</h2></div><div class="grid-3" role="radiogroup" aria-label="Difficulty">';
+  h+='<section class="stack tight"><div class="step"><span class="n">02</span><h2 class="h3">Choose difficulty</h2></div><div class="grid-3" role="radiogroup" aria-label="Difficulty">';
   for(const d of Object.values(DIFF)){
     h+='<button class="choice" role="radio" aria-checked="'+(s.diff===d.key)+'" data-act="pickdiff" data-v="'+d.key+'"><span class="t"><span>'+({easy:'Easy',medium:'Medium',hard:'Hard'})[d.key]+'</span><span>'+d.time.replace('About ','about ')+'</span></span><span class="n">'+d.name+'</span><span class="d">'+d.quarters+' quarters. '+esc(d.blurb)+'</span></button>';
   }
