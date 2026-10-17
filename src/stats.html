@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Pseudo CEO stats</title>
+<style>
+:root{--bg:#F6F5F1;--sheet:#fff;--ink:#14161B;--muted:#5C6270;--faint:#8A90A0;--rule:#DAD8D0;--accent:#0B4FB3;--gain:#14794A;--loss:#B3261E;--bar:#0B4FB3;--bar2:#9DB8E6}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1117;--sheet:#161B24;--ink:#EEF0F5;--muted:#A3A9B8;--faint:#7C8396;--rule:#2A3140;--accent:#7FB0FF;--gain:#4CC38A;--loss:#FF8A80;--bar:#7FB0FF;--bar2:#2D4470}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:28px 16px 64px;display:grid;gap:28px}
+h1{font-size:28px;margin:0;letter-spacing:-.01em}
+h2{font-size:17px;margin:0 0 10px}
+p{margin:0;color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+input,select,button{font:inherit;color:inherit}
+input,select{padding:9px 11px;border:1px solid var(--rule);border-radius:6px;background:var(--sheet)}
+button{padding:9px 15px;border-radius:6px;border:0;background:var(--accent);color:#fff;font-weight:600;cursor:pointer}
+button.sec{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--rule)}
+button.danger{background:transparent;color:var(--loss);box-shadow:inset 0 0 0 1px var(--loss);padding:4px 10px;font-size:13px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--sheet);border-radius:8px;padding:14px 16px}
+.tile b{display:block;font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile span{font-size:13px;color:var(--muted)}
+.card{background:var(--sheet);border-radius:8px;padding:16px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14.5px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;border-bottom:1px solid var(--rule);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-size:12.5px;color:var(--muted);font-weight:600}
+tr:last-child td{border-bottom:0}
+.up{color:var(--gain)}.down{color:var(--loss)}
+svg{display:block;width:100%;height:auto}
+.legend{display:flex;gap:16px;font-size:13px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.err{color:var(--loss)}
+.spark{display:inline-flex;align-items:flex-end;gap:2px;height:26px}
+.spark i{display:block;width:8px;background:var(--bar);border-radius:1px 1px 0 0;min-height:1px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div><h1>Pseudo CEO stats</h1><p>Anonymous play counts. Private to you: needs your STATS_KEY.</p></div>
+  <form class="row" id="gate">
+    <input id="key" type="password" placeholder="STATS_KEY" autocomplete="current-password" aria-label="Stats key" style="min-width:240px">
+    <select id="days" aria-label="Range"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option></select>
+    <button>Load</button><span id="msg" class="err"></span>
+  </form>
+  <div id="out" hidden>
+    <div class="tiles" id="tiles"></div>
+    <section style="margin-top:28px"><h2>Unique players and games started, per day</h2><div class="card"><svg id="chart" viewBox="0 0 900 220" role="img" aria-label="Daily unique players and games started"></svg><div class="legend"><span><i style="background:var(--bar)"></i>Unique players</span><span><i style="background:var(--bar2)"></i>Games started</span></div></div></section>
+    <section style="margin-top:28px"><h2>By company and seat</h2><div class="card"><table id="grid"></table></div><p style="margin-top:8px;font-size:13px">Counts since tracking began, not just the range above. Avg edge is points ahead of the real playbook on completed games.</p></section>
+    <section style="margin-top:28px"><h2>Where games end</h2><div class="card"><table id="drop"></table></div><p style="margin-top:8px;font-size:13px">How many games reached each quarter. A steep early drop means players quit before the game finds its feet.</p></section>
+    <section style="margin-top:28px"><h2>Moderation</h2>
+      <div class="row"><select id="mco"></select><select id="md"><option value="easy">Guided</option><option value="medium">Standard</option><option value="hard">Hot Seat</option></select><button class="sec" id="mload" type="button">Load board</button></div>
+      <div class="card" style="margin-top:10px"><table id="mod"></table></div>
+    </section>
+  </div>
+</main>
+<script>
+const CO={intc:'Intel',ba:'Boeing',unh:'UnitedHealth',nke:'Nike',khc:'Kraft Heinz'},DF={easy:'Guided',medium:'Standard',hard:'Hot Seat'};
+const $=id=>document.getElementById(id),n=v=>(v||0).toLocaleString('en-US');
+let KEY='';try{KEY=sessionStorage.getItem('pc.key')||''}catch(e){}
+$('key').value=KEY;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function api(path,opt){const r=await fetch(path,Object.assign({headers:{'X-Stats-Key':KEY}},opt));const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||('Error '+r.status));return j}
+$('gate').addEventListener('submit',e=>{e.preventDefault();KEY=$('key').value.trim();try{sessionStorage.setItem('pc.key',KEY)}catch(e){}load()});
+async function load(){
+  $('msg').textContent='';
+  try{const s=await api('/api/stats?days='+$('days').value);render(s);$('out').hidden=false}
+  catch(e){$('msg').textContent=e.message;$('out').hidden=true}
+}
+function render(s){
+  const T=s.total,starts=T.start||0;let done=0,fired=0;
+  for(const c in CO)for(const d in DF){done+=T['done:'+c+':'+d]||0;fired+=T['fired:'+c+':'+d]||0}
+  const ended=done+fired;
+  $('tiles').innerHTML=[[n(s.uvAll),'unique players, all time'],[n(starts),'games started'],[ended?Math.round(ended/Math.max(starts,1)*100)+'%':'0%','games that reached the debrief'],[n(done),'completed'],[n(fired),'fired by the board'],[n(T.share),'shares'],[n(T.post),'leaderboard posts'],[n(T.view),'page views']].map(x=>'<div class="tile"><b>'+x[0]+'</b><span>'+x[1]+'</span></div>').join('');
+  // daily chart
+  const W=900,H=220,pad=28,ser=s.series,mx=Math.max(1,...ser.map(d=>Math.max(d.uv,d.ev.start||0))),bw=(W-pad*2)/ser.length;
+  let g='<line x1="'+pad+'" y1="'+(H-pad)+'" x2="'+(W-pad)+'" y2="'+(H-pad)+'" stroke="var(--rule)"/>';
+  ser.forEach((d,i)=>{const x=pad+i*bw,h1=(H-pad*2)*(d.ev.start||0)/mx,h2=(H-pad*2)*d.uv/mx;
+    g+='<rect x="'+(x+bw*.12)+'" y="'+(H-pad-h1)+'" width="'+bw*.76+'" height="'+h1+'" fill="var(--bar2)"><title>'+d.day+': '+(d.ev.start||0)+' started</title></rect>';
+    g+='<rect x="'+(x+bw*.3)+'" y="'+(H-pad-h2)+'" width="'+bw*.4+'" height="'+h2+'" fill="var(--bar)"><title>'+d.day+': '+d.uv+' unique players</title></rect>';});
+  g+='<text x="'+pad+'" y="'+(H-8)+'" font-size="12" fill="var(--faint)">'+ser[0].day+'</text><text x="'+(W-pad)+'" y="'+(H-8)+'" font-size="12" text-anchor="end" fill="var(--faint)">'+ser[ser.length-1].day+'</text><text x="'+pad+'" y="14" font-size="12" fill="var(--faint)">max '+mx+'</text>';
+  $('chart').innerHTML=g;
+  // grid
+  let t='<thead><tr><th>Company and difficulty</th><th>Started</th><th>Completed</th><th>Fired</th><th>Finish rate</th><th>Avg edge</th><th>Ranked entries</th></tr></thead><tbody>';
+  for(const c in CO)for(const d in DF){const k=c+':'+d,st=T['start:'+k]||0,dn=T['done:'+k]||0,fr=T['fired:'+k]||0,en=T['edgeN:'+k]||0,ed=en?(T['edge:'+k]||0)/en/10:null;
+    t+='<tr><td>'+CO[c]+', '+DF[d]+'</td><td>'+n(st)+'</td><td>'+n(dn)+'</td><td>'+n(fr)+'</td><td>'+(st?Math.round((dn+fr)/st*100)+'%':'–')+'</td><td class="'+(ed==null?'':ed>=0?'up':'down')+'">'+(ed==null?'–':(ed>=0?'+':'−')+Math.abs(ed).toFixed(1))+'</td><td>'+n(s.boards[k])+'</td></tr>'}
+  $('grid').innerHTML=t+'</tbody>';
+  // drop-off
+  let dr='<thead><tr><th>Company and difficulty</th><th>Quarters reached</th></tr></thead><tbody>';
+  for(const c in CO)for(const d in DF){const q=[];for(let i=0;i<20;i++)q.push(T['q:'+c+':'+d+':'+i]||0);const top=Math.max(...q);
+    if(!top){dr+='<tr><td>'+CO[c]+', '+DF[d]+'</td><td class="faint" style="text-align:left">no games yet</td></tr>';continue}
+    const last=q.map((v,i)=>v?i:-1).reduce((a,b)=>Math.max(a,b));
+    dr+='<tr><td>'+CO[c]+', '+DF[d]+'</td><td style="text-align:left"><span class="spark">'+q.slice(0,last+1).map((v,i)=>'<i style="height:'+Math.max(3,Math.round(26*v/top))+'px" title="Quarter '+(i+1)+': '+v+'"></i>').join('')+'</span> <span class="faint" style="margin-left:6px">'+q[0]+' to '+q[last]+'</span></td></tr>'}
+  $('drop').innerHTML=dr+'</tbody>';
+}
+$('mco').innerHTML=Object.entries(CO).map(([k,v])=>'<option value="'+k+'">'+v+'</option>').join('');
+$('mload').onclick=modLoad;
+async function modLoad(){
+  try{const j=await api('/api/admin?co='+$('mco').value+'&d='+$('md').value);
+    $('mod').innerHTML=j.rows.length?'<thead><tr><th>Name</th><th>Edge</th><th>Scenario</th><th>Posted</th><th></th></tr></thead><tbody>'+j.rows.map(r=>'<tr><td>'+esc(r.n)+'</td><td>'+(r.edge>=0?'+':'−')+Math.abs(r.edge).toFixed(1)+'</td><td>'+esc(r.seed)+'</td><td>'+new Date(r.ts).toLocaleDateString()+'</td><td><button class="danger" data-k="'+r.k+'">Remove</button></td></tr>').join('')+'</tbody>':'<tbody><tr><td class="faint">No entries on this board.</td></tr></tbody>'}
+  catch(e){$('msg').textContent=e.message}
+}
+$('mod').addEventListener('click',async e=>{const b=e.target.closest('button[data-k]');if(!b||!confirm('Remove this entry from the leaderboard?'))return;
+  try{await api('/api/admin',{method:'POST',headers:{'X-Stats-Key':KEY,'Content-Type':'application/json'},body:JSON.stringify({co:$('mco').value,d:$('md').value,k:b.dataset.k})});modLoad()}catch(er){$('msg').textContent=er.message}});
+if(KEY)load();
+</script>
+</body>
+</html>
