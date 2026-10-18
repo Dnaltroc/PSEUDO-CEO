@@ -818,12 +818,14 @@ function step(game,who,ch,opt){
   opt=opt||{};
   const co=CO[game.coId],D=DIFF[game.diffKey],q=game.q,st=game[who],seed=game.seed;
   const cash0=st.cash;let fin=0;
-  const noise=opt.noise!==false,notes=[],outs={};
+  const noise=opt.noise!==false,notes=[],outs={},fits={};
   const pq=game.plan.quarters[q];
   const sd=noise?D.sd:0;
   // event auto effects
   if(pq.event&&!opt.skipEvent){
     const ev=EV[pq.event];let mul=D.evMul;
+    const sg=who==='st'?game.strategy:game.ghostStrategy;
+    if(sg&&EVENT_FORCE[ev.id]&&sg.top.indexOf(EVENT_FORCE[ev.id])>=0){mul*=HEDGE;if(who==='st')opt._hedged=true}
     if(ev.cyber){mul*=st.flags.cyberShield?0.4:st.flags.cyberHalf?0.7:st.flags.cyberWeak?1.5:1}
     if(ev.auto)pushFx(st,ev.auto,q,rngFor(seed,'evfx',q),noise,D,mul);
     if(ev.autoOut){const t=applyOpt(st,{out:ev.autoOut},q,rngFor(seed,'evout',q),noise,D,mul,null);if(t)outs['ev:'+ev.id+':auto']=t}
@@ -835,6 +837,10 @@ function step(game,who,ch,opt){
     const ctx=contextFor(co,st,o,card);
     const t=applyOpt(st,o,q,rngFor(seed,'fx',q,cid,oi),noise,D,1,null,{cid,oi,q},ctx);
     if(t)outs[cid]=t;
+    const sg=who==='st'?game.strategy:game.ghostStrategy;
+    if(sg){const f=fitOf(cid,oi,sg.posture);fits[cid]=f;
+      if(f>0)pushFx(st,[['exe',2],['inv',0.5]],q,null,false,D);
+      else if(f<0)pushFx(st,[['exe',-2],['inv',-1.5]],q,null,false,D)}
   }
   // allocation
   const R=annRev(st),eqNow=Math.max(equityRaw(st,co,st.base),0.05*st.eq0);
@@ -935,7 +941,7 @@ function step(game,who,ch,opt){
   st.expOp=op*(1+clamp(g,-5,5)/100)*(1+st.gf);
   st.lastG=g;st.lastOp=op;st.cashHist.push(st.cash);
   const nH=st.revHist.length;
-  const rec={q,rev:st.rev,g,margin,op,fcf,cash:st.cash,debt:st.debt,kpi:st.kpi,idx:st.idx,ret,s,exp,rescue,div:st.div,buyback,outs,callNote,meters:Object.assign({},M),
+  const rec={q,rev:st.rev,g,margin,op,fcf,cash:st.cash,debt:st.debt,kpi:st.kpi,idx:st.idx,ret,s,exp,rescue,div:st.div,buyback,outs,callNote,fits,hedged:!!opt._hedged,meters:Object.assign({},M),
     interest,tax,ni,da:co.start.da,capex:co.start.capex,wc:co.start.wc,cash0,fin,other:(st.cash-cash0)-(fcf-st.div-buyback)-fin,
     yoy:(st.revHist[nH-1]/st.revHist[nH-5]-1)*100,ttmRev:ttm(st.revHist),ttmOp:ttm(st.opHist),lev:leverage(st,co),shares:st.shares,expNext:st.expOp,guide:st.guide,eq:eq};
   st.hist.push(rec);
@@ -1075,11 +1081,134 @@ function applyCall(game,who,qs,answers){
   return {inv,brd,flag,quality:qs.length?qsum/qs.length:2};
 }
 
+/* ---------- strategy: Five Forces read + how-to-win posture ---------- */
+const FORCES=[['rivalry','Rivals'],['buyers','Buyers'],['suppliers','Suppliers'],['entrants','New entrants'],['substitutes','Substitutes']];
+const POSTURES=[['cost','Cost leader'],['differentiate','Differentiator'],['focus','Focused niche'],['reinvent','Reinventor']];
+const POSTURE_OPP={cost:'differentiate',differentiate:'cost',focus:'reinvent',reinvent:'focus'};
+/* which force each shock belongs to; a force you flagged softens the shock because you saw it coming */
+const EVENT_FORCE={tariff:'suppliers',inputs:'suppliers',strike:'suppliers',medtrend:'suppliers',recession:'buyers',raid:'rivalry',glp1:'substitutes'};
+const HEDGE=0.65;
+/* Hand-tagged: which strategy each option serves. c cost leader, d differentiator, f focus, r reinvent, - neutral.
+   Our judgment; it decides whether a choice fits or fights the posture you picked. */
+const FIT_TAG={
+ 'intc-14a':'rfc','intc-spin':'r-f','intc-asic':'cdf','intc-raise':'---','intc-layers':'c--','intc-yield':'dc-','intc-chips':'r-c',
+ 'ba-rate':'cdf','ba-newjet':'rdc','ba-cert':'dcf','ba-spirit':'d-c','ba-union':'---','ba-defense':'cff','ba-china':'cd-',
+ 'unh-ma':'fd-','unh-pa':'ddc','unh-optum':'f-c','unh-coding':'d--','unh-ai':'cc-','unh-unit':'f-r','unh-2027':'---',
+ 'nke-channel':'d-c','nke-franchise':'fdc','nke-cfo':'---','nke-running':'f-c','nke-china':'rfc','nke-amazon':'cdf','nke-windfall':'d--',
+ 'khc-600':'dc-','khc-split':'r-f','khc-kids':'dcr','khc-private':'c-d','khc-glp1':'d-r','khc-div':'---','khc-coffee':'d-c',
+ 'g-ai':'dc-','g-price':'d-c','g-coo':'---','g-union':'---','g-acq':'r-f','g-office':'---','g-cyber':'d-c','g-climate':'---','g-iday':'---','g-supply':'---',
+ 'ev:tariff':'d-c','ev:recession':'c-r','ev:activist':'---','ev:cyber':'d-','ev:probe':'d-','ev:inputs':'d-c','ev:raid':'---','ev:aisurge':'rd','ev:escape':'dc','ev:medtrend':'--','ev:order':'cd','ev:strike':'--'
+};
+const _FT={c:'cost',d:'differentiate',f:'focus',r:'reinvent'};
+/* +1 the option fits the posture, -1 it fights it, 0 neutral */
+function fitOf(cid,oi,posture){
+  const t=_FT[(FIT_TAG[cid]||'')[oi]];
+  if(!t)return 0;
+  if(t===posture)return 1;
+  if(POSTURE_OPP[posture]===t)return -1;
+  return 0;
+}
+function validStrategy(s,co){
+  if(!s||typeof s!=='object')return false;
+  if(!Array.isArray(s.top)||s.top.length!==2||s.top[0]===s.top[1])return false;
+  if(!s.top.every(f=>FORCES.some(x=>x[0]===f)))return false;
+  return POSTURES.some(x=>x[0]===s.posture);
+}
+function setStrategy(game,s){
+  const co=CO[game.coId];
+  if(!co.strategy||!validStrategy(s))return false;
+  game.strategy={top:s.top.slice(),posture:s.posture};
+  game.ghostStrategy={top:co.strategy.ref.slice(),posture:co.strategy.lead.posture};
+  return true;
+}
+function strategySummary(game){
+  const co=CO[game.coId],S=co.strategy,mine=game.strategy;
+  if(!mine||!S)return null;
+  let al=0,fo=0,ne=0,hedged=0;
+  for(const l of game.log){if(l.fits)for(const k in l.fits){const f=l.fits[k];if(f>0)al++;else if(f<0)fo++;else ne++}if(l.hedged)hedged++}
+  const match=mine.top.filter(f=>S.ref.indexOf(f)>=0).length;
+  return {posture:mine.posture,top:mine.top,refPosture:S.lead.posture,ref:S.ref,match,aligned:al,fought:fo,neutral:ne,hedged};
+}
+
+/* ---------- strategy data: a sourced Five Forces read for each company ----------
+   Pressure: 1 weak, 2 moderate, 3 strong. The reference read and the leadership posture are our
+   reading of the filings and public statements, not a ruling. */
+const _SD={
+ intc:{
+  forces:{
+   rivalry:{p:3,line:'AMD contests x86 chips, Arm designers and hyperscaler custom silicon attack share, Nvidia leads AI, and TSMC leads contract manufacturing.',src:'https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/intc-20251227.htm'},
+   buyers:{p:2,line:'Big cloud and PC customers hold some leverage, but demand is outrunning supply and Intel has signed long-term deals and raised prices.',src:'https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf'},
+   suppliers:{p:3,line:'ASML is the sole source of EUV tools, TSMC makes some Intel chips, and substrates, memory and wafers are short.',src:'https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/intc-20251227.htm'},
+   entrants:{p:2,line:'Leading-edge fabs cost enormous sums, so few can enter; the newer threat is Arm and RISC-V designers and custom chips from the cloud giants.',src:'https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/intc-20251227.htm'},
+   substitutes:{p:2,line:'GPU systems and custom chips can divert spending from CPUs, though management says AI inference is now lifting server CPU demand.',src:'https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/intc-20251227.htm'}},
+  ref:['rivalry','suppliers'],refWhy:'Intel fights AMD, Arm designers, Nvidia and TSMC on every front while depending on ASML, TSMC and scarce supply to ship what customers want.',
+  lead:{line:'Leadership says it is rebuilding the balance sheet and execution, proving 18A with internal volume to win outside customers for 14A, and pairing CPUs with GPUs and custom chips for AI.',src:'https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf',posture:'reinvent'},
+  pl:{cost:'Squeeze fab and packaging costs, but TSMC’s scale makes undercutting it very hard.',
+      differentiate:'Win on x86 compatibility, advanced packaging and tightly paired CPU, GPU and custom-chip systems for AI.',
+      focus:'Retreat to core client and server CPUs on mature in-house nodes, and pause 14A if no big outside customer signs.',
+      reinvent:'Become a trusted leading-edge foundry for outside designers while also supplying AI systems. Costly, and it hinges on landing 14A customers.'}},
+ ba:{
+  forces:{
+   rivalry:{p:2,line:'Airbus and Chinese makers challenge in jets and Lockheed, Northrop, RTX and SpaceX in defense, but a backlog near twelve years of output softens price fights.',src:'https://www.sec.gov/Archives/edgar/data/12927/000162828026004357/ba-20251231.htm'},
+   buyers:{p:2,line:'A 6,200-plane backlog gives Boeing leverage, but delays let airlines claim compensation or cancel, and fixed-price defense contracts have cost billions.',src:'https://www.sec.gov/Archives/edgar/data/12927/000162828026004357/ba-20251231.htm'},
+   suppliers:{p:3,line:'Many parts are sole-sourced and slow to requalify; engine delays hold up 787 output and Boeing bought Spirit to regain control.',src:'https://www.sec.gov/Archives/edgar/data/12927/000162828026004357/ba-20251231.htm'},
+   entrants:{p:1,line:'Certification hurdles keep new jet makers out; China’s COMAC delivered only eight aircraft in the first half of 2026.',src:'https://aircargoweek.com/?p=110037'},
+   substitutes:{p:1,line:'The 10-K names no substitute threat; fuel prices and environmental rules sway demand more than any alternative to flying.',src:'https://www.sec.gov/Archives/edgar/data/12927/000162828026004357/ba-20251231.htm'}},
+  ref:['suppliers','buyers'],refWhy:'A sold-out order book makes rivalry mild, so profit is squeezed by parts and engine bottlenecks and by customers’ delay remedies and fixed-price government terms.',
+  lead:{line:'Leadership says it will stabilize around safety and quality, ramp 737 and 787 output step by step, turn cash flow positive, stop signing loss-making fixed-price deals, sell Jeppesen and take Spirit back in.',src:'https://leehamnews.com/2026/07/28/boeing-losses-narrow-cash-flow-positive/',posture:'focus'},
+  pl:{cost:'Squeeze the 737 and 787 lines and suppliers for lower unit costs. Risky for a company whose past cost-cutting is blamed for quality crises.',
+      differentiate:'Win on proven safety, quality and delivery reliability plus the widebody range, so airlines pay for dependability.',
+      focus:'Concentrate on core jets, chosen defense programs and services, sell non-core units and walk away from loss-making bids.',
+      reinvent:'Build a new-generation airplane or rebuild the engineering culture. Years of heavy spending while cash flow is just recovering.'}},
+ unh:{
+  forces:{
+   rivalry:{p:2,line:'Rivals range from startups to giant insurers; Medicare Advantage enrollment fell to about 7.6M from 8.4M, though margins are recovering.',src:'https://www.sec.gov/Archives/edgar/data/0000731766/000073176626000255/earningsrelease3q26unh.htm'},
+   buyers:{p:3,line:'Medicare premiums from CMS are about 44% of revenue and the government sets rates, while employers and states hold the contracts.',src:'https://www.sec.gov/Archives/edgar/data/731766/000073176626000062/unh-20251231.htm'},
+   suppliers:{p:3,line:'Hospitals, physician groups and drug makers hold leverage: cost trend ran above plan and out-of-network awards can far exceed Medicare rates.',src:'https://www.webull.com/news/15741091905627136'},
+   entrants:{p:1,line:'Heavy regulation and scale protect it; the 10-K flags provider-run groups and tech entrants as possible disruptors.',src:'https://www.sec.gov/Archives/edgar/data/731766/000073176626000062/unh-20251231.htm'},
+   substitutes:{p:2,line:'Traditional Medicare and provider-run care groups can replace Medicare Advantage plans, though over half of eligible seniors still choose Advantage.',src:'https://www.webull.com/news/15741091905627136'}},
+  ref:['buyers','suppliers'],refWhy:'Premiums are set by government and employer buyers while medical costs are set largely by providers and drug makers, squeezing the margin between them.',
+  lead:{line:'Leadership says it is repairing margins through discipline and simpler operations, exiting weak markets, cutting prior authorizations, shifting toward integrated value-based care and building AI tools.',src:'https://www.webull.com/news/15741091905627136',posture:'focus'},
+  pl:{cost:'Use Optum’s scale, AI claims automation and employed physicians to run lower administrative and medical costs than any rival insurer.',
+      differentiate:'Win on integrated Optum care, higher Medicare quality ratings and pharmacy transparency, so members and employers pay for a better-run experience.',
+      focus:'Concentrate on profitable niches such as special-needs Medicare plans and national employer accounts, and exit markets where margins lag.',
+      reinvent:'Rebuild how the company pays, authorizes and delivers care with AI, fewer prior authorizations and value-based contracts.'}},
+ nke:{
+  forces:{
+   rivalry:{p:3,line:'Adidas, New Balance, On, Deckers, Anta, Li Ning and lululemon contest the same shoppers on innovation, style and athlete ties.',src:'https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000088/nke-20260531.htm'},
+   buyers:{p:3,line:'Retailers can cancel orders placed months ahead, and the top three U.S. accounts make about 29% of U.S. sales.',src:'https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000088/nke-20260531.htm'},
+   suppliers:{p:2,line:'Contractors make nearly all product: four factories produce about 60% of footwear, Vietnam about 52%, and tariffs have lifted costs.',src:'https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000088/nke-20260531.htm'},
+   entrants:{p:2,line:'Nike says startup barriers in footwear and apparel are low and newer brands can react faster to trends.',src:'https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000088/nke-20260531.htm'},
+   substitutes:{p:1,line:'The filing warns tastes could drift away from athletic goods, but it shows no concrete substitute taking share today.',src:'https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000088/nke-20260531.htm'}},
+  ref:['rivalry','buyers'],refWhy:'Nike’s weak spots are where rivals and retail partners meet it: Sportswear is down and partners are clearing aged shoes, forcing tighter orders and discounts.',
+  lead:{line:'Leadership says it is rebuilding around specific sports to win back performance credibility first, with a multiyear cost and supply-chain program funding the turnaround.',src:'https://www.benzinga.com/news/26/10/62124853',posture:'differentiate'},
+  pl:{cost:'Use sourcing scale and savings to undercut rivals and retail discounts, risking the premium image just when pricing power is needed.',
+      differentiate:'Bet on performance innovation, athlete ties and scarcity in key sports, so shoppers pay up over On, New Balance or adidas.',
+      focus:'Narrow to a few sports and segments such as running, basketball and football, and shrink lifestyle lines.',
+      reinvent:'Rewrite how Nike operates: fewer regions, a flexible supply chain, and a reset of China and direct-to-consumer.'}},
+ khc:{
+  forces:{
+   rivalry:{p:3,line:'National food giants, regional players and retailer private labels fight on price, promotion and innovation.',src:'https://www.sec.gov/Archives/edgar/data/1637459/000163745926000009/khc-20251227.htm'},
+   buyers:{p:3,line:'Walmart alone is about 21% of sales and the top five North America customers make about 46% of segment sales.',src:'https://www.sec.gov/Archives/edgar/data/1637459/000163745926000009/khc-20251227.htm'},
+   suppliers:{p:2,line:'It buys huge volumes of dairy, meat, coffee, sweeteners and packaging at volatile, partly hedged prices.',src:'https://www.marketbeat.com/instant-alerts/kraft-heinz-q2-earnings-call-highlights-2026-08-05/'},
+   entrants:{p:1,line:'The 10-K treats new entrants as a minor risk; shelf space and scale distribution do most of the blocking.',src:'https://www.sec.gov/Archives/edgar/data/1637459/000163745926000009/khc-20251227.htm'},
+   substitutes:{p:2,line:'Weight-loss drugs, ingredient worries and health trends could pull shoppers toward fresher or store-brand options; the 10-K flags it without a number.',src:'https://www.sec.gov/Archives/edgar/data/1637459/000163745926000009/khc-20251227.htm'}},
+  ref:['buyers','rivalry'],refWhy:'A few big retailers and a crowded field of brand and store-brand rivals cap pricing and force promotions, and volume fell even as price rose.',
+  lead:{line:'Leadership says it is spending more, about $700M extra in 2026 mostly on marketing and innovation, to rebuild its brands and return to volume-led growth after pausing the planned split.',src:'https://businesswire.com/news/home/20260805074009/en/Kraft-Heinz-Reports-Second-Quarter-2026-Results-Updates-2026-Full-Year-Outlook',posture:'differentiate'},
+  pl:{cost:'Use scale in sourcing, plants and logistics to cut prices against Walmart and private label, squeezing margins already under input inflation.',
+      differentiate:'Fund Heinz, Kraft, Philadelphia, Oscar Mayer and Capri Sun with more marketing and innovation so shoppers pay a premium.',
+      focus:'Concentrate on a few winning platforms and prune or sell weaker areas like meats.',
+      reinvent:'Revive the paused split or remake the portfolio into healthier, protein-forward and beverage categories.'}}
+};
+for(const k in _SD)CO[k].strategy=_SD[k];
+
 /* ---------- game lifecycle ---------- */
-function newGame(coId,diffKey,seed){
+function newGame(coId,diffKey,seed,strategy){
   const co=CO[coId],D=DIFF[diffKey];
   const st=initState(co);
-  return {v:2,coId,diffKey,seed:String(seed),q:0,st,ghost:clone(st),plan:makePlan(co,D,String(seed)),log:[],rewinds:D.rewinds,boardLow:0,status:'play',firedAt:null,snap:null,cab:newCabinet(String(seed)),call:null};
+  const mine=(strategy&&co.strategy&&validStrategy(strategy))?{top:strategy.top.slice(),posture:strategy.posture}:null;
+  const ghostS=mine?{top:co.strategy.ref.slice(),posture:co.strategy.lead.posture}:null;
+  return {v:2,strategy:mine,ghostStrategy:ghostS,coId,diffKey,seed:String(seed),q:0,st,ghost:clone(st),plan:makePlan(co,D,String(seed)),log:[],rewinds:D.rewinds,boardLow:0,status:'play',firedAt:null,snap:null,cab:newCabinet(String(seed)),call:null};
 }
 function commitQuarter(game,ch,quality){
   const D=DIFF[game.diffKey];
@@ -1092,7 +1221,7 @@ function commitQuarter(game,ch,quality){
   step(game,'ghost',gch,{});
   game.ghost.jobsCut+=sum(Object.keys(gch.cards).map(cid=>CARD[cid].opts[gch.cards[cid]].jobs||0))*(co.workforce||0);
   const cabEv=cabUpdate(game,ch);
-  game.log.push({q:game.q,ch,gch,quality,outs:rec.outs,cab:cabEv});
+  game.log.push({q:game.q,ch,gch,quality,outs:rec.outs,cab:cabEv,fits:rec.fits,hedged:rec.hedged});
   if(D.fire&&game.q>=2){
     if(game.st.meters.brd<D.fire.below)game.boardLow++;else game.boardLow=0;
     if(game.boardLow>=D.fire.streak){game.status='fired';game.firedAt=game.q}
@@ -1140,4 +1269,4 @@ function fmtPct(v,d){d=d==null?1:d;return (v<0?'−':v>0?'+':'')+Math.abs(v).toF
 function qLabel(q){const qq=((q+3)%4)+1,y=2026+Math.floor((q+3)/4);return 'Q'+qq+' '+y}
 function qMonths(q){return ['Jan–Mar','Apr–Jun','Jul–Sep','Oct–Dec'][((q+3)%4)]}
 
-if(typeof module!=='undefined'&&module.exports)module.exports={contextFor,ctxQ,ctxRaw,ctxGrades,makeCall,applyCall,comingDue,roleOf,TONES,ttm,minCash,CO,GENERIC,EVENTS,CARD,EV,DIFF,newGame,commitQuarter,step,assess,ghostChoices,replayExpected,scorecard,processScore,grade,rewind,allocMenu,leverage,fmtB};
+if(typeof module!=='undefined'&&module.exports)module.exports={setStrategy,FORCES,POSTURES,EVENT_FORCE,FIT_TAG,fitOf,validStrategy,strategySummary,contextFor,ctxQ,ctxRaw,ctxGrades,makeCall,applyCall,comingDue,roleOf,TONES,ttm,minCash,CO,GENERIC,EVENTS,CARD,EV,DIFF,newGame,commitQuarter,step,assess,ghostChoices,replayExpected,scorecard,processScore,grade,rewind,allocMenu,leverage,fmtB};

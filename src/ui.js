@@ -19,7 +19,7 @@ const LET='ABCD';
 const ext=(href,text)=>'<a href="'+esc(href)+'" target="_blank" rel="noopener">'+text+'</a>';
 
 let G=null;
-let UI={screen:'home',setup:{co:'intc',diff:'medium',seed:randSeed()},card:0,picks:{},alloc:null,last:null,prevMeters:null,prevIdx:100,dash:false,answers:[],callRes:null,board:{co:'intc',d:'medium',state:'idle',rows:[],total:0}};
+let UI={strat:{top:[],posture:null,step:0},screen:'home',setup:{co:'intc',diff:'medium',seed:randSeed()},card:0,picks:{},alloc:null,last:null,prevMeters:null,prevIdx:100,dash:false,answers:[],callRes:null,board:{co:'intc',d:'medium',state:'idle',rows:[],total:0}};
 
 function randSeed(){const w=['ledger','harbor','granite','cobalt','summit','tandem','meridian','quarry','lantern','pivot','anchor','vector','orchard','forge','beacon','delta'];const r=Math.random;return w[Math.floor(r()*w.length)]+'-'+(100+Math.floor(r()*900))}
 
@@ -32,7 +32,7 @@ function kpiFmt(c,v){return c.kpi.fmt(v)}
 function lvl(){return D().hints}
 function isPlain(){return lvl()==='plain'}
 function isFull(){return lvl()==='numbers'}
-function save(){if(G)store.set(SAVE,{G,UI:{screen:UI.screen,card:UI.card,picks:UI.picks,alloc:UI.alloc,last:UI.last,prevMeters:UI.prevMeters,prevIdx:UI.prevIdx,answers:UI.answers,callRes:UI.callRes}})}
+function save(){if(G)store.set(SAVE,{G,UI:{strat:UI.strat,screen:UI.screen,card:UI.card,picks:UI.picks,alloc:UI.alloc,last:UI.last,prevMeters:UI.prevMeters,prevIdx:UI.prevIdx,answers:UI.answers,callRes:UI.callRes}})}
 function go(screen){UI.screen=screen;render();window.scrollTo(0,0);save()}
 function initials(n){return n.split(/\s+/).map(w=>w[0]).slice(0,2).join('')}
 const ROLE_CLS={cfo:'',coo:'r2',cco:'r3',gc:'r4',cpo:'r5'};
@@ -157,7 +157,7 @@ function renderBar(){
 }
 function stageLabel(){
   const pq=G.plan.quarters[G.q],n=(pq?pq.cards.length:0)+1;
-  return ({brief:'Briefing',card:'Decision '+(UI.card+1)+' of '+n,alloc:'Decision '+n+' of '+n,results:'Results',call:'Earnings call'})[UI.screen]||'';
+  return ({strategy:'Strategy room',brief:'Briefing',card:'Decision '+(UI.card+1)+' of '+n,alloc:'Decision '+n+' of '+n,results:'Results',call:'Earnings call'})[UI.screen]||'';
 }
 function scoreboard(){
   const c=co(),st=G.st,d=D(),P=isPlain(),F=isFull(),mg=curMargin(st);
@@ -274,6 +274,7 @@ function renderHome(){
   h+='<div class="actions"><button class="btn" data-act="start">Start as CEO of '+c.name+'</button></div></section>';
   h+='<details class="fold"><summary>How it works</summary><ul class="list">';
   h+='<li>Each company starts from its latest 10-K and 10-Q, pulled from SEC filing data. Every starting figure links to its filing.</li>';
+  h+='<li>Before Quarter 1 you spend two minutes in the <b>Strategy room</b>: read the industry through Porter’s Five Forces, pick the two pressures that worry you most, and choose how you will win. Choices that fit your strategy are easier to execute, and shocks tied to a pressure you watched hit softer.</li>';
   h+='<li>The right call depends on your position. A big bet is smart with cash to spare and reckless when cash is tight. Each option shows what your situation means for it.</li>';
   h+='<li>Five named executives advise you. They remember when you overrule them, and an advisor who loses trust resigns. Advisors and analysts are fictional.</li>';
   h+='<li>After each quarter you take questions on the earnings call. Overselling bad news buys a quarter of calm and costs you if the next quarter misses.</li>';
@@ -292,11 +293,73 @@ function startGame(){
   if(inp&&inp.value.trim())s.seed=inp.value.trim().slice(0,40);
   G=newGame(s.co,s.diff,s.seed);
   UI.card=0;UI.picks={};UI.alloc=null;UI.last=null;UI.answers=[];UI.callRes=null;UI.dash=false;
+  UI.strat={top:[],posture:null,step:0};
   NET.ev('start',{co:s.co,d:s.diff});
-  go('brief');
+  go('strategy');
 }
 function quarterCards(){return G.plan.quarters[G.q].cards}
 function defaultAlloc(){return {reinvest:'hold',ret:G.st.div>0?'hold':'none',debt:'hold',guide:'maintain'}}
+
+/* ---------- STRATEGY ROOM ---------- */
+const FORCE_PLAIN={rivalry:'How hard competitors fight you for the same customers.',buyers:'How much power customers have to push your price down.',suppliers:'How much the companies you depend on can raise prices or hold up supply.',entrants:'How easily newcomers can show up and take a slice of your market.',substitutes:'Different products that could do the same job for your customers.'};
+const POSTURE_PLAIN={cost:'Be the cheapest to run and win on price.',differentiate:'Be worth paying more for.',focus:'Do fewer things and win those.',reinvent:'Change what the business is.'};
+const PRESS=['','Weak','Moderate','Strong'];
+function forceName(k){return FORCES.find(f=>f[0]===k)[1]}
+function postureName(k){return POSTURES.find(f=>f[0]===k)[1]}
+function renderStrategy(){
+  const c=co(),S=c.strategy,P=isPlain(),F=isFull(),T=UI.strat;
+  let h='<div class="stack enter">';
+  h+='<div class="prog" aria-hidden="true"><span class="on"></span><span class="'+(T.step>=1?'on':'')+'"></span></div>';
+  if(T.step===0){
+    h+='<div class="stack tight"><div class="kicker">Strategy room. Step 1 of 2. <b>'+(P?'Who has the power':'Industry read, Porter’s Five Forces')+'</b></div><h1 class="h1">'+(P?'What is squeezing '+esc(c.name)+'?':'Where is the pressure on '+esc(c.name)+'?')+'</h1></div>';
+    h+='<p class="lede">'+(P?'Every industry has five pressures that decide who keeps the profit. Read them, then pick the <b>two that worry you most</b>. A shock tied to a pressure you picked will hit about a third softer, because you saw it coming.'
+       :'Pick the <b>two forces</b> that bite hardest. A shock tied to a force you pick lands about a third softer.'+(F?' Pressure ratings are hidden on Hot Seat: judge from the evidence.':''))+'</p>';
+    h+='<div class="opts" role="group" aria-label="Pick two forces">';
+    FORCES.forEach(([k,nm],i)=>{
+      const f=S.forces[k],on=T.top.indexOf(k)>=0;
+      h+='<button class="opt" role="checkbox" aria-checked="'+on+'" data-act="sforce" data-v="'+k+'"><span class="lt">'+(i+1)+'</span><span><span class="ol">'+esc(nm)+'</span>';
+      if(P)h+='<span class="od" style="display:block">'+esc(FORCE_PLAIN[k])+'</span>';
+      h+='<span class="od" style="display:block">'+esc(f.line)+'</span>';
+      if(!F)h+='<span class="chips"><span class="chip '+(f.p===3?'down':f.p===1?'up':'')+'">'+PRESS[f.p]+' pressure</span></span>';
+      h+='</span></button>';
+    });
+    h+='</div><p class="note">Evidence from '+esc(c.name)+'’s latest 10-K and recent earnings commentary: '+FORCES.map(([k])=>ext(S.forces[k].src,forceName(k))).join(', ')+'.</p>';
+    h+='<div class="actions stick"><span class="note">'+T.top.length+' of 2 picked</span><span class="grow"></span><button class="btn" data-act="snext" '+(T.top.length===2?'':'disabled')+'>Next: how will you win?</button></div>';
+  }else{
+    h+='<div class="stack tight"><div class="kicker">Strategy room. Step 2 of 2. <b>'+(P?'How you will win':'Where to play, how to win')+'</b></div><h1 class="h1">How will '+esc(c.name)+' win?</h1></div>';
+    h+='<p class="lede">Choices that <b>fit</b> your strategy are easier to execute and investors reward them. Choices that <b>fight</b> it confuse the company. Pick the one you can live with for the whole run.</p>';
+    h+='<div class="opts" role="radiogroup" aria-label="Your strategy">';
+    POSTURES.forEach(([k,nm],i)=>{
+      h+='<button class="opt" role="radio" aria-checked="'+(T.posture===k)+'" data-act="sposture" data-v="'+k+'"><span class="lt">'+LET[i]+'</span><span><span class="ol">'+esc(nm)+'</span>';
+      if(P)h+='<span class="od" style="display:block"><i>'+esc(POSTURE_PLAIN[k])+'</i></span>';
+      h+='<span class="od" style="display:block">'+esc(S.pl[k])+'</span></span></button>';
+    });
+    h+='</div>';
+    h+='<p class="note">You picked '+T.top.map(forceName).join(' and ')+' as the pressures to watch. You can see how that compares with our read in the debrief.</p>';
+    h+='<div class="actions stick"><button class="btn sec" data-act="sback">Back</button><span class="grow"></span><button class="btn" data-act="sgo" '+(T.posture?'':'disabled')+'>Start Quarter 1</button></div>';
+  }
+  h+='</div>';
+  $app.innerHTML=h;
+}
+function strategyLine(){
+  if(!G.strategy)return '';
+  return '<p class="note stratline">Your strategy: <b>'+esc(postureName(G.strategy.posture))+'</b>. Watching: <b>'+G.strategy.top.map(forceName).map(esc).join('</b> and <b>')+'</b>.</p>';
+}
+function strategyDebrief(){
+  const sm=strategySummary(G),c=co();
+  if(!sm)return '';
+  const S=c.strategy,P=isPlain(),tot=sm.aligned+sm.fought+sm.neutral;
+  const row=(k,v,n)=>'<div class="srow"><span class="sk">'+k+'</span><b class="sv">'+v+'</b>'+(n?'<p class="sn">'+n+'</p>':'')+'</div>';
+  let h='<div class="section stack tight"><h3 class="h3">Strategy</h3><div class="slist">';
+  h+=row('Your strategy',esc(postureName(sm.posture)),esc(S.pl[sm.posture]));
+  h+=row('Real leadership’s strategy',esc(postureName(sm.refPosture)),esc(S.lead.line)+' '+ext(S.lead.src,'Source'));
+  h+=row('Pressures you watched',sm.top.map(forceName).map(esc).join(' and '),sm.match===2?'Both match our read.':sm.match===1?'One matches our read.':'Neither matches our read.');
+  h+=row('Our read',sm.ref.map(forceName).map(esc).join(' and '),esc(S.refWhy));
+  h+=row('Decisions that fit your strategy',sm.aligned+' of '+tot,sm.fought+' fought it, '+sm.neutral+' were neutral.');
+  h+=row('Shocks softened',String(sm.hedged),'Quarters where a shock hit a pressure you were watching.');
+  h+='</div><p class="note">The pressure read and the leadership label are our reading of '+esc(c.name)+'’s filings and public statements, not a ruling. Fit comes from our own tagging of each option. '+(P?'':'Fits add execution and investor confidence; fights subtract them.')+'</p></div>';
+  return h;
+}
 
 /* ---------- BRIEFING ---------- */
 function renderBrief(){
@@ -307,7 +370,7 @@ function renderBrief(){
   let h='<div class="stack enter">';
   h+='<div class="kicker">Board briefing for <b>'+qLabel(q)+'</b>, '+qMonths(q)+'</div>';
   if(q===0){
-    h+='<h1 class="h1">You are the new CEO of '+c.name+'.</h1><p class="lede">'+esc(c.pitch)+'</p>';
+    h+='<h1 class="h1">You are the new CEO of '+c.name+'.</h1><p class="lede">'+esc(c.pitch)+'</p>'+strategyLine();
     h+='<div class="section stack tight"><h3 class="h3">Where it stands</h3><ul class="facts">'+c.facts.map(f=>'<li>'+esc(f[0])+' '+ext(f[1],'Source')+'</li>').join('')+'</ul>';
     h+=P?'<p class="note">Your key number is <b>'+esc(c.kpi.plain)+'</b>: '+esc(c.kpi.plainD)+' It is '+kpiFmt(c,G.st.kpi)+' today.</p>':'<p class="note">Key number: <b>'+esc(c.kpi.name)+'</b> ('+esc(c.kpi.unit)+'), now '+kpiFmt(c,G.st.kpi)+'.</p>';
     h+=sourcesBlock(c)+'</div>';
@@ -329,6 +392,7 @@ function renderBrief(){
     h+='<h1 class="h1">'+esc(briefHeadline(c,r))+'</h1>';
     h+=P?'<p class="lede">Last quarter you sold '+fmtB(r.rev)+', '+(r.g>=0?'up ':'down ')+Math.abs(r.g).toFixed(1)+'%. You '+(r.op>=0?'kept '+fmtB(r.op)+' in operating profit':'lost '+fmtB(Math.abs(r.op))+' running the business')+' and have '+fmtB(r.cash)+' in the bank. Company score: '+r.idx.toFixed(1)+'.</p>'
          :'<p class="lede">Last quarter: revenue '+fmtB(r.rev)+' ('+fmtPct(r.g)+' q/q), operating margin '+r.margin.toFixed(1)+'%, cash '+fmtB(r.cash)+', value index '+r.idx.toFixed(1)+'.</p>';
+    h+=strategyLine();
   }
   // news: cabinet changes from last quarter
   const lastLog=G.log.length?G.log[G.log.length-1]:null;
@@ -360,7 +424,7 @@ function renderBrief(){
   }
   if(pq.event){
     const e=EV[pq.event];const good=['rates','viral','aisurge','order'].indexOf(e.id)>=0;
-    h+='<div class="section event'+(good?' good':'')+' stack tight"><div class="flag">'+(good?'Good news this quarter':'Trouble this quarter')+'</div><h3 class="h2" style="font-size:24px">'+esc(e.title)+'</h3><p class="body">'+esc(e.body)+'</p><p class="note">'+(e.opts?'You will decide how to respond.':'No decision needed. It will show up in your results.')+'</p></div>';
+    h+='<div class="section event'+(good?' good':'')+' stack tight"><div class="flag">'+(good?'Good news this quarter':'Trouble this quarter')+'</div><h3 class="h2" style="font-size:24px">'+esc(e.title)+'</h3><p class="body">'+esc(e.body)+'</p><p class="note">'+(e.opts?'You will decide how to respond.':'No decision needed. It will show up in your results.')+'</p>'+(G.strategy&&EVENT_FORCE[e.id]&&G.strategy.top.indexOf(EVENT_FORCE[e.id])>=0?'<p class="note"><b>You were watching '+esc(forceName(EVENT_FORCE[e.id]))+'.</b> The first hit lands about a third softer.</p>':'')+'</div>';
   }
   if(isFull()){h+=pipelineTable();if(G.st.hist.length)h+=historyTable()}
   if(q!==0)h+=agendaHtml;
@@ -475,6 +539,7 @@ function renderCard(){
     const ctx=ctxs[i];
     h+='<button class="opt" role="radio" aria-checked="'+(UI.picks[cid]===i)+'" data-act="pickopt" data-v="'+i+'"><span class="lt">'+LET[i]+'</span><span><span class="ol">'+esc(o.l)+'</span><span class="od" style="display:block">'+esc(o.d)+'</span>'+chipsFor(o);
     if(ctx.notes.length)h+='<span class="ctx">'+ctx.notes.map(n=>'<div class="'+(d.hints==='tags'?'':n[0])+'">'+esc(n[1])+(isFull()&&ctx.extra.length&&n===ctx.notes[0]?' <span class="faint">('+ctx.extra.map(e=>fxText(e,st)).filter(Boolean).join(', ')+')</span>':'')+'</div>').join('')+'</span>';
+    if(isPlain()&&G.strategy){const f=fitOf(cid,i,G.strategy.posture);if(f)h+='<span class="chips"><span class="chip '+(f>0?'up':'down')+'">'+(f>0?'Fits your strategy':'Cuts against your strategy')+'</span></span>'}
     if(o.out&&d.hints!=='tags')h+=oddsFor_(o,ctx);
     h+='</span></button>';
   });
@@ -748,6 +813,7 @@ function renderDebrief(){
   h+='<div class="section stack tight"><h3 class="h3">Scorecard, 0 to 100</h3><div class="bars">';
   for(const [k,l] of rows)h+='<div class="brow"><span>'+l+'</span><div class="pair"><div class="pb"><b style="width:'+me[k].toFixed(0)+'%"></b></div><div class="pb gh"><b style="width:'+gh[k].toFixed(0)+'%"></b></div><div class="nums"><span>you '+me[k].toFixed(0)+'</span><span>real playbook '+gh[k].toFixed(0)+'</span></div></div></div>';
   h+='</div><p class="note">Weights: shareholder value 35%, balance sheet 20%, the other three 15% each.</p></div>';
+  h+=strategyDebrief();
   // people & team
   const quits=[].concat.apply([],G.log.map(l=>(l.cab||[]).filter(e=>e.type==='quit')));
   const calls=G.log.filter(l=>l.call);const callAvg=calls.length?calls.reduce((a,l)=>a+l.call.quality,0)/calls.length:null;
@@ -783,6 +849,7 @@ function renderDebrief(){
   h+='<details class="fold"><summary>Assumptions and sources</summary><ul class="list">';
   h+='<li>Start: '+c.name+'’s latest 10-K and 10-Q.'+(c.est.length?' Not from a filing: '+esc(c.est.join('; '))+'.':'')+'</li>';
   h+='<li>The real playbook reinvests "'+c.real.reinvest+'", treats returns as "'+c.real.ret+'" and debt as "'+c.real.debt+'", keeps guidance steady, answers analysts candidly on bad news, and picks the option closest to leadership’s announced moves. Some events are hypothetical; there it picks the response most consistent with leadership’s stated approach.</li>';
+  h+='<li>Strategy: the five-forces read and each company’s leadership posture come from its 10-K and recent earnings commentary and are our judgment. Fit and shock effects are modeled, not calibrated.</li>';
   h+='<li>Decision quality compares your option with the best fit for your situation at the time, not with how the dice landed.</li>';
   h+='<li>Advisors and analysts are fictional. Workforce figures are real. Simulation only; not investment advice.</li></ul>';
   h+='<div class="links" style="margin-top:12px">'+c.facts.map((f,i)=>ext(f[1],'Fact source '+(i+1))).join('')+'</div>'+'<div style="margin-top:8px">'+sourcesBlock(c)+'</div></details>';
@@ -866,6 +933,7 @@ function shareBlock(){
 }
 function postBlock(){
   if(!NET.ok)return '';
+  if(!G.strategy)return '<section class="section stack tight"><h3 class="h3">Leaderboard</h3><p class="note">This run started before the Strategy room existed, so it cannot be posted. Start a new run to compete.</p></section>';
   if(G.status!=='done')return '<section class="section stack tight"><h3 class="h3">Leaderboard</h3><p class="note">Runs that end with the board replacing you are not ranked. Finish all '+D().quarters+' quarters to post a score.</p><div class="actions"><button class="btn sec" data-act="board">See the leaderboard</button></div></section>';
   return '<section class="section stack tight"><h3 class="h3">Post to the leaderboard</h3><p class="note">The server replays your choices to confirm the score. Only the name you enter and your result are saved, one row per player on each board.</p>'
    +'<div class="field"><label for="lbname">Display name</label><input id="lbname" maxlength="16" autocomplete="nickname" spellcheck="false" value="'+esc(store.get('pseudoceo.name')||'')+'"></div>'
@@ -876,7 +944,7 @@ async function postScore(btn){
   if(name.length<2){flash('lbmsg','Enter a name of 2 to 16 characters.','down');return}
   btn.disabled=true;flash('lbmsg','Checking your run on the server…');
   try{
-    const r=await NET.post('/api/score',{pid:NET.pid,name,co:G.coId,d:G.diffKey,seed:G.seed,rewinds:Math.max(0,D().rewinds-G.rewinds),runs:G.log.map(l=>({ch:l.ch,ans:l.ans}))});
+    const r=await NET.post('/api/score',{pid:NET.pid,name,co:G.coId,d:G.diffKey,seed:G.seed,rewinds:Math.max(0,D().rewinds-G.rewinds),strategy:G.strategy,runs:G.log.map(l=>({ch:l.ch,ans:l.ans}))});
     store.set('pseudoceo.name',name);store.set('pseudoceo.lastboard',[G.coId,G.diffKey]);
     const mine=store.get('pseudoceo.mine')||[];if(!mine.includes(r.k)){mine.push(r.k);store.set('pseudoceo.mine',mine.slice(-30))}
     flash('lbmsg',(r.kept?'Posted. ':'You already have a higher score on this board, so that one stays. ')+'You are #'+r.rank+' of '+r.total+' on '+co().name+', '+D().name+'. Server-verified score: '+fmtEdge(r.edge)+' vs the real playbook.','up');
@@ -915,7 +983,7 @@ function renderBoard(){
 function render(){
   document.body.dataset.co=UI.screen==='board'?UI.board.co:(G&&UI.screen!=='home')?G.coId:UI.setup.co;
   renderBar();renderHud();
-  ({home:renderHome,brief:renderBrief,card:renderCard,alloc:renderAlloc,results:renderResults,call:renderCall,debrief:renderDebrief,board:renderBoard})[UI.screen]();
+  ({home:renderHome,strategy:renderStrategy,brief:renderBrief,card:renderCard,alloc:renderAlloc,results:renderResults,call:renderCall,debrief:renderDebrief,board:renderBoard})[UI.screen]();
 }
 function keepSeed(){const inp=document.getElementById('seed');if(inp)UI.setup.seed=inp.value}
 document.addEventListener('click',e=>{
@@ -926,9 +994,14 @@ document.addEventListener('click',e=>{
     case 'pickco':keepSeed();UI.setup.co=v;render();break;
     case 'pickdiff':keepSeed();UI.setup.diff=v;render();break;
     case 'start':startGame();break;
-    case 'resume':{const sv=store.get(SAVE);if(sv&&sv.G){G=sv.G;Object.assign(UI,sv.UI);if(UI.screen==='home')UI.screen='brief';render();window.scrollTo(0,0)}break}
+    case 'resume':{const sv=store.get(SAVE);if(sv&&sv.G){G=sv.G;Object.assign(UI,sv.UI);if(UI.screen==='home')UI.screen='brief';if(G.coId&&CO[G.coId].strategy&&!G.strategy&&G.q===0){UI.screen='strategy';if(!UI.strat||!Array.isArray(UI.strat.top))UI.strat={top:[],posture:null,step:0}}render();window.scrollTo(0,0)}break}
     case 'discard':store.del(SAVE);G=null;render();break;
     case 'dash':UI.dash=!UI.dash;renderHud();break;
+    case 'sforce':{const t=UI.strat.top,i=t.indexOf(v);if(i>=0)t.splice(i,1);else{t.push(v);if(t.length>2)t.shift()}renderStrategy();save();break}
+    case 'sposture':UI.strat.posture=v;renderStrategy();save();break
+    case 'snext':UI.strat.step=1;go('strategy');break;
+    case 'sback':UI.strat.step=0;go('strategy');break;
+    case 'sgo':if(setStrategy(G,{top:UI.strat.top,posture:UI.strat.posture}))go('brief');break;
     case 'agenda':UI.card=0;go(quarterCards().length?'card':'alloc');break;
     case 'pickopt':UI.picks[quarterCards()[UI.card]]=+v;renderCard();save();break;
     case 'nextcard':if(UI.card+1<quarterCards().length){UI.card++;go('card')}else go('alloc');break;

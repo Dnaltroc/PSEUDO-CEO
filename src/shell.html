@@ -1,3 +1,10 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2B3BD1">
+<meta name="description" content="Run a real company quarter by quarter, then see how you did against what its actual leadership did. Intel, Boeing, UnitedHealth, Nike and Kraft Heinz.">
 <title>Pseudo CEO</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -338,6 +345,47 @@ body{background:var(--paper);transition:background-color .4s}
 .fig .k{font-size:11.5px}
 .fig .v{font-size:19px}
 .actions.stick{position:sticky;bottom:0;z-index:6;padding:14px 0 calc(14px + env(safe-area-inset-bottom));margin-top:4px;background:linear-gradient(to top,var(--paper) 72%,transparent)}
+
+.slist{display:grid}
+.srow{padding:12px 0;border-top:1px solid var(--rule);display:grid;gap:3px}
+.srow:first-child{border-top:0}
+.srow .sk{font-size:13px;color:var(--muted)}
+.srow .sv{font-size:18px}
+.srow .sn{margin:0;font-size:14.5px;color:var(--muted);line-height:1.45}
+.stratline{margin:0}
+</style>
+<style>
+/* mobile pass: phone-first tap targets, text floor, compact company list, one-column choices */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;background:var(--paper)}
+a,button,summary,.choice,.opt,.seg button,.tab{touch-action:manipulation;-webkit-tap-highlight-color:rgba(43,59,209,.14)}
+@media (max-width:640px){
+  .brand{min-height:44px;padding-right:10px}
+  .bandbtn,.bandbtn.sm{min-height:44px;padding:0 14px;display:inline-flex;align-items:center;justify-content:center}
+  .btn{min-height:48px;justify-content:center}
+  .tab{min-height:44px;display:inline-flex;align-items:center}
+  details.fold>summary{min-height:44px;align-items:center}
+  .seg{grid-template-columns:1fr}
+  .seg button{min-height:56px;padding:12px 14px}
+  .seg small{font-size:13.5px}
+  .facts li a,.credit a,.note a,.body a,.lede a{padding:12px 4px;margin:-12px -4px}
+  .credit{font-size:12.5px}
+  td a,th a{display:inline-block;padding:13px 7px;margin:-13px -7px}
+  .links{gap:0 18px}
+  .links a{display:inline-flex;align-items:center;min-height:44px}
+  .note a,.facts li a{padding:14px 5px;margin:-14px -5px}
+  .fig .k,.band .score .k,.track-wrap .k2,.choice .t{font-size:12.5px}
+  .grid-co{grid-template-columns:1fr}
+  .grid-co .choice{grid-template-columns:96px 1fr;column-gap:14px;row-gap:1px;align-items:center;padding:12px 12px 12px 0}
+  .grid-co .choice .thumb{grid-column:1;grid-row:1/span 4;height:88px;margin:0}
+  .grid-co .choice .t,.grid-co .choice .n,.grid-co .choice .s,.grid-co .choice .d{grid-column:2}
+  .grid-co .choice[aria-checked="true"]{padding-left:12px}
+  .grid-co .choice .n{font-size:21px}
+  .actions .btn{flex:1 1 auto}
+}
+@media (max-width:360px){
+  .wrap{padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px))}
+  .band .co-name{font-size:26px}
+}
 </style>
 <style>/*PHOTOS*/</style>
 
