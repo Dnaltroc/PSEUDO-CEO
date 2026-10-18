@@ -3,7 +3,7 @@ const E = require('../src/engine.js');
 const { replay } = require('../api/_replay.js');
 let n = 0, bad = 0;
 for (const co of Object.keys(E.CO)) for (const d of ['easy', 'medium', 'hard']) for (let s = 0; s < 6; s++) {
-  const seed = 'rt-' + s, g = E.newGame(co, d, seed), runs = [], c = E.CO[co];
+  const seed = 'rt-' + s, strategy = { top: E.FORCES.map(f => f[0]).sort(() => Math.random() - 0.5).slice(0, 2), posture: E.POSTURES[Math.floor(Math.random() * 4)][0] }, g = E.newGame(co, d, seed, strategy), runs = [], c = E.CO[co];
   const r = Math.random;
   while (g.status === 'play') {
     const pq = g.plan.quarters[g.q], cards = {};
@@ -21,10 +21,11 @@ for (const co of Object.keys(E.CO)) for (const d of ['easy', 'medium', 'hard']) 
   n++;
   const me = E.scorecard(g.st, c), gh = E.scorecard(g.ghost, c);
   let out;
-  try { out = replay({ co, d, seed, runs: JSON.parse(JSON.stringify(runs)) }); } catch (e) { bad++; console.log('FAIL', co, d, seed, e.message); continue; }
+  try { out = replay({ co, d, seed, strategy, runs: JSON.parse(JSON.stringify(runs)) }); } catch (e) { bad++; console.log('FAIL', co, d, seed, e.message); continue; }
   if (Math.abs(out.edge - (me.overall - gh.overall)) > 1e-9 || Math.abs(out.idx - g.st.idx) > 1e-9) { bad++; console.log('MISMATCH', co, d, seed, out.edge, me.overall - gh.overall); }
 }
 console.log('checked', n, 'completed games;', bad, 'problems');
 // tampering must fail
 const g0 = { co: 'intc', d: 'easy', seed: 'x', runs: [] };
 try { replay(g0); console.log('BAD: empty run accepted'); } catch (e) { console.log('empty run rejected:', e.message); }
+try { replay({ co: 'intc', d: 'easy', seed: 'x', runs: [] , strategy: { top: ['rivalry','rivalry'], posture: 'cost' } }); console.log('BAD: duplicate forces accepted'); } catch (e) { console.log('bad strategy rejected:', e.message); }
