@@ -11,10 +11,12 @@ function replay(b) {
   const co = E.CO[b.co];
   const D = E.DIFF[b.d];
   if (!co || !D) throw bad('Unknown company or difficulty');
+  if (!E.validStrategy(b.strategy)) throw bad('Pick your strategy before you start');
   if (typeof b.seed !== 'string' || !b.seed.trim() || b.seed.length > 40) throw bad('Bad scenario code');
   if (!Array.isArray(b.runs) || b.runs.length !== D.quarters) throw bad('Only finished games can be posted');
 
-  const g = E.newGame(b.co, b.d, b.seed);
+  const g = E.newGame(b.co, b.d, b.seed, b.strategy);
+  if (!g.strategy) throw bad('Bad strategy');
   for (let i = 0; i < b.runs.length; i++) {
     if (g.status !== 'play') throw bad('Run does not match the scenario');
     const r = b.runs[i];
