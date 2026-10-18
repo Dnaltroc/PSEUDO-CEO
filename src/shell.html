@@ -325,6 +325,19 @@ body{background:var(--paper);transition:background-color .4s}
 .tab[aria-pressed="true"] .faint{color:rgba(255,255,255,.75)}
 .tbl tr.tot td{border-bottom-color:var(--rule);background:var(--accent-soft)}
 .tbl.board th:nth-child(2),.tbl.board td:nth-child(2){text-align:left}
+
+/* pacing pass: slim header, step label, sticky primary action */
+.band .wrap{padding-block:10px 14px;gap:10px}
+.band .co-name{font-size:clamp(26px,7vw,34px)}
+.band .score .n{font-size:clamp(44px,12vw,56px)}
+.band .score .k{font-size:12px}
+.track-wrap .k2{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--chair-dim)}
+.track-wrap .k2 b{color:var(--on-chair);font-weight:700;margin-left:4px}
+.bandbtn.sm{padding:5px 10px;font-size:13px;white-space:nowrap}
+.figs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 10px;padding-top:10px}
+.fig .k{font-size:11.5px}
+.fig .v{font-size:19px}
+.actions.stick{position:sticky;bottom:0;z-index:6;padding:14px 0 calc(14px + env(safe-area-inset-bottom));margin-top:4px;background:linear-gradient(to top,var(--paper) 72%,transparent)}
 </style>
 <style>/*PHOTOS*/</style>
 

@@ -150,15 +150,20 @@ function renderBar(){
   }else if(!inGame){
     h+='<div class="home-hero"><h1>Be the pseudo CEO.</h1><p>Run Intel, Boeing, UnitedHealth, Nike or Kraft Heinz from where they actually stand today. Every starting number comes from their SEC filings. <b>Then see how your quarters compare with what the real CEO did.</b></p></div>';
   }else h+=scoreboard();
-  h+=credit(bco)+'</div>';
+  if(!inGame||onBoard||UI.dash||UI.screen==='brief'||UI.screen==='debrief')h+=credit(bco);
+  h+='</div>';
   $bar.className='band ph-'+bco;
   $bar.innerHTML=h;
+}
+function stageLabel(){
+  const pq=G.plan.quarters[G.q],n=(pq?pq.cards.length:0)+1;
+  return ({brief:'Briefing',card:'Decision '+(UI.card+1)+' of '+n,alloc:'Decision '+n+' of '+n,results:'Results',call:'Earnings call'})[UI.screen]||'';
 }
 function scoreboard(){
   const c=co(),st=G.st,d=D(),P=isPlain(),F=isFull(),mg=curMargin(st);
   const debrief=UI.screen==='debrief';
   const shownQ=Math.max(0,Math.min((UI.screen==='results'||UI.screen==='call')?G.q-1:G.q,d.quarters-1));
-  let h='<div class="co-line"><div><div class="co-name">'+c.name+'</div><div class="co-sub">'+(debrief?'Final results':'CEO since '+qLabel(0)+'. Now in '+qLabel(shownQ)+', '+qMonths(shownQ))+'</div></div>';
+  let h='<div class="co-line"><div><div class="co-name">'+c.name+'</div><div class="co-sub">'+(debrief?'Final results':qLabel(shownQ)+', '+qMonths(shownQ))+'</div></div>';
   h+='<div class="score"><div class="n">'+st.idx.toFixed(F?1:0)+'</div><div class="k">'+(P?'company score':'value index')+', started at 100'+(d.ghostLive?'. Real playbook: '+G.ghost.idx.toFixed(0):'')+'</div></div></div>';
   /* quarter track: one block per quarter, filled as played, coral when the index fell */
   h+='<div class="track-wrap"><div class="track" aria-label="Quarter '+Math.min(G.q+1,d.quarters)+' of '+d.quarters+'">';
@@ -168,15 +173,15 @@ function scoreboard(){
     h+='<i class="'+cls+'" title="'+qLabel(i)+(r?': index '+r.idx.toFixed(1):'')+'"></i>';
   }
   const played=st.hist.length;
-  h+='</div><div class="k">'+(debrief?played+' of '+d.quarters+' quarters played':'Quarter '+Math.min(G.q+(UI.screen==='results'||UI.screen==='call'?0:1),d.quarters)+' of '+d.quarters)+(G.rewinds>0&&!debrief?', '+G.rewinds+' rewind'+(G.rewinds>1?'s':'')+' left':'')+'</div></div>';
+  h+='</div><div class="k2"><span>'+(debrief?played+' of '+d.quarters+' quarters played':'Quarter '+Math.min(G.q+(UI.screen==='results'||UI.screen==='call'?0:1),d.quarters)+' of '+d.quarters+' <b>'+stageLabel()+'</b>')+(G.rewinds>0&&!debrief?'. '+G.rewinds+' rewind'+(G.rewinds>1?'s':'')+' left':'')+'</span>'+(debrief?'':'<button class="bandbtn sm" data-act="dash" aria-expanded="'+UI.dash+'">'+(UI.dash?'Fewer numbers':'More numbers')+'</button>')+'</div></div>';
   if(debrief)return h;
   const b=st.meters.brd;
   h+='<div class="figs">';
   h+='<div class="fig"><div class="k">'+(P?'Cash in the bank':'Cash')+'</div><div class="v">'+fmtB(st.cash)+'</div></div>';
-  h+='<div class="fig"><div class="k">'+(P?'Profit margin':'Operating margin')+'</div><div class="v">'+mg.toFixed(1)+'%</div></div>';
+  h+='<div class="fig"><div class="k">Margin</div><div class="v">'+mg.toFixed(1)+'%</div></div>';
   h+='<div class="fig"><div class="k">'+(P?'Debt owed':'Debt')+'</div><div class="v">'+fmtB(st.debt)+'</div></div>';
-  h+='<div class="fig"><div class="k">'+(P?'Board support':'Board confidence')+'</div><div class="v'+(b<35?' warn':'')+'">'+(F?b.toFixed(1):Math.round(b))+'</div></div>';
-  h+='<button class="bandbtn" data-act="dash" aria-expanded="'+UI.dash+'">'+(UI.dash?'Fewer numbers':'More numbers')+'</button></div>';
+  h+='<div class="fig"><div class="k">Board</div><div class="v'+(b<35?' warn':'')+'">'+(F?b.toFixed(1):Math.round(b))+'</div></div>';
+  h+='</div>';
   if(UI.dash){
     const cell=(t,v,sub)=>'<div><dt>'+t+'</dt><dd>'+v+'</dd>'+(sub?'<div class="sub">'+sub+'</div>':'')+'</div>';
     h+='<div class="dash"><dl class="dgrid">';
@@ -296,6 +301,9 @@ function defaultAlloc(){return {reinvest:'hold',ret:G.st.div>0?'hold':'none',deb
 /* ---------- BRIEFING ---------- */
 function renderBrief(){
   const c=co(),q=G.q,pq=G.plan.quarters[q],d=D(),P=isPlain();
+  let agendaHtml='<div class="section stack tight"><h3 class="h3">Agenda for this quarter</h3><ol class="agenda">';
+  for(const cid of pq.cards){const cd=CARD[cid];agendaHtml+='<li><span>'+esc(cd.title)+'</span><span class="c">'+esc(cd.isEvent?'Response':cd.cat)+'</span></li>'}
+  agendaHtml+='<li><span>'+(P?'Money plan and promise to Wall Street':'Capital plan and guidance')+'</span><span class="c">Allocation</span></li><li><span>Earnings call</span><span class="c">Investors</span></li></ol></div>';
   let h='<div class="stack enter">';
   h+='<div class="kicker">Board briefing for <b>'+qLabel(q)+'</b>, '+qMonths(q)+'</div>';
   if(q===0){
@@ -303,10 +311,11 @@ function renderBrief(){
     h+='<div class="section stack tight"><h3 class="h3">Where it stands</h3><ul class="facts">'+c.facts.map(f=>'<li>'+esc(f[0])+' '+ext(f[1],'Source')+'</li>').join('')+'</ul>';
     h+=P?'<p class="note">Your key number is <b>'+esc(c.kpi.plain)+'</b>: '+esc(c.kpi.plainD)+' It is '+kpiFmt(c,G.st.kpi)+' today.</p>':'<p class="note">Key number: <b>'+esc(c.kpi.name)+'</b> ('+esc(c.kpi.unit)+'), now '+kpiFmt(c,G.st.kpi)+'.</p>';
     h+=sourcesBlock(c)+'</div>';
-    h+=filingsTable(c,true);
-    h+='<div class="section stack tight"><h3 class="h3">Your leadership team</h3><div class="advisors">';
+    h+=agendaHtml;
+    h+=filingsTable(c,false);
+    h+='<details class="fold"><summary>Your leadership team</summary><div class="stack tight"><div class="advisors">';
     for(const [k,t] of CAB_ROLES){const m=G.cab[k];h+='<div class="adv">'+avatar(m.name,k)+'<div><b>'+esc(m.name)+'</b><div class="note">'+esc(t)+'</div></div></div>'}
-    h+='</div><p class="note">They advise on every decision and remember whether you listen. Lose someone’s trust and they resign, which hurts the part of the company they run. The names are fictional.</p></div>';
+    h+='</div><p class="note">They advise on every decision and remember whether you listen. Lose someone’s trust and they resign, which hurts the part of the company they run. The names are fictional.</p></div></details>';
     if(P){
       h+='<div class="section stack tight"><h3 class="h3">How to play</h3><ol class="list">';
       h+='<li><b>Read the briefing</b> for what happened and what is on the agenda.</li>';
@@ -354,10 +363,8 @@ function renderBrief(){
     h+='<div class="section event'+(good?' good':'')+' stack tight"><div class="flag">'+(good?'Good news this quarter':'Trouble this quarter')+'</div><h3 class="h2" style="font-size:24px">'+esc(e.title)+'</h3><p class="body">'+esc(e.body)+'</p><p class="note">'+(e.opts?'You will decide how to respond.':'No decision needed. It will show up in your results.')+'</p></div>';
   }
   if(isFull()){h+=pipelineTable();if(G.st.hist.length)h+=historyTable()}
-  h+='<div class="section stack tight"><h3 class="h3">Agenda</h3><ol class="agenda">';
-  for(const cid of pq.cards){const cd=CARD[cid];h+='<li><span>'+esc(cd.title)+'</span><span class="c">'+esc(cd.isEvent?'Response':cd.cat)+'</span></li>'}
-  h+='<li><span>'+(P?'Money plan and promise to Wall Street':'Capital plan and guidance')+'</span><span class="c">Allocation</span></li><li><span>Earnings call</span><span class="c">Investors</span></li></ol></div>';
-  h+='<div class="actions"><button class="btn" data-act="agenda">'+(pq.cards.length?'Open the first decision':'Go to the capital plan')+'</button></div></div>';
+  if(q!==0)h+=agendaHtml;
+  h+='<div class="actions stick"><button class="btn" data-act="agenda">'+(pq.cards.length?'Open the first decision':'Go to the capital plan')+'</button></div></div>';
   $app.innerHTML=h;
 }
 function briefHeadline(c,r){
@@ -478,7 +485,7 @@ function renderCard(){
     if(words.length)h+='<div class="section gloss stack tight"><h3 class="h3">Words to know</h3><dl>'+words.map(w=>'<div><dt>'+esc(w[1])+'</dt><dd>'+esc(w[2])+'</dd></div>').join('')+'</dl></div>';
   }
   if(isFull())h+='<p class="note">Sizes are averages; each is drawn at random within roughly ±'+Math.round(35*d.sd)+'%. Delays include Hot Seat’s slower payoffs. Growth and margin are percentage points; meters run 0 to 100.</p>';
-  h+='<div class="actions"><button class="btn sec" data-act="back">Back</button><span class="grow"></span><button class="btn" data-act="nextcard" '+(UI.picks[cid]==null?'disabled':'')+'>'+(UI.card+1<cards.length?'Next decision':(isPlain()?'Go to the money plan':'Go to the capital plan'))+'</button></div></div>';
+  h+='<div class="actions stick"><button class="btn sec" data-act="back">Back</button><span class="grow"></span><button class="btn" data-act="nextcard" '+(UI.picks[cid]==null?'disabled':'')+'>'+(UI.card+1<cards.length?'Next decision':(isPlain()?'Go to the money plan':'Go to the capital plan'))+'</button></div></div>';
   $app.innerHTML=h;
 }
 
@@ -510,7 +517,7 @@ function renderAlloc(){
   }
   let h='<div class="stack enter">';
   h+='<div class="prog" aria-hidden="true">'+Array.from({length:total},()=>'<span class="on"></span>').join('')+'</div>';
-  h+='<div class="stack tight"><div class="kicker">Decision '+total+' of '+total+'. <b>'+(P?'Money':'Capital allocation')+'</b></div><h2 class="h2">'+(P?'Set the money plan':'Set the capital plan')+'</h2></div>';
+  h+='<div class="stack tight"><div class="kicker">Decision '+total+' of '+total+'. <b>'+(P?'Money':'Capital allocation')+'</b></div><h2 class="h2">'+(P?'Set the money plan':'Set the capital plan')+'</h2><p class="lede">Each choice starts on <b>keep things as they are</b>. Change only what you want to, then close the quarter.'+(isFull()?'':' Your CFO, '+G.cab.cfo.name.split(' ')[0]+', flags any risk at the bottom.')+'</p></div>';
   h+='<div class="section stack">';
   groups.forEach(([k,t,desc],gi)=>{
     if(gi)h+='<hr class="sep">';
@@ -540,7 +547,7 @@ function renderAlloc(){
     h+=row('Board firing line',d.fire?'Below '+d.fire.below+' for '+d.fire.streak+' qtr'+(d.fire.streak>1?'s':''):'None');
     h+='</tbody></table></div><p class="note">Raise costs '+fmtB(0.02*st.rev)+' now for +0.35 pt of growth a quarter over four quarters, starting '+Math.max(1,Math.round(3*d.lag))+' quarters out. Surge costs '+fmtB(0.04*st.rev)+' for +0.55 pt. Cut adds +0.9 pt of margin now and −0.3 pt of growth later.</p></div>';
   }
-  h+='<div class="actions"><button class="btn sec" data-act="back">Back</button><span class="grow"></span><button class="btn" data-act="commit">Close the quarter</button></div></div>';
+  h+='<div class="actions stick"><button class="btn sec" data-act="back">Back</button><span class="grow"></span><button class="btn" data-act="commit">Close the quarter</button></div></div>';
   $app.innerHTML=h;
 }
 
@@ -654,7 +661,7 @@ function renderResults(){
   if(!fire)bn+=' On Guided, the board cannot fire you.';
   if(F&&fire)bn+=' Confidence '+brd.toFixed(1)+'; firing line '+fire.below+'.';
   h+='<div class="section board'+(warn?' warn':'')+'"><h3 class="h3">From the board</h3><p>'+esc(bn)+'</p></div>';
-  h+='<div class="actions">';
+  h+='<div class="actions stick">';
   if(G.call&&!G.call.done)h+='<button class="btn" data-act="call">Join the earnings call</button>';
   else if(G.status==='play')h+='<button class="btn" data-act="nextq">Start '+qLabel(G.q)+'</button>';
   else h+='<button class="btn" data-act="debrief">See your debrief</button>';
@@ -694,9 +701,9 @@ function renderCall(){
   if(done){
     const r=UI.callRes;
     h+='<div class="section stack tight"><h3 class="h3">Reaction</h3><p class="body">Investor mood '+(r.inv>=0?'rose ':'fell ')+Math.abs(r.inv)+' point'+(Math.abs(r.inv)===1?'':'s')+(r.brd?' and board support moved '+(r.brd>0?'+':'−')+Math.abs(r.brd):'')+'. '+(r.flag?'You talked up bad news. If next quarter misses, analysts will hold it against you.':'You made no promises you will have to walk back.')+'</p></div>';
-    h+='<div class="actions">'+(G.status==='play'?'<button class="btn" data-act="nextq">Start '+qLabel(G.q)+'</button>':'<button class="btn" data-act="debrief">See your debrief</button>')+'</div>';
+    h+='<div class="actions stick">'+(G.status==='play'?'<button class="btn" data-act="nextq">Start '+qLabel(G.q)+'</button>':'<button class="btn" data-act="debrief">See your debrief</button>')+'</div>';
   }else{
-    h+='<div class="actions"><button class="btn" data-act="endcall" '+(UI.answers.filter(Boolean).length<call.qs.length?'disabled':'')+'>End the call</button></div>';
+    h+='<div class="actions stick"><button class="btn" data-act="endcall" '+(UI.answers.filter(Boolean).length<call.qs.length?'disabled':'')+'>End the call</button></div>';
   }
   h+='<p class="note">Analysts and their firms are fictional.</p></div>';
   $app.innerHTML=h;
