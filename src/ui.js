@@ -19,8 +19,21 @@ const LET='ABCD';
 const ext=(href,text)=>'<a href="'+esc(href)+'" target="_blank" rel="noopener">'+text+'</a>';
 
 let G=null;
-let UI={screen:'home',setup:{co:'intc',diff:'medium',seed:randSeed()},card:0,picks:{},alloc:null,last:null,prevMeters:null,prevIdx:100,dash:false,answers:[],callRes:null,board:{co:'intc',d:'medium',state:'idle',rows:[],total:0}};
+let UI={screen:'home',setup:{co:'intc',diff:(()=>{const b=store.get(BEST);return b&&Object.keys(b).length?'medium':'easy'})(),seed:randSeed(),auto:true},card:0,picks:{},alloc:null,last:null,prevMeters:null,prevIdx:100,dash:false,answers:[],callRes:null,board:{co:'intc',d:'medium',state:'idle',rows:[],total:0}};
 
+/* A scenario code that starts with a signature from the server ('harbor-482-9f3a1c') can be posted to the leaderboard.
+   A plain local code ('harbor-482') still plays, but only as practice. */
+const RANKED=/^[a-z]{3,10}-\d{3}-[0-9a-f]{6}$/;
+const isRanked=sd=>RANKED.test(String(sd||''));
+let seedP=null;
+function fetchSeed(){
+  if(!NET.ok)return null;
+  seedP=NET.get('/api/seed').then(j=>{
+    if(j&&typeof j.seed==='string'&&isRanked(j.seed)&&UI.setup.auto){UI.setup.seed=j.seed;const i=document.getElementById('seed');if(i&&UI.screen==='home'){i.value=j.seed;seedNote()}}
+  }).catch(()=>{});
+  return seedP;
+}
+function seedNote(){const i=document.getElementById('seed'),n=document.getElementById('seednote');if(!i||!n)return;const r=isRanked(i.value.trim());n.textContent=r?'Ranked code. You can post this game to the leaderboard.':'Practice code. You can play it, but it cannot be posted to the leaderboard. Reload or tap Play again for a ranked one.';n.className='note'+(r?'':' faint')}
 function randSeed(){const w=['ledger','harbor','granite','cobalt','summit','tandem','meridian','quarry','lantern','pivot','anchor','vector','orchard','forge','beacon','delta'];const r=Math.random;return w[Math.floor(r()*w.length)]+'-'+(100+Math.floor(r()*900))}
 
 /* ---------- helpers ---------- */
@@ -444,7 +457,7 @@ function renderHome(){
   }
   h+='</div></section>';
   h+='<section class="stack tight"><div class="step"><span class="n">03</span><h2 class="h3">Take the job</h2></div>';
-  h+='<div class="field"><label for="seed">Scenario code. Share it so a friend faces the same events.</label><input id="seed" value="'+esc(s.seed)+'" autocomplete="off" spellcheck="false"></div>';
+  h+='<div class="field"><label for="seed">Scenario code. Share it so a friend faces the same events.</label><input id="seed" value="'+esc(s.seed)+'" autocomplete="off" spellcheck="false"><p class="note" id="seednote" aria-live="polite"></p></div>';
   {const p=PL();
   h+='<p class="who">'+(p?'You are <b>'+esc(p.name)+'</b>, taking the chair at <b>'+esc(c.name)+'</b>. <button class="link" data-act="plclear">Not you?</button>':'You will enter your name next, then take the chair at <b>'+esc(c.name)+'</b>.')+'</p>';}
   h+='<div class="actions"><button class="btn" data-act="start">'+(PL()?esc(plFirst(PL().name))+', start as CEO of '+c.name:'Start as CEO of '+c.name)+'</button></div></section>';
@@ -458,17 +471,21 @@ function renderHome(){
   h+='<li>Layoff decisions show the company’s real headcount, sites, unions and recent layoff rounds, with sources.</li>';
   h+='<li>The <b>stock price</b> starts at the real closing price on '+PX_ASOF+'. After that it moves with how your decisions play out in a simplified model of the company, so it is a score you can read like a stock, not a forecast. The <b>real playbook</b> plays the same scenario using the choices leadership actually announced.</li>';
   h+='<li>Photos and logos come from Wikimedia Commons. Credits are listed below.</li>';
-  h+='<li>Leaderboard: after you finish a game you can post it under a name you choose. The server replays your choices to confirm the score, so numbers cannot be typed in. Only your name and result are saved.</li>';
-  h+='<li>Privacy: the site counts anonymous plays (which company and difficulty were picked, how far games got) and unique players using a random ID kept in your browser. These counts hold no names or emails. Separately, the name and email you type on the welcome screen are stored privately for the site owner, who may email you about this project. They are never shown to other players, sold or shared, and you can have them removed on the <a href="/privacy" target="_blank" rel="noopener">privacy page</a>. Do Not Track turns off the anonymous counts only. An hour-long abuse limit uses a scrambled form of your connection address that is not kept.</li><li>Simulation only; not investment advice.</li></ul></details>';
+  h+='<li>Leaderboard: after you finish a game you can post it under a name you choose. The server hands out each ranked scenario code and replays your choices to confirm the score, so numbers cannot be typed in. Only your name and result are saved.</li>';
+  h+='<li>Privacy: the site counts anonymous plays (which company and difficulty were picked, how far games got) and unique players using a random ID kept in your browser. These counts hold no names or emails. Separately, after a game you can choose to leave your email. It is stored privately for the site owner, who may write to you about his work. It is never shown to other players, sold or shared, and you can have it removed on the <a href="/privacy" target="_blank" rel="noopener">privacy page</a>. Do Not Track turns off the anonymous counts only. An hour-long abuse limit uses a scrambled form of your connection address that is not kept.</li><li>Simulation only; not investment advice.</li></ul></details>';
+  h+='<p class="note">Intel, Boeing, UnitedHealth Group, Nike and Kraft Heinz are real companies used as settings. They are not affiliated with this game and have not endorsed it. Logos belong to their owners. The newspaper, advisors and analysts are fictional. Simulation only; not investment advice.</p>';
+  h+='<p class="note"><a href="/method" target="_blank" rel="noopener">How the model works</a> &middot; <a href="/privacy" target="_blank" rel="noopener">Privacy</a></p>';
   h+=faceCredits();
   h+='</div>';
-  $app.innerHTML=h;
+  $app.innerHTML=h;seedNote();
 }
 
 /* ---------- start / quarter ---------- */
-function startGame(){
-  const s=UI.setup;const inp=document.getElementById('seed');
-  if(inp&&inp.value.trim())s.seed=inp.value.trim().slice(0,40);
+async function startGame(){
+  const s=UI.setup;
+  if(s.auto&&!isRanked(s.seed)&&seedP)await Promise.race([seedP,new Promise(r=>setTimeout(r,1500))]);
+  const inp=document.getElementById('seed');
+  if(inp&&inp.value.trim()&&!s.auto)s.seed=inp.value.trim().slice(0,40);
   G=newGame(s.co,s.diff,s.seed);
   UI.card=0;UI.picks={};UI.alloc=null;UI.last=null;UI.answers=[];UI.callRes=null;UI.dash=false;
   NET.ev('start',{co:s.co,d:s.diff});
@@ -492,11 +509,40 @@ function plBoardName(){const p=PL();if(!p)return '';const f=plFirst(p.name).norm
   const n=(f+(l&&l!==f?' '+l[0]+'.':'')).trim();return n.length>=2?n.slice(0,16):''}
 let leadBusy=false;
 async function sendLead(){
-  const p=store.get(PKEY);if(!p||p.sent||!p.email||!NET.ok||leadBusy)return;
-  leadBusy=true;
-  try{await NET.post('/api/leads',{name:p.name,email:p.email,updates:!!p.updates,co:G?G.coId:undefined,d:G?G.diffKey:undefined});const q=store.get(PKEY);if(q&&q.email===p.email){q.sent=true;store.set(PKEY,q)}}
+  const p=store.get(PKEY);if(!p||p.sent||!p.email||!NET.ok||leadBusy)return false;
+  leadBusy=true;let ok=false;
+  try{await NET.post('/api/leads',{name:p.name||'Player',email:p.email,updates:!!p.updates,co:G?G.coId:undefined,d:G?G.diffKey:undefined});const q=store.get(PKEY);if(q&&q.email===p.email){q.sent=true;store.set(PKEY,q)}ok=true}
   catch(e){/* try again on the next start; play is never blocked */}
-  leadBusy=false;
+  leadBusy=false;return ok;
+}
+/* After a game: an optional, plainly worded way to leave an email. */
+function contactBlock(){
+  if(!NET.ok)return '';
+  const p=store.get(PKEY)||{};
+  let h='<section class="section stack tight" id="contact"><h3 class="h3">A note from the developer</h3>';
+  if(p.email&&p.sent){
+    return h+'<p class="body">Thanks, your email is saved. You can have it removed any time on the <a href="/privacy" target="_blank" rel="noopener">privacy page</a>.</p></section>';
+  }
+  h+='<p class="body">I’m Cortland Clarke. I built this game on my own while I look for work in finance. If you leave your email, I may write to you once or twice about my work or roles I’m after. I will not sell or share it, and you can have it removed any time on the <a href="/privacy" target="_blank" rel="noopener">privacy page</a>. Leaving it is entirely optional. Here is <a href="https://cortlandclarke.com" target="_blank" rel="noopener">my site</a>.</p>';
+  h+='<form id="contactform" novalidate>';
+  if(!PL())h+='<div class="field"><label for="ctname">Your name</label><input id="ctname" maxlength="40" autocomplete="name" spellcheck="false" placeholder="First and last name"></div>';
+  h+='<div class="field"><label for="ctemail">Your email</label><input id="ctemail" type="email" inputmode="email" maxlength="120" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com"><p class="ferr" id="ctemail-e" role="alert"></p></div>';
+  h+='<label class="chk"><input type="checkbox" id="ctupd"><span>Also email me when new companies and features are added.</span></label>';
+  h+='<div class="actions"><button class="btn" type="submit">Leave my email</button></div><p class="note" id="ctmsg" role="status"></p></form></section>';
+  return h;
+}
+async function submitContact(){
+  const m=document.getElementById('ctemail'),er=document.getElementById('ctemail-e'),nm=document.getElementById('ctname');
+  const email=m.value.trim(),name=nm?plClean(nm.value):(PL()?PL().name:'');
+  if(!plEmailOK(email)){er.textContent='Enter a valid email, like you@example.com.';m.setAttribute('aria-invalid','true');m.focus();return}
+  if(nm&&!plNameOK(name)){er.textContent='Enter your name, at least 2 letters.';nm.focus();return}
+  er.textContent='';m.removeAttribute('aria-invalid');
+  const upd=!!document.getElementById('ctupd').checked,btn=document.querySelector('#contactform button[type=submit]');
+  btn.disabled=true;flash('ctmsg','Saving…');
+  store.set(PKEY,Object.assign({},store.get(PKEY)||{},{name,email,updates:upd,sent:false}));
+  const ok=await sendLead();
+  if(ok){const sec=document.getElementById('contact');if(sec)sec.innerHTML='<h3 class="h3">A note from the developer</h3><p class="body">Thanks, your email is saved. You can have it removed any time on the <a href="/privacy" target="_blank" rel="noopener">privacy page</a>.</p>'}
+  else{flash('ctmsg','Could not save it right now. Try again in a minute.','down');btn.disabled=false}
 }
 /* ---------- WELCOME ---------- */
 function renderWelcome(){
@@ -504,31 +550,26 @@ function renderWelcome(){
   let h='<div class="stack enter welcome">';
   h+='<div class="wl-hero">'+logo(c.id,'lg')+'<div class="kicker">Welcome to the corner office</div><h1 class="h1" id="wl-h">'+(p?'Welcome, CEO '+esc(plLast(p.name))+'.':'Welcome, future CEO.')+'</h1></div>';
   h+='<p class="lede">For the next '+d.quarters+' quarters you run '+esc(c.name)+' from today’s numbers. '+esc(c.ceoLast)+'’s announced plan plays through the same scenario beside you, so you can see who does better.</p>';
-  h+='<form id="lead" class="wl-form" novalidate autocomplete="on"><p class="wl-ask">'+(p?'Welcome back. Check your details, then take the chair.':'Before you take the job, tell us who is taking it.')+'</p>';
+  h+='<form id="lead" class="wl-form" novalidate autocomplete="on"><p class="wl-ask">'+(p?'Welcome back. Check your name, then take the chair.':'Before you take the job, tell us who is taking it.')+'</p>';
   h+='<div class="field"><label for="plname">Your name</label><input id="plname" name="name" maxlength="40" autocomplete="name" autocapitalize="words" spellcheck="false" aria-describedby="plname-e" value="'+esc(p?p.name:'')+'" placeholder="First and last name"><p class="ferr" id="plname-e" role="alert"></p></div>';
-  h+='<div class="field"><label for="plemail">Your email</label><input id="plemail" name="email" type="email" inputmode="email" maxlength="120" autocomplete="email" autocapitalize="off" spellcheck="false" aria-describedby="plemail-e" value="'+esc(p?p.email:'')+'" placeholder="you@example.com"><p class="ferr" id="plemail-e" role="alert"></p></div>';
-  h+='<label class="chk"><input type="checkbox" id="plupd" '+(p&&p.updates?'checked':'')+'><span>Email me about new companies and features. Optional.</span></label>';
-  h+='<p class="note">Your name goes on your scorecard. Your email is stored privately. It is never shown to other players, sold or shared. The site owner may email you directly about this project. You can have it removed any time on the <a href="/privacy" target="_blank" rel="noopener">privacy page</a>.</p>';
+  h+='<p class="note">Your name goes on your scorecard and in the newspaper if the board fires you. It stays on this device. Nothing else is asked before you play.</p>';
   h+='<button class="btn" type="submit">Take the chair</button></form>';
   h+='<div class="wl-card">'+face(c.id,'xl')+'<div><div class="kicker" style="margin:0 0 4px">You take the chair of</div><div class="wl-name">'+esc(c.ceo)+'</div><div class="wl-role">'+esc(c.ceoRole)+' since '+esc(c.ceoSince)+'</div><div class="wl-stock">'+esc(c.ticker)+' closed at <b>'+pxs+'</b> on '+PX_ASOF+'</div></div></div>';
-  h+='<ul class="wl-list"><li><b>Your scoreboard is the stock price.</b> It starts at '+pxs+'. Put $10,000 in on day one and watch it grow or shrink with your decisions.</li>';
-  h+='<li><b>A live tracker shows how you compare</b> with '+esc(c.ceoLast)+'’s announced plan, quarter by quarter.</li>';
+  h+='<ul class="wl-list"><li><b>The stock price shows how you are doing.</b> It starts at '+pxs+'. Put $10,000 in on day one and watch it grow or shrink with your decisions. Your final score also counts cash and debt, customers, people and trust, and stock is the biggest piece at 35%.</li>';
+  h+='<li><b>A live tracker shows how you compare</b> with '+esc(c.ceoLast)+'’s announced plan, quarter by quarter. Whoever ends with the higher overall score wins.</li>';
   h+='<li><b>It takes '+d.time.replace('About ','about ')+'.</b> First you read why the company is struggling, then you run it one quarter at a time.</li></ul>';
   h+='<p class="note">'+esc(c.pitch)+'</p>';
   h+=faceLine(c.id)+'</div>';
   $app.innerHTML=h;
 }
 function enterGame(){
-  const n=document.getElementById('plname'),m=document.getElementById('plemail');if(!n||!m)return;
-  const en=document.getElementById('plname-e'),em=document.getElementById('plemail-e');
-  const name=plClean(n.value),email=m.value.trim();
-  const badN=!plNameOK(name),badM=!plEmailOK(email);
-  en.textContent=badN?'Enter your name, at least 2 letters.':'';em.textContent=badM?'Enter a valid email, like you@example.com.':'';
-  n.setAttribute('aria-invalid',badN);m.setAttribute('aria-invalid',badM);
-  if(badN){n.focus();return}if(badM){m.focus();return}
-  const old=store.get(PKEY),upd=!!(document.getElementById('plupd')&&document.getElementById('plupd').checked);
-  store.set(PKEY,{name,email,updates:upd,sent:!!(old&&old.sent&&old.email===email&&old.name===name&&!!old.updates===upd)});
-  sendLead();
+  const n=document.getElementById('plname');if(!n)return;
+  const en=document.getElementById('plname-e'),name=plClean(n.value),badN=!plNameOK(name);
+  en.textContent=badN?'Enter your name, at least 2 letters.':'';
+  n.setAttribute('aria-invalid',badN);
+  if(badN){n.focus();return}
+  const old=store.get(PKEY)||{};
+  store.set(PKEY,Object.assign({},old,{name}));
   go('story');
 }
 /* ---------- WHY IS THE COMPANY STRUGGLING (replaces the old Strategy room) ---------- */
@@ -538,7 +579,7 @@ const STORY={
     ['The chip business is coming back.','Intel made $16.1 billion last quarter, up 25% from a year ago.',['f0']],
     ['Making chips for other companies is the money pit.','Intel Foundry, the part that runs the factories, lost $2.1 billion in one quarter on $5.8 billion of sales.',['f1']],
     ['Almost nobody outside Intel is buying.','Only about $293 million of that factory revenue came from outside customers. Nearly all the rest came from Intel’s own chip designers.',['f2']],
-    ['The next big bet has no customer yet.','Intel’s next chip-making process, called 14A, is aimed at 2028. No outside company has committed to buy big volumes.',['f3']],
+    ['The next big bet has no customer yet.','Intel’s next chip-making process, called 14A, is aimed at 2028. No outside company has been announced as a big-volume buyer.',['f3']],
     ['Rivals are strong on every side.','AMD fights for PC and server chips, Nvidia leads in AI, and TSMC leads in making chips for other companies. Intel also buys its most advanced machines from a single supplier, ASML.',['r:rivalry','r:suppliers']]],
     job:'Keep spending billions on factories that lose money, or protect cash for the chip products that are finally selling?'},
   ba:{head:'Boeing is building planes faster again, but it still loses money and one quality slip could undo the progress.',pts:[
@@ -614,7 +655,7 @@ function renderFired(){
   h+='<h1 class="pp-h" id="pp-h">CEO '+esc(nm)+' fired from '+esc(c.name)+'</h1>';
   h+='<p class="pp-deck">The board ran out of patience after '+n+' quarter'+(n>1?'s':'')+'. The stock is '+dir+' '+Math.abs(pm.pct).toFixed(1)+'% since the new chief took over.</p>';
   h+='<div class="pp-grid"><div class="pp-main">';
-  h+='<figure class="pp-fig"><div class="pp-photo" role="img" aria-label="A man in a suit sitting with his head in his hands. His face is blurred."></div><figcaption><b>FILE PHOTO.</b> A man in distress. Stock image with the face blurred. It is not '+esc(nm)+' or anyone connected to '+esc(c.name)+'. Photo: '+esc(ph.by)+', '+ext(ph.url,esc(ph.lic))+'. Cropped, blurred and made black and white.</figcaption></figure>';
+  h+='<figure class="pp-fig"><div class="pp-photo" role="img" aria-label="A man in a suit sitting with his head in his hands. His face is blurred."></div><figcaption><b>FILE PHOTO.</b> A man in distress. Stock image with the face blurred. It is not '+esc(nm)+' or anyone connected to '+esc(c.name)+'. Photo: '+ext('https://www.ciphr.com',esc(ph.by))+', '+ext(ph.url,esc(ph.lic))+'. Cropped, blurred and made black and white.</figcaption></figure>';
   h+='<p class="pp-by">By the Pseudo Post staff</p>';
   h+='<div class="pp-body">';
   h+='<p><span class="pp-dl">THE BOARD —</span> The board of '+esc(c.name)+' ('+esc(c.ticker)+') voted to remove '+esc(nm)+' as chief executive after '+n+' quarter'+(n>1?'s':'')+' in the job. '+(miss>0?(miss===1?'One quarter':miss+' quarters')+' came in below what Wall Street expected. ':'')+'Directors lost patience with the results.</p>';
@@ -651,7 +692,7 @@ function renderBrief(){
   h+='<div class="kicker">'+LG()+'Board briefing for <b>'+qLabel(q)+'</b>, '+qMonths(q)+'</div>';
   if(q===0){
     h+='<h1 class="h1">You are the new CEO of '+c.name+'.</h1><p class="lede">'+esc(c.pitch)+'</p>';
-    h+='<div class="section stack tight"><h3 class="h3">Where it stands</h3><ul class="facts">'+c.facts.map(f=>'<li>'+esc(f[0])+' '+ext(f[1],'Source')+'</li>').join('')+'</ul>';
+    h+='<div class="section stack tight"><h3 class="h3">Where it stands</h3><p class="note">The numbers behind the struggle are on the page you just read. Each starting figure links to its filing below.</p>';
     h+=SM?'<p class="note">Your key number is <b>'+esc(c.kpi.plain)+'</b>: '+esc(c.kpi.plainD)+' It is '+kpiFmt(c,G.st.kpi)+' today.</p>':'<p class="note">Key number: <b>'+esc(c.kpi.name)+'</b> ('+esc(c.kpi.unit)+'), now '+kpiFmt(c,G.st.kpi)+'.</p>';
     h+=sourcesBlock(c)+'</div>';
     h+=agendaHtml;
@@ -808,10 +849,14 @@ function renderCard(){
   // advisors
   let advIdx=cd.opts.map((o,i)=>i);
   h+='<div class="section stack tight"><h3 class="h3">Your team weighs in</h3><div class="advisors">';
+  const usedRole={};
   for(const i of advIdx){const o=cd.opts[i];if(!o.a)continue;
-    const k=roleOf(o.a[0]);const m=k?G.cab[k]:null;
-    const name=m?m.name:o.a[0],title=m?m.title:'';
-    h+='<div class="adv">'+avatar(m?m.name:o.a[0],k)+'<div><q>'+esc(o.a[1])+'</q><div class="who"><b>'+esc(name)+'</b>'+(title?'<span>'+esc(title)+'</span>':'')+'<span>backs '+LET[i]+'</span>';
+    let k=roleOf(o.a[0]);let m=k?G.cab[k]:null;
+    let name=m?m.name:o.a[0],title=m?m.title:'';
+    /* two options argued by the same cabinet member would read as one person on both sides, so the second adviser is shown under their own fictional name and title */
+    if(k&&usedRole[k]){const free=NAMES.filter(n=>!Object.keys(G.cab).some(z=>z[0]!=='_'&&G.cab[z].name===n));name=free[hashStr(G.seed+'|'+cid+'|'+i)%free.length];title=o.a[0];m=null;k=null}
+    else if(k)usedRole[k]=1;
+    h+='<div class="adv">'+avatar(m?m.name:name,k)+'<div><q>'+esc(o.a[1])+'</q><div class="who"><b>'+esc(name)+'</b>'+(title?'<span>'+esc(title)+'</span>':'')+'<span>backs '+LET[i]+'</span>';
     if(m&&d.hints!=='tags')h+='<span class="trust">trust <span class="tbar"><b class="'+(m.loyalty<30?'low':'')+'" style="width:'+m.loyalty+'%"></b></span>'+(isFull()?Math.round(m.loyalty):'')+'</span>';
     if(m&&m.loyalty<30)h+='<span class="tag r">May resign</span>';
     if(d.advisors==='rec'&&grades[i]===best)h+='<span class="tag">Best fit now</span>';
@@ -1089,7 +1134,7 @@ function renderDebrief(){
   const title=fired?'The board replaced you after '+qLabel(G.firedAt)+'.':ds>=3?'You beat the real playbook.':ds<=-3?'The real playbook beat you.':'You finished close to the real playbook.';
   let h='<div class="stack enter">';
   h+='<div class="kicker">'+LG()+(PL()?esc(PL().name)+'’s debrief':'Debrief')+' for '+c.name+' on '+d.name+', scenario '+esc(G.seed)+'</div><h1 class="h1">'+esc(title)+'</h1>';
-  h+='<p class="lede">You ran '+c.name+' for '+n+' quarter'+(n>1?'s':'')+'. Your stock finished at <b>'+fmtPx(pxOf('st'))+'</b>, '+fmtPct(pnlOf('st').pct)+' from where you started. '+esc(c.ceo)+'’s real playbook would have finished at '+fmtPx(pxOf('ghost'))+' in the same scenario.</p>';
+  h+='<p class="lede">You ran '+c.name+' for '+n+' quarter'+(n>1?'s':'')+'. Your stock finished at <b>'+fmtPx(pxOf('st'))+'</b>, '+fmtPct(pnlOf('st').pct)+' from where you started. '+esc(c.ceo)+'’s real playbook would have finished at '+fmtPx(pxOf('ghost'))+' in the same scenario. The verdict above uses your overall score below, where the stock price counts for 35% and the rest is balance sheet, customers, people and trust.</p>';
   h+=shareBlock();
   h+='<div class="section scores">';
   h+='<div class="big"><span class="k">Overall score</span><span class="v">'+me.overall.toFixed(0)+'</span><span class="k">real playbook '+gh.overall.toFixed(0)+'</span></div>';
@@ -1144,6 +1189,7 @@ function renderDebrief(){
   h+='<li>Advisors and analysts are fictional. Workforce figures are real. Simulation only; not investment advice.</li></ul>';
   h+='<div class="links" style="margin-top:12px">'+c.facts.map((f,i)=>ext(f[1],'Fact source '+(i+1))).join('')+'</div>'+'<div style="margin-top:8px">'+sourcesBlock(c)+'</div></details>';
   h+=postBlock();
+  h+=contactBlock();
   h+='<div class="actions"><button class="btn" data-act="again">Play '+c.name+' again</button><button class="btn sec" data-act="same">Replay this exact scenario</button><button class="btn link" data-act="home">Choose another company</button></div></div>';
   $app.innerHTML=h;
   drawCard(document.getElementById('sharecv'));
@@ -1224,6 +1270,7 @@ function shareBlock(){
 function postBlock(){
   if(!NET.ok)return '';
   if(G.status!=='done')return '<section class="section stack tight"><h3 class="h3">Leaderboard</h3><p class="note">Runs that end with the board replacing you are not ranked. Finish all '+D().quarters+' quarters to post a score.</p><div class="actions"><button class="btn sec" data-act="board">See the leaderboard</button></div></section>';
+  if(!isRanked(G.seed))return '<section class="section stack tight"><h3 class="h3">Leaderboard</h3><p class="note">This game used a practice scenario code, so it cannot be ranked. Ranked codes are handed out by the server when the home screen loads. Tap Play again to get one.</p><div class="actions"><button class="btn sec" data-act="board">See the leaderboard</button></div></section>';
   return '<section class="section stack tight"><h3 class="h3">Post to the leaderboard</h3><p class="note">The server replays your choices to confirm the score. Only the name you enter and your result are saved, one row per player on each board.</p>'
    +'<div class="field"><label for="lbname">Display name</label><input id="lbname" maxlength="16" autocomplete="nickname" spellcheck="false" value="'+esc(store.get('pseudoceo.name')||plBoardName())+'"></div>'
    +'<div class="actions"><button class="btn" data-act="postscore">Post score</button><button class="btn sec" data-act="board">See the leaderboard</button></div><p class="note" id="lbmsg"></p></section>';
@@ -1275,7 +1322,7 @@ function render(){
   ({home:renderHome,welcome:renderWelcome,story:renderStory,fired:renderFired,brief:renderBrief,card:renderCard,alloc:renderAlloc,results:renderResults,call:renderCall,debrief:renderDebrief,board:renderBoard})[UI.screen]();
   renderDesk();
 }
-function keepSeed(){const inp=document.getElementById('seed');if(inp)UI.setup.seed=inp.value}
+function keepSeed(){const inp=document.getElementById('seed');if(inp&&inp.value!==UI.setup.seed){UI.setup.seed=inp.value;UI.setup.auto=false}}
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]');if(!b||b.disabled)return;
   const act=b.dataset.act,v=b.dataset.v;
@@ -1315,17 +1362,18 @@ document.addEventListener('click',e=>{
     case 'bd':UI.board.d=v;loadBoard();break;
     case 'postscore':postScore(b);break;
     case 'sharenative':case 'sharedl':case 'sharecopy':shareResult(act);break;
-    case 'again':UI.setup={co:G.coId,diff:G.diffKey,seed:randSeed()};startGame();break;
-    case 'same':UI.setup={co:G.coId,diff:G.diffKey,seed:G.seed};startGame();break;
+    case 'again':UI.setup={co:G.coId,diff:G.diffKey,seed:randSeed(),auto:true};fetchSeed();startGame();break;
+    case 'same':UI.setup={co:G.coId,diff:G.diffKey,seed:G.seed,auto:false};startGame();break;
   }
 });
 
-document.addEventListener('submit',e=>{if(e.target&&e.target.id==='lead'){e.preventDefault();enterGame()}});
+document.addEventListener('submit',e=>{if(e.target&&e.target.id==='lead'){e.preventDefault();enterGame()}else if(e.target&&e.target.id==='contactform'){e.preventDefault();submitContact()}});
 document.addEventListener('input',e=>{
-  const t=e.target;if(t&&(t.id==='plname'||t.id==='plemail')){const er=document.getElementById(t.id+'-e');if(er)er.textContent='';t.removeAttribute('aria-invalid')}
+  if(e.target&&e.target.id==='seed'){UI.setup.seed=e.target.value;UI.setup.auto=false;seedNote()}
+  const t=e.target;if(t&&(t.id==='plname'||t.id==='plemail'||t.id==='ctemail'||t.id==='ctname')){const er=document.getElementById(t.id+'-e');if(er)er.textContent='';t.removeAttribute('aria-invalid')}
   if(e.target&&e.target.id==='plname'){const h=document.getElementById('wl-h'),l=plLast(e.target.value);if(h)h.textContent=l&&plNameOK(e.target.value)?'Welcome, CEO '+l+'.':'Welcome, future CEO.'}
 });
 /* ---------- boot ---------- */
-function boot(data){{const sv=store.get(SAVE);if(sv&&!saveOK(sv))store.del(SAVE)}if(data&&data.G&&saveOK(data)){G=data.G;UI=Object.assign(UI,data.UI)}if(UI.screen==='board')UI.screen='home';if(UI.screen==='strategy')UI.screen='story';render();NET.ev('view');sendLead()}
+function boot(data){{const sv=store.get(SAVE);if(sv&&!saveOK(sv))store.del(SAVE)}if(data&&data.G&&saveOK(data)){G=data.G;UI=Object.assign(UI,data.UI)}if(UI.screen==='board')UI.screen='home';if(UI.screen==='strategy')UI.screen='story';render();NET.ev('view');sendLead();if(UI.setup.auto&&!isRanked(UI.setup.seed))fetchSeed()}
 if(window.claude&&window.claude.hot&&window.claude.hot.snapshot)window.claude.hot.snapshot(()=>({G,UI}));
 if(window.claude&&window.claude.hot&&window.claude.hot.ready)window.claude.hot.ready(boot);else boot((window.claude&&window.claude.hot&&window.claude.hot.data)||{});

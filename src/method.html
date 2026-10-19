@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How the model works | Pseudo CEO</title>
+<meta name="description" content="How Pseudo CEO turns company filings into a quarter-by-quarter simulation, how the score is built, and where it is simplified.">
+<link rel="canonical" href="https://pseudo-ceo.vercel.app/method">
+<style>
+:root{--bg:#EDEFF4;--sheet:#fff;--ink:#12162B;--muted:#555C72;--rule:#D3D7E2;--accent:#2B3BD1;--ok:#0B7A5C;--bad:#C23A22}
+@media (prefers-color-scheme:dark){:root{--bg:#0E1120;--sheet:#171B30;--ink:#E7E9F3;--muted:#A0A7C2;--rule:#2B3150;--accent:#8FA0FF;--ok:#52C99F;--bad:#F2806A}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,'Segoe UI',sans-serif}
+main{max-width:680px;margin:0 auto;padding:28px 18px 64px}
+a{color:var(--accent)}
+.back{display:inline-block;margin-bottom:18px;font-weight:600;text-decoration:none}
+h1{font-size:clamp(30px,8vw,44px);line-height:1.05;margin:0 0 6px;font-weight:800;letter-spacing:-.02em}
+.upd{color:var(--muted);margin:0 0 22px;font-size:14px}
+h2{font-size:21px;margin:30px 0 6px;font-weight:800}
+code,.eq{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px}
+.eq{display:block;background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:12px 14px;margin:10px 0;overflow-x:auto;white-space:pre;line-height:1.55}
+p,ul{margin:8px 0}
+ul{padding-left:20px}
+li{margin:5px 0}
+.box{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:18px;margin-top:12px}
+label{display:block;font-weight:600;margin-bottom:6px}
+input[type=email]{width:100%;font:inherit;padding:11px 12px;border:1px solid var(--rule);border-radius:4px;background:var(--bg);color:var(--ink)}
+button{margin-top:12px;font:inherit;font-weight:700;padding:12px 18px;border:0;border-radius:4px;background:var(--accent);color:#fff;cursor:pointer}
+@media (prefers-color-scheme:dark){button{color:#0E1120}}
+button:disabled{opacity:.6;cursor:default}
+#msg{margin:10px 0 0;font-size:15px;min-height:1.4em}
+#msg.ok{color:var(--ok)} #msg.bad{color:var(--bad)}
+.small{font-size:14px;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+<a class="back" href="/">&larr; Back to the game</a>
+<h1>How the model works</h1>
+<p class="upd">Last updated October 19, 2026. A plain description of a simplified model, written so you can check it.</p>
+
+<p>Pseudo CEO is a teaching simulation, not a forecast. It starts each company from its latest filed numbers, lets you make the decisions its real leadership faced, and compares you with a "real playbook" that makes the choices leadership announced, in the same random scenario.</p>
+
+<h2>Where the starting numbers come from</h2>
+<ul>
+<li>Revenue, operating margin, cash, debt, depreciation, capex and shares come from each company's latest 10-K and 10-Q on SEC EDGAR. Every figure links to its filing inside the game.</li>
+<li>Headline facts in the "Why is it struggling?" page link to the company's own earnings release, SEC exhibit or call transcript wherever one exists. A few leadership-move cards still link to news reports, and those are labeled as such.</li>
+<li>The starting stock price is the real closing price on October 16, 2026. After that, the price is the model's output.</li>
+<li>Anything that is not from a filing (for example an estimate of one input) is listed on the filings table as "not from a filing".</li>
+</ul>
+
+<h2>One quarter, step by step</h2>
+<p>Each quarter you answer a few decision cards, set a capital plan (reinvest, shareholder returns, debt, guidance) and take questions on an earnings call. Then the model advances one quarter:</p>
+<span class="eq">revenue growth   = base growth + effects of your choices
+                   + customer-satisfaction term + reinvestment payoff
+                   + market shock + company-specific shock
+operating margin = base margin + effects of your choices
+                   + execution term + company-specific shock
+operating income = revenue x margin
+interest         = debt x 4.5% / 4
+tax              = 18% x (operating income - interest)
+free cash flow   = net income + depreciation - capex + working capital
+cash             = cash + free cash flow - dividends - buybacks</span>
+<p>Interest and tax use flat rates for every company rather than each one's exact rate. If cash falls below a safety floor, the model borrows to refill it and the board and investors lose confidence.</p>
+
+<h2>How the stock price is produced</h2>
+<span class="eq">equity target = trailing 4-quarter revenue
+                 x starting multiple
+                 x exp( 0.06 x change in trailing margin
+                      + g x change in year-over-year growth )
+                 x investor-confidence factor
+                 - (debt - cash)
+index          = index + 0.75 x (target index - index) + random noise (about 2.5%)
+stock price    = starting price x index / 100</span>
+<p><code>g</code> is 0.025 for every company except Intel, where it is 0.013 because Intel's revenue growth swings were driving a re-rating far larger than a plausible two-year move. That is the author's judgment call, not a measured value.</p>
+<p>The index starts at 100. A stock price in the game is therefore a readable score, not a price prediction. The model has no sector, interest-rate or sentiment cycle beyond the random shocks.</p>
+
+<h2>The score</h2>
+<p>Your overall score is a weighted scorecard from 0 to 100:</p>
+<ul>
+<li>Shareholder value, 35%: the stock index, scaled so that 100 (unchanged) scores 50.</li>
+<li>Balance sheet, 20%: falls as net debt (debt minus cash) rises relative to earnings before interest, tax and depreciation, and takes a penalty when cash is thin.</li>
+<li>Customers, 15%, people and execution, 15%, stakeholder trust (regulators, board, investors), 15%: these are meters your decisions move.</li>
+</ul>
+<p>The verdict "You beat the real playbook" or "The real playbook beat you" compares your overall score with the playbook's, with a three-point margin for "close". Because the stock is only 35% of the score, you can end with a higher share price and still lose on overall score if you wrecked the balance sheet or your people.</p>
+
+<h2>The real playbook</h2>
+<p>For every card, one option is marked as the closest match to what leadership actually announced or did. Where an event is hypothetical, the marked option is the one most consistent with leadership's stated approach. The playbook plays those options and a fixed capital plan through the same scenario you face. The sources for each card are linked in the debrief. The choice of which option is "closest" is my reading of public statements.</p>
+
+<h2>Decision quality and luck</h2>
+<ul>
+<li>Each option has a 0 to 3 rating that I assigned from corporate-finance reasoning. It is adjusted by your situation at the time (for example, a big bet is rated better with cash to spare and worse when cash is tight). These ratings are editorial. They are the least objective part of the game, and the debrief shows the reasoning for each card.</li>
+<li>"Decision quality" grades your choices against the best option for your situation, not against how the dice landed.</li>
+<li>"Luck" is the gap between your real result and a replay of your same choices with the random shocks removed.</li>
+</ul>
+
+<h2>Scenarios and the leaderboard</h2>
+<p>A scenario code seeds the random shocks, so everyone who plays the same code faces the same events. The server hands out signed codes for ranked games. When you post a score, the server replays your choices through the same engine and computes the score itself, so a score cannot be typed in. Only completed games are ranked. Rewinds are self-reported.</p>
+
+<h2>When the board fires you</h2>
+<p>On Standard, board support below 28 out of 100 for two quarters in a row ends the game, after the first two quarters. On Hot Seat, one quarter below 27 does. Guided has no firing. The firing screen is a fictional newspaper page that is labeled as fiction on the page itself.</p>
+
+<h2>What this model does not do</h2>
+<ul>
+<li>It is not a forecast and not investment advice. Real companies have thousands of drivers this model flattens into a handful.</li>
+<li>Starting points are real. Everything after that is the model's output, including every stock price.</li>
+<li>Some cards are hypothetical responses to invented events. They are marked as events.</li>
+<li>Balance is imperfect. Some companies are easier to beat than others, and luck matters more on the harder modes. The debrief shows how much of your result was luck.</li>
+<li>The advisors, analysts and their firms are fictional. Workforce figures, layoffs and starting financials are real and sourced.</li>
+</ul>
+
+<h2>Spot an error?</h2>
+<p>Corrections are welcome. Reach the site owner through <a href="https://cortlandclarke.com">cortlandclarke.com</a>, and include the company and the card or fact.</p>
+</main>
+</body>
+</html>

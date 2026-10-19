@@ -18,7 +18,7 @@ const DIFF={
     blurb:'Plain English. Every number is explained, every term is defined, each choice shows what it helps or hurts, and an advisor flags the strongest option. The board cannot fire you. 3 rewinds.'},
   medium:{key:'medium',name:'Standard',quarters:8,time:'About 20 min',sd:1,lag:1,ev:0.5,evMul:1,hints:'tags',fire:{below:28,streak:2},rewinds:1,ghostLive:false,fog:false,advisors:'all',
     blurb:'Fewer hints. Each choice shows what it touches, but not whether it helps or hurts. Your advisors disagree with each other. Two bad board quarters in a row and you are fired. 1 rewind.'},
-  hard:{key:'hard',name:'Hot Seat',quarters:12,time:'About 30 min',sd:1.4,lag:1.5,ev:0.7,evMul:1.3,hints:'numbers',fire:{below:32,streak:1},rewinds:0,ghostLive:false,fog:false,advisors:'all',
+  hard:{key:'hard',name:'Hot Seat',quarters:12,time:'About 30 min',sd:1.4,lag:1.5,ev:0.7,evMul:1.3,hints:'numbers',fire:{below:27,streak:1},rewinds:0,ghostLive:false,fog:false,advisors:'all',
     blurb:'No hints. Full financial statements, exact numbers on every choice, and nothing flagged for you. Slower payoffs, bigger shocks, and one bad board quarter gets you fired. No rewinds.'}
 };
 
@@ -38,7 +38,7 @@ const VAR_GOOD={g:1,m:1,cash:1,cr:1,debt:-1,dr:-1,inv:1,brd:1,emp:1,cus:1,reg:1,
 const CO={
 intc:{id:'intc',name:'Intel',ticker:'INTC',sector:'Semiconductors',ceo:'Lip-Bu Tan',dilemma:'Bet-the-company capex',
   pitch:'The products business is recovering. The foundry still loses about $2 billion a quarter, and almost all of its revenue comes from Intel itself.',
-  start:{rev:16.128,g:1.0,m:11.1,cash:29.73,debt:50.54,da:2.93,capex:3.66,wc:0,div:0,mult:6,kpi:0.29},
+  start:{rev:16.128,g:1.0,m:11.1,cash:29.73,debt:50.54,da:2.93,capex:3.66,wc:0,div:0,mult:6,gsens:0.013,kpi:0.29},
   est:[],
   meters:{inv:65,brd:55,emp:40,cus:50,reg:60,exe:50},
   kpi:{plain:'Outside chip sales',plainS:'Chips made for other companies',plainD:'Money from making chips for other companies, per quarter. Higher is better.',name:'External foundry revenue',short:'Ext. foundry',unit:'$B/qtr',good:1,drift:0.02,min:0,max:6,fmt:v=>'$'+v.toFixed(2)+'B'},
@@ -47,34 +47,34 @@ intc:{id:'intc',name:'Intel',ticker:'INTC',sector:'Semiconductors',ceo:'Lip-Bu T
     ['Q2 2026 revenue was $16.1B, up about 25% from a year earlier.','https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf'],
     ['Intel Foundry lost $2.1B on $5.8B of revenue in Q2 2026, about a −36% operating margin.','https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf'],
     ['About $293M of that foundry revenue came from outside customers.','https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf'],
-    ['14A high-volume manufacturing is targeted for 2028, with no confirmed external volume customer.','https://fourweekmba.com/ai-intel-foundry-q2-2026-losses-narrowing/']
+    ['14A high-volume manufacturing is targeted for 2028, and no external volume customer has been announced.','https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf']
   ],
   deck:[
     {id:'intc-14a',cat:'Capital allocation',title:'How hard do you bet on 14A?',at:0,
-     body:'Your 14A process targets high-volume production in 2028. Outside customers are asking how much capacity they can reserve, but none has signed for volume. Each quarter of clean-room construction costs billions.',
-     src:'https://fourweekmba.com/ai-intel-foundry-q2-2026-losses-narrowing/',
+     body:'Your 14A process targets high-volume production in 2028. Outside customers are asking how much capacity they can reserve, but none has been announced as signing for volume. Each quarter of clean-room construction costs billions.',
+     src:'https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf',
      why:'When a capex bet depends on customers you have not signed, staging spend against commitments keeps the option alive without betting the balance sheet.',
      opts:[
-      {l:'Build the full 14A line now',d:'About $6B extra over four quarters. Capacity is ready if customers come.',fx:[['cash',-1.5,0,4],['g',0.8,6,99],['kpi',0.4,5],['inv',-4],['exe',-2]],q:2,a:['Chief Technology Officer','If we wait for signatures, we will be late again. Late is how we lost this business.']},
-      {l:'Build in stages against signed commitments',d:'About $2.4B over four quarters, with more released as contracts land.',fx:[['cash',-0.6,0,4],['g',0.45,5,99],['kpi',0.25,4],['inv',3]],q:3,ghost:1,a:['CFO','Tie every dollar of shell construction to a signed volume agreement. That is the deal we can defend.']},
-      {l:'Pause 14A and partner on the leading edge',d:'Protects margins now. Washington and your engineers will not like it.',fx:[['m',1.5,0,99],['g',-0.5,4,99],['kpi',-0.1],['reg',-8],['emp',-6],['inv',5]],q:1,a:['Board member','The market rewarded discipline this year. A pause would be read as discipline.']}
+      {l:'Build the full 14A line now',d:'About $6B extra over four quarters. Capacity is ready if customers come.',fx:[['cash',-1.5,0,4],['g',0.56,6,99],['kpi',0.28,5],['inv',-4],['exe',-2]],q:2,a:['Chief Technology Officer','If we wait for signatures, we will be late again. Late is how we lost this business.']},
+      {l:'Build in stages against signed commitments',d:'About $2.4B over four quarters, with more released as contracts land.',fx:[['cash',-0.6,0,4],['g',0.315,5,99],['kpi',0.175,4],['inv',3]],q:3,ghost:1,a:['CFO','Tie every dollar of shell construction to a signed volume agreement. That is the deal we can defend.']},
+      {l:'Pause 14A and partner on the leading edge',d:'Protects margins now. Washington and your engineers will not like it.',fx:[['m',1.5,0,99],['g',-0.35,4,99],['kpi',-0.07],['reg',-8],['emp',-6],['inv',5]],q:1,a:['Board member','The market rewarded discipline this year. A pause would be read as discipline.']}
      ]},
     {id:'intc-spin',cat:'Portfolio architecture',title:'Should the foundry stand on its own?',
      body:'Bankers say outside investors would buy a minority stake in Intel Foundry. Some shareholders want a full separation so the products business stops funding fab losses.',
      why:'A separation announced before the foundry is self-funding tends to distract both halves; minority capital can fund the build without breaking the structure.',
      opts:[
-      {l:'Sell a minority stake to outside investors',d:'Raises cash for the build while keeping control.',fx:[['cash',8,2],['inv',4],['brd',2],['exe',-3]],q:2,a:['Head of Strategy','Outside money also brings outside discipline. Customers see a foundry that others will fund.']},
+      {l:'Sell a minority stake to outside investors',d:'Raises cash for the build while keeping control.',fx:[['cash',8,2],['inv',4],['brd',2],['exe',-3]],q:3,a:['Head of Strategy','Outside money also brings outside discipline. Customers see a foundry that others will fund.']},
       {l:'Keep the company whole',d:'Stay integrated. Products and foundry share one plan.',fx:[['emp',2],['cus',2]],q:2,ghost:1,a:['COO','Splitting now would mean two half-finished turnarounds.']},
-      {l:'Announce a full spin-off within 18 months',d:'A clean story for investors. A long distraction for everyone else.',fx:[['inv',8],['exe',-7],['emp',-6],['cus',-4],['g',-0.3,1,4],['cr',-1,1,2]],q:1,a:['Activist shareholder','Sum of the parts is worth more than the whole. Unlock it.']}
+      {l:'Announce a full spin-off within 18 months',d:'A clean story for investors. A long distraction for everyone else.',fx:[['inv',8],['exe',-7],['emp',-6],['cus',-4],['g',-0.21,1,4],['cr',-1,1,2]],q:1,a:['Activist shareholder','Sum of the parts is worth more than the whole. Unlock it.']}
      ]},
     {id:'intc-asic',cat:'Vision and product',title:'A hyperscaler wants custom chips at thin margins',
      body:'A large cloud company offers a multi-year order for custom AI silicon built in your fabs. The volume is real. The price is low, and they want priority on capacity.',
      src:'https://seekingalpha.com/article/4926760-intels-turnaround-is-finally-backed-by-results',
      why:'Early foundry customers buy proof as much as wafers. Thin-margin volume that fills fabs and proves a node can be worth more than the margin it costs.',
      opts:[
-      {l:'Accept their price',d:'Fills fabs and proves the node to other buyers.',fx:[['g',1.0,1,8],['m',-0.8,1,8],['kpi',0.5,2],['cus',6]],q:3,ghost:1,a:['Head of Foundry','Every other customer is watching who trusts us first.']},
-      {l:'Counter at a higher price',d:'Better margin if they accept. They might walk.',out:[{p:0.55,t:'They accepted the counter.',fx:[['g',0.8,1,8],['m',-0.3,1,8],['kpi',0.4,2],['cus',3]]},{p:0.45,t:'They walked and signed elsewhere.',fx:[['cus',-4],['inv',-3]]}],q:2,a:['CFO','We are not a charity. If they need us, they will pay for it.']},
-      {l:'Decline and protect product margins',d:'Keep capacity for your own x86 products.',fx:[['m',0.3,0,4],['kpi',-0.05],['cus',-5],['inv',-3]],q:1,a:['Head of Client Products','Our own chips earn more per wafer. Feed them first.']}
+      {l:'Accept their price',d:'Fills fabs and proves the node to other buyers.',fx:[['g',0.7,1,8],['m',-0.8,1,8],['kpi',0.35,2],['cus',6]],q:3,ghost:1,a:['Head of Foundry','Every other customer is watching who trusts us first.']},
+      {l:'Counter at a higher price',d:'Better margin if they accept. They might walk.',out:[{p:0.55,t:'They accepted the counter.',fx:[['g',0.56,1,8],['m',-0.3,1,8],['kpi',0.28,2],['cus',3]]},{p:0.45,t:'They walked and signed elsewhere.',fx:[['cus',-4],['inv',-3]]}],q:2,a:['CFO','We are not a charity. If they need us, they will pay for it.']},
+      {l:'Decline and protect product margins',d:'Keep capacity for your own x86 products.',fx:[['m',0.3,0,4],['kpi',-0.035],['cus',-5],['inv',-3]],q:1,a:['Head of Client Products','Our own chips earn more per wafer. Feed them first.']}
      ]},
     {id:'intc-raise',cat:'Financing',title:'Bankers pitch another capital raise',
      body:'The stock has rallied hard this year. Bankers say now is the time to raise money for the foundry build, either as new shares or as convertible debt.',
@@ -89,7 +89,7 @@ intc:{id:'intc',name:'Intel',ticker:'INTC',sector:'Semiconductors',ceo:'Lip-Bu T
      body:'Margins are still below peers. Your finance team proposes another round of cuts after the large layoffs of the past two years.',
      why:'After deep layoffs, further broad cuts tend to cost execution; removing layers is usually the cheaper lever.',
      opts:[
-      {l:'Cut 8% of remaining staff',jobs:0.08,d:'Biggest savings. Morale and execution take a hit.',fx:[['m',1.5,1,99],['emp',-12],['exe',-5],['g',-0.2,2,4],['cr',-3,0,1],['inv',4]],q:1,a:['CFO','Peers run leaner. The math says cut.']},
+      {l:'Cut 8% of remaining staff',jobs:0.08,d:'Biggest savings. Morale and execution take a hit.',fx:[['m',1.5,1,99],['emp',-12],['exe',-5],['g',-0.14,2,4],['cr',-3,0,1],['inv',4]],q:1,a:['CFO','Peers run leaner. The math says cut.']},
       {l:'Remove management layers only',jobs:0.015,d:'Smaller savings. Faster decisions.',fx:[['m',0.6,1,99],['emp',-4],['exe',3]],q:3,ghost:1,a:['COO','We still have too many people approving work and too few doing it.']},
       {l:'Freeze hiring',d:'Slow, quiet savings through attrition.',fx:[['m',0.3,1,99],['emp',-2]],q:2,a:['Chief People Officer','People are tired. A freeze buys savings without another shock.']}
      ]},
@@ -97,15 +97,15 @@ intc:{id:'intc',name:'Intel',ticker:'INTC',sector:'Semiconductors',ceo:'Lip-Bu T
      body:'A scenario event: yields on a new product ramp are below plan. Launching on schedule means selling fewer good chips per wafer and risking quality complaints.',
      why:'Shipping a weak ramp to hit a date trades a one-quarter miss for a reputation problem that lasts much longer.',
      opts:[
-      {l:'Delay the launch one quarter',d:'Fix yields first. Miss the date.',fx:[['g',-0.6,0,2],['exe',6],['cus',-3]],q:3,ghost:1,a:['Head of Manufacturing','Give us twelve weeks and the ramp is clean.']},
+      {l:'Delay the launch one quarter',d:'Fix yields first. Miss the date.',fx:[['g',-0.42,0,2],['exe',6],['cus',-3]],q:3,ghost:1,a:['Head of Manufacturing','Give us twelve weeks and the ramp is clean.']},
       {l:'Launch on schedule',d:'Hit the date at lower yield.',fx:[['m',-1.2,0,3],['cus',2],['exe',-5]],out:[{p:0.7,t:'The launch held up.',fx:[]},{p:0.3,t:'Customers reported quality problems.',fx:[['cus',-10],['inv',-5]]}],q:1,a:['Head of Sales','Customers planned around this date. Missing it hurts more than a weak ramp.']},
-      {l:'Shift some volume to an outside foundry',d:'Protects the date. Undercuts your foundry story.',fx:[['m',-0.8,0,4],['cus',3],['kpi',-0.05],['emp',-3],['reg',-2]],q:2,a:['Head of Client Products','Customers do not care whose fab it came from.']}
+      {l:'Shift some volume to an outside foundry',d:'Protects the date. Undercuts your foundry story.',fx:[['m',-0.8,0,4],['cus',3],['kpi',-0.035],['emp',-3],['reg',-2]],q:2,a:['Head of Client Products','Customers do not care whose fab it came from.']}
      ]},
     {id:'intc-chips',cat:'Regulatory',title:'Washington wants faster domestic capacity',
      body:'Officials ask you to accelerate a delayed US fab. More public support is possible. The building only makes sense if demand shows up.',
      why:'Government support lowers the cost of capacity but does not create demand; matching timelines to customers protects both relationships.',
      opts:[
-      {l:'Accelerate the fab for more support',d:'More grants later, heavy spending now.',fx:[['cash',-2,0,4],['cash',3,2],['reg',12],['g',0.3,8,99],['inv',-3]],q:2,a:['Head of Government Affairs','We need allies in Washington more than ever.']},
+      {l:'Accelerate the fab for more support',d:'More grants later, heavy spending now.',fx:[['cash',-2,0,4],['cash',3,2],['reg',12],['g',0.21,8,99],['inv',-3]],q:2,a:['Head of Government Affairs','We need allies in Washington more than ever.']},
       {l:'Keep the current timeline',d:'Explain that capacity follows customers.',fx:[['reg',-4]],q:2,ghost:1,a:['CFO','Fabs without customers are monuments.']},
       {l:'Push the timeline out further',d:'Saves cash. Strains a key relationship.',fx:[['cash',1,0,2],['reg',-12],['inv',2]],q:1,a:['Treasurer','Every dollar we do not spend this year is a dollar we do not borrow.']}
      ]}
@@ -126,8 +126,8 @@ ba:{id:'ba',name:'Boeing',ticker:'BA',sector:'Aerospace',ceo:'Kelly Ortberg',dil
   ],
   deck:[
     {id:'ba-rate',cat:'Operating architecture',title:'Ask the FAA for 52 a month?',at:1,
-     body:'The line is moving to 47 jets a month. Leadership has said it wants 63 eventually, and that each step needs months of stability first. Airlines want planes now.',
-     src:'https://stocktwits.com/news-articles/markets/equity/boeing-ba-stock-climbs-after-ceo-says-production-at-levels-not-seen-since-2018/cZZCMQvRJbh',
+     body:'The line is moving to 47 jets a month. Leadership has said it wants 63 a month someday, and that each step up depends on a stable production system and suppliers who can keep pace. Airlines want planes now.',
+     src:'https://s2.q4cdn.com/661678649/files/doc_financials/2026/q2/Transcript.pdf',
      why:'Rate increases taken before the system is stable are how quality escapes happen; waiting a quarter is cheaper than a grounding.',
      opts:[
       {l:'Request 52 now',d:'More deliveries sooner. Strains a line that just stepped up.',fx:[['kpi',5,1],['exe',-6]],out:[{p:0.65,t:'The step-up held.',fx:[['reg',-2]]},{p:0.35,t:'A quality escape forced a slowdown.',fx:[['reg',-12],['exe',-8],['cus',-6],['kpi',-5,2]]}],q:1,a:['Head of Sales','Customers are short of jets. Every month we wait, they look at Airbus.']},
@@ -154,7 +154,7 @@ ba:{id:'ba',name:'Boeing',ticker:'BA',sector:'Aerospace',ceo:'Kelly Ortberg',dil
      ]},
     {id:'ba-spirit',cat:'Operating architecture',title:'How deep do you integrate Spirit AeroSystems?',
      body:'Boeing completed its acquisition of Spirit AeroSystems, the supplier that built the fuselage involved in the 2024 door-plug blowout. Spirit is now yours to fix.',
-     src:'https://ceointerviews.ai/quote/before-the-year-end-we-took-another-important-MTA2Nzg2NA/',
+     src:'https://s2.q4cdn.com/661678649/files/doc_financials/2025/q4/Transcript.pdf',
      why:'Buying a supplier only fixes quality if you bring it inside your quality system; squeezing it for cost repeats the original mistake.',
      opts:[
       {l:'Fully integrate its quality systems',d:'About $2B over a year. Fewer defects later.',fx:[['cash',-0.5,0,4],['exe',10,2],['m',0.5,4,99],['reg',3,2]],q:3,ghost:1,a:['Head of Quality','One quality system, one set of inspectors, one standard.']},
@@ -171,20 +171,20 @@ ba:{id:'ba',name:'Boeing',ticker:'BA',sector:'Aerospace',ceo:'Kelly Ortberg',dil
      ]},
     {id:'ba-defense',cat:'Capital allocation',title:'How to bid on new defense work',
      body:'Defense budgets include increases for programs like the F-47, KC-46 and F-15EX. Fixed-price development contracts have produced large Boeing charges in the past.',
-     src:'https://ceointerviews.ai/quote/before-the-year-end-we-took-another-important-MTA2Nzg2NA/',
+     src:'https://s2.q4cdn.com/661678649/files/doc_financials/2026/q1/Transcript.pdf',
      why:'Fixed-price development work transfers technical risk to the contractor; growth is only worth it if the price covers that risk.',
      opts:[
       {l:'Bid aggressively on fixed-price work',d:'Win more programs. Carry the cost risk.',fx:[['g',0.5,2,99],['m',-0.6,2,99]],out:[{p:0.7,t:'Programs ran on budget so far.',fx:[]},{p:0.3,t:'A program overran and forced a charge.',fx:[['cash',-2,4],['inv',-6,4]]}],q:1,a:['Head of Defense','Lose these and we lose the next generation of programs.']},
       {l:'Bid only with cost protection',d:'Fewer wins. Less downside.',fx:[['g',0.2,2,99]],q:3,ghost:1,a:['CFO','We have written off enough on fixed-price tankers.']},
       {l:'Exit some defense programs',jobs:0.02,d:'Simpler company. Washington notices.',fx:[['g',-0.4,0,99],['m',0.3,0,99],['reg',-4]],q:1,a:['Board member','Focus on commercial. That is where the cash is.']}
      ]},
-    {id:'ba-china',cat:'Vision and product',title:'A possible China mega-order',
-     body:'Leadership has said a US–China summit could produce a large aircraft order. Chinese buyers want steep discounts and early slots.',
-     src:'https://ceointerviews.ai/quote/before-the-year-end-we-took-another-important-MTA2Nzg2NA/',
+    {id:'ba-china',cat:'Vision and product',title:'Firming up the China order',
+     body:'A May US–China summit produced a commitment for 200 Boeing jets, well short of the roughly 500 once discussed. Leadership says it should become firm orders later this year, with more possible. Buyers will want to negotiate price and delivery slots.',
+     src:'https://www.marketscreener.com/news/boeing-ceo-says-200-jet-china-deal-an-initial-tranche-with-more-to-come-ce7f5ad3d181f621',
      why:'Discounting to win a politically timed order locks in low margins for a decade; holding price keeps the order book healthy but leaves you exposed to politics.',
      opts:[
-      {l:'Offer deep discounts to lock it in',d:'Hundreds of jets. Thin margins.',fx:[['cus',6],['g',0.6,4,99],['m',-0.4,4,99]],q:2,a:['Head of Sales','This is the biggest order of the decade.']},
-      {l:'Hold pricing and let the talks play out',d:'Might win the order. Might not.',out:[{p:0.5,t:'China placed the order at your price.',fx:[['g',0.4,4,99],['cus',3]]},{p:0.5,t:'The order did not come this year.',fx:[]}],q:2,ghost:1,a:['CFO','Our backlog is full. We do not need to buy this order.']},
+      {l:'Offer deep discounts to lock it in',d:'Turns the 200 into firm orders and more. Thin margins.',fx:[['cus',6],['g',0.6,4,99],['m',-0.4,4,99]],q:2,a:['Head of Sales','This is the biggest order of the decade.']},
+      {l:'Hold pricing and let the talks play out',d:'Might firm up the order. Might not.',out:[{p:0.5,t:'China placed the order at your price.',fx:[['g',0.4,4,99],['cus',3]]},{p:0.5,t:'The order did not come this year.',fx:[]}],q:2,ghost:1,a:['CFO','Our backlog is full. We do not need to buy this order.']},
       {l:'Give the slots to other airlines',d:'Reward loyal customers instead.',fx:[['cus',3]],q:2,a:['Head of Customer Engagement','Our existing customers waited through the groundings.']}
      ]}
   ]},
@@ -276,13 +276,13 @@ nke:{id:'nke',name:'Nike',ticker:'NKE',sector:'Apparel and footwear',ceo:'Elliot
   facts:[
     ['Fiscal Q4 2026 revenue fell 1% to $10.97B.','https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000076/q4fy26exhibit991er.htm'],
     ['EPS of $0.72 included a $0.52 benefit from a $986M expected tariff recovery; without it, EPS was $0.20.','https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000076/q4fy26exhibit991er.htm'],
-    ['Nike guided to revenue declines of low-to-mid single digits over the next six months.','https://www.benzinga.com/node/60207942'],
+    ['Nike guided to revenue declines of low-to-mid single digits over the next six months.','https://s1.q4cdn.com/806093406/files/doc_financials/2026/q4/NIKE-Inc-Q4FY26-OFFICIAL-Transcript_-FINAL.pdf'],
     ['Fiscal 2026 wholesale revenue grew 6% to $27.5B while Nike Direct fell 6% to $17.7B.','https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000076/q4fy26exhibit991er.htm']
   ],
   deck:[
     {id:'nke-channel',cat:'Operating architecture',title:'How hard do you clean up the channel?',at:0,
      body:'Nike is cutting wholesale supply and pulling back digital promotions to clean up retail channels. Revenue will fall before it recovers.',
-     src:'https://www.benzinga.com/node/60207942',
+     src:'https://s1.q4cdn.com/806093406/files/doc_financials/2026/q4/NIKE-Inc-Q4FY26-OFFICIAL-Transcript_-FINAL.pdf',
      why:'Discounted inventory in the channel trains customers to wait for sales; clearing it costs revenue now and restores full-price selling later.',
      opts:[
       {l:'Cut supply and promotions hard',d:'Two weak quarters. Full-price selling returns.',fx:[['g',-1.2,0,2],['m',1.0,2,99],['cus',4,2],['kpi',-4]],q:3,ghost:1,a:['Head of Marketplace','Clean channels are the only way back to full price.']},
@@ -290,8 +290,8 @@ nke:{id:'nke',name:'Nike',ticker:'NKE',sector:'Apparel and footwear',ceo:'Elliot
       {l:'Keep shipping to hit revenue',d:'Revenue holds. Discounts deepen.',fx:[['g',0.3,0,2],['m',-0.8,1,4],['cus',-6]],q:0,a:['Head of Sales','Our wholesale partners want product. Give it to them.']}
      ]},
     {id:'nke-franchise',cat:'Vision and product',title:'What to do with Dunk, Air Force 1 and Jordan 1',
-     body:'Nike Sportswear and Jordan Streetwear both fell double digits last quarter. Lifestyle and franchise footwear are expected to stay negative through the first half of fiscal 2027.',
-     src:'https://www.benzinga.com/node/60207942',
+     body:'Nike Sportswear fell double digits last quarter. Nike expects Sportswear and Jordan Streetwear to stay negative this fiscal year, with improvement expected in the back half.',
+     src:'https://s1.q4cdn.com/806093406/files/doc_financials/2026/q4/NIKE-Inc-Q4FY26-OFFICIAL-Transcript_-FINAL.pdf',
      why:'Over-distributed icons lose their pull; scarcity restores it, but only if you can live with the lost volume.',
      opts:[
       {l:'Pull back sharply on legacy franchises',d:'Volume falls. Demand recovers later.',fx:[['g',-0.8,0,3],['cus',6,3],['m',0.4,2,99]],q:3,ghost:1,a:['Chief Brand Officer','Scarcity made these shoes. Flooding the market broke them.']},
@@ -299,17 +299,17 @@ nke:{id:'nke',name:'Nike',ticker:'NKE',sector:'Apparel and footwear',ceo:'Elliot
       {l:'Discount to clear inventory',d:'Fast cash. Brand damage.',fx:[['g',0.4,0,1],['m',-1.2,0,2],['cus',-6]],q:0,a:['CFO','Inventory is cash sitting on shelves.']}
      ]},
     {id:'nke-cfo',cat:'People and governance',title:'Replace the departing CFO',
-     body:'Longtime CFO Matt Friend is leaving amid rising tariffs and soft digital sales. Investors are watching who replaces him.',
-     src:'https://www.benzinga.com/node/60207942',ghostNote:'Nike had not named a permanent successor in the sources used here; the real playbook assumes an internal promotion.',
+     body:'Longtime CFO Matt Friend is stepping down amid rising tariffs and soft digital sales. Investors are watching who replaces him.',
+     src:'https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000070/pressrelease062326.htm',ghostNote:'In the real event Nike named David Denton, a former finance chief at Pfizer and Lowe’s, as its new CFO.',
      why:'In a turnaround, an outside CFO with turnaround credibility can buy patience; an interim CFO signals drift.',
      opts:[
-      {l:'Hire an outside CFO with turnaround experience',d:'Some disruption. Investors gain confidence.',fx:[['exe',-2],['exe',6,2],['inv',5]],q:3,a:['Lead Director','Bring in someone the market already trusts.']},
-      {l:'Promote the internal finance lead',d:'Continuity. Less of a signal.',fx:[['exe',2],['emp',3],['inv',-2]],q:2,ghost:1,a:['Chief People Officer','Our bench is strong. Reward it.']},
+      {l:'Hire an outside CFO with turnaround experience',d:'Some disruption. Investors gain confidence.',fx:[['exe',-2],['exe',6,2],['inv',5]],q:3,ghost:1,a:['Lead Director','Bring in someone the market already trusts.']},
+      {l:'Promote the internal finance lead',d:'Continuity. Less of a signal.',fx:[['exe',2],['emp',3],['inv',-2]],q:2,a:['Chief People Officer','Our bench is strong. Reward it.']},
       {l:'Leave it interim for a year',d:'No rush. Drift risk.',fx:[['exe',-6],['inv',-4]],q:0,a:['General Counsel','No need to decide during earnings season.']}
      ]},
     {id:'nke-running',cat:'Capital allocation',title:'Running is growing. Lifestyle is not.',
      body:'Technical running footwear posted its fifth straight quarter of double-digit growth. Nike moved 8,000 employees into sport-based teams.',
-     src:'https://www.benzinga.com/node/60207942',
+     src:'https://s1.q4cdn.com/806093406/files/doc_financials/2026/q4/NIKE-Inc-Q4FY26-OFFICIAL-Transcript_-FINAL.pdf',
      why:'Concentrating resources where the brand is already winning compounds faster than spreading them evenly.',
      opts:[
       {l:'Double down on running',d:'Marketing and product money follows the growth.',fx:[['cr',-1.5,0,2],['g',0.5,2,99],['cus',5]],q:3,ghost:1,a:['Head of Running','We are winning athletes back one race at a time.']},
@@ -336,7 +336,7 @@ nke:{id:'nke',name:'Nike',ticker:'NKE',sector:'Apparel and footwear',ceo:'Elliot
      ]},
     {id:'nke-windfall',cat:'Financing',title:'What to do with the tariff refund',
      body:'Nike booked a $986M one-time benefit from recovering past tariffs. It is already in the bank.',
-     src:'https://www.benzinga.com/node/60207942',ghostNote:'The sources used here do not say how Nike will use the refund; the real playbook assumes it strengthens the balance sheet.',
+     src:'https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000076/q4fy26exhibit991er.htm',ghostNote:'The sources used here do not say how Nike will use the refund; the real playbook assumes it strengthens the balance sheet.',
      why:'One-time cash is best spent on one-time needs; using it for a buyback during a downturn gives up flexibility.',
      opts:[
       {l:'Fund brand marketing',d:'Brand heat while you reset.',fx:[['cr',-3,0,2],['cus',6],['g',0.3,1,4]],q:2,a:['Chief Marketing Officer','The brand is the moat. Feed it.']},
@@ -369,7 +369,7 @@ khc:{id:'khc',name:'Kraft Heinz',ticker:'KHC',sector:'Packaged food',ceo:'Steve 
       {l:'Spread it evenly across everything',d:'Every brand gets a little.',fx:[['cr',-1.2,0,4],['g',0.2,1,99]],q:2,a:['Head of North America','Every brand team has a plan. Fund them all.']}
      ]},
     {id:'khc-split',cat:'Portfolio architecture',title:'Restart the breakup?',at:3,
-     body:'The split into a sauces company and a grocery company was paused in February. Your CEO has kept the option open once the business is growing again.',
+     body:'The split into a sauces company and a grocery company was paused in February. Leadership has kept the option open once the business is growing again.',
      src:'https://www.foodingredientsfirst.com/news/kraft-heinz-separation-pause-investment',
      why:'Breaking up a shrinking company splits the problem in two; fixing growth first makes any later separation worth more.',
      opts:[
@@ -722,7 +722,7 @@ function equityRaw(st,co,b){
   const tr=ttm(st.revHist),to=ttm(st.opHist),n=st.revHist.length;
   const mT=to/tr*100,yoy=(st.revHist[n-1]/st.revHist[n-5]-1)*100;
   const tf=(0.75+0.5*st.meters.inv/100)/(0.75+0.5*b.inv/100);
-  const mult=co.start.mult*Math.exp(0.06*(mT-b.mT)+0.025*clamp(yoy-b.yoy,-30,30))*tf;
+  const mult=co.start.mult*Math.exp(0.06*(mT-b.mT)+(co.start.gsens||0.025)*clamp(yoy-b.yoy,-30,30))*tf;
   return tr*mult-(st.debt-st.cash);
 }
 function annRev(st){return st.rev*4}
@@ -812,7 +812,7 @@ function contextFor(co,st,o,card){
     else if(M.exe<40){r.pmul=0.6;add(-2,[],'bad','Execution is weak, which worsens the odds.')}
   }
   const cautious=sf<0.02&&!o.out&&gUp<=0&&inflow<0.2*st.rev&&!!card&&card.opts.some(x=>x!==o&&(spendFrac(x,st)>=0.1||x.fx&&x.fx.some(e=>e[0]==='g'&&e[1]>0)));
-  if(cautious&&shrinking&&M.cus<55)add(-2,[['g',-0.4,1,4],['inv',-3]],'bad','Sales are slipping. Playing it safe now lets rivals take share.');
+  if(cautious&&shrinking&&M.cus<55)add(-2,[['g',-0.4,1,4],['inv',-3]],'bad','Sales are slipping and this does little to restart growth, so rivals can take share.');
   if(cautious&&rich&&!shrinking&&M.inv<70)add(-2,[['inv',-4],['g',-0.15,2,4]],'bad','You are sitting on a lot of cash. Investors expect you to put it to work.');
   if(gUp>0&&shrinking&&sf<0.1)add(2,[['g',0.25,1,99]],'good','Sales are falling, so anything that restarts growth is worth more now.');
   if(fxSum(o.fx,'cus')<=-5&&M.cus<38)add(-2,[['cus',-4],['g',-0.3,0,3]],'bad','Customers are already unhappy. This could push them to rivals.');
