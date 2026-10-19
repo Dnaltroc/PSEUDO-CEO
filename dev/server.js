@@ -56,6 +56,7 @@ redisSrv.listen(0, () => {
         const ct = String(req.headers['content-type'] || '');
         req.body = raw ? (ct.includes('application/json') ? (() => { try { return JSON.parse(raw); } catch (e) { return raw; } })() : raw) : undefined;
         res.status = (c) => { res.statusCode = c; return res; };
+        res.send = (b) => { res.end(b); return res; };
         res.json = (o) => { res.setHeader('content-type', 'application/json'); res.end(JSON.stringify(o)); };
         h(req, res);
       });
@@ -65,7 +66,9 @@ redisSrv.listen(0, () => {
     let f = path.join(root, 'public', p);
     if (!fs.existsSync(f) && fs.existsSync(f + '.html')) f += '.html';
     if (!fs.existsSync(f)) { res.statusCode = 404; return res.end('not found'); }
-    res.setHeader('content-type', f.endsWith('.html') ? 'text/html; charset=utf-8' : 'text/plain');
+    const MIME = { '.html': 'text/html; charset=utf-8', '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2', '.txt': 'text/plain' };
+    res.setHeader('content-type', MIME[path.extname(f)] || 'text/plain');
+    try { for (const h of JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 'utf8')).headers[0].headers) res.setHeader(h.key, h.value); } catch (e) {}
     res.end(fs.readFileSync(f));
   }).listen(PORT, () => console.log('Pseudo CEO dev server on http://localhost:' + PORT));
 });
