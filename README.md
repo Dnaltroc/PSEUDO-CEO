@@ -22,7 +22,7 @@ Every starting number (revenue, margin, cash, debt, capital spending, dividends,
 - **Scored against the real playbook.** A "ghost" plays the same scenario using what the real leadership announced. Your scoreboard is the share price: it starts at the real Oct 16, 2026 close, and a live tracker, a $10,000 profit-and-loss and a quarter-by-quarter timeline show how you compare with the real CEO.
 - **Your leadership team.** Five fictional executives advise you. Overrule them and they lose trust; take their advice and they gain it.
 - **Earnings calls.** Answer analysts with confidence, candor or deflection. Overpromising has a cost.
-- **Welcome, CEO.** Each game opens with a welcome screen for the real CEO whose chair you take, with a photo where a free one exists (initials otherwise) and the company logo throughout. Photo and logo credits are listed in the game.
+- **Welcome, CEO.** Before the first quarter the player enters their name and email on the welcome screen (saved on the device, so a returning player just confirms). The game then greets them as "CEO <last name>" and uses their name on the home screen, band, tracker, debrief and share card. The real CEO whose chair they take is shown with a photo where a free one exists (initials otherwise), and the company logo appears throughout. Photo and logo credits are listed in the game.
 - **Three difficulties.** Guided (plain English, 6 quarters, about 10 min), Standard (8 quarters, about 20 min), Hot Seat (12 quarters, about 30 min, full numbers, one bad board quarter ends it).
 - **Luck is separated from skill.** The debrief replays your choices without random noise.
 
@@ -49,7 +49,7 @@ Before Quarter 1 the player reads the industry with Porter's Five Forces (a sour
 
 ```
 src/        engine.js (simulation + data), ui.js (screens), shell.html (styles), photos.css, stats.html
-api/        serverless functions: event, score, leaderboard, stats, admin (+ _replay.js, _lib.js)
+api/        serverless functions: event, score, leaderboard, leads, stats, admin (+ _replay.js, _lib.js)
 dev/        local dev server with an in-memory database, and a replay self-test
 build.js    assembles src/ into public/index.html (the single-file game)
 ```

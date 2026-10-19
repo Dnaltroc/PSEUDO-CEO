@@ -403,11 +403,12 @@ a,button,summary,.choice,.opt,.seg button,.tab{touch-action:manipulation;-webkit
 .co-id{display:flex;align-items:center;gap:12px;min-width:0}
 .face{--s:44px;display:inline-grid;place-items:center;flex:none;width:var(--s);height:var(--s);border-radius:50%;background:#C9CEDD var(--face) center/cover no-repeat;box-shadow:0 0 0 2px var(--sheet),0 0 0 3px var(--rule);color:#fff;font-weight:760;font-size:calc(var(--s)*.36);font-stretch:90%;letter-spacing:.02em;vertical-align:middle}
 .face.mono{background:var(--c,var(--chair))}
+.choice[aria-checked="true"] .face.mono{box-shadow:0 0 0 2px rgba(255,255,255,.75)}
 .face.xs{--s:22px;box-shadow:none}
 .face.xl{--s:96px;box-shadow:0 0 0 3px var(--sheet),0 0 0 4px var(--rule)}
 .choice .d.ceo{display:flex;align-items:center;gap:8px;color:var(--ink)}
 .choice[aria-checked="true"] .d.ceo{color:var(--on-chair)}
-.choice .thumb .logo{position:absolute;left:8px;top:8px;z-index:2}
+.choice .thumb .logo{position:absolute;left:8px;top:8px;z-index:2;--maxw:min(130px,calc(100% - 16px))}
 .av.pic{background:none;overflow:hidden;padding:0;box-shadow:0 0 0 2px var(--r1)}
 .av.pic.r2{box-shadow:0 0 0 2px var(--r2)}.av.pic.r3{box-shadow:0 0 0 2px var(--r3)}.av.pic.r4{box-shadow:0 0 0 2px var(--r4)}.av.pic.r5{box-shadow:0 0 0 2px var(--r5)}
 .av.pic svg{display:block;width:100%;height:100%}
@@ -474,6 +475,16 @@ body.noscroll{overflow:hidden}
 .wl-name{font-size:clamp(22px,5.5vw,28px);font-weight:780;font-stretch:112%;line-height:1.1}
 .wl-role{color:var(--muted);font-size:15px;margin-top:2px}
 .wl-stock{display:flex;align-items:center;gap:9px;margin-top:10px;font-size:14.5px;flex-wrap:wrap}
+.wl-form{display:grid;gap:14px;background:var(--sheet);border-radius:6px;padding:18px;box-shadow:inset 0 0 0 1px var(--rule)}
+.wl-form .field{max-width:none}
+.wl-form input{width:100%;min-height:48px}
+.wl-form input[aria-invalid="true"]{border-color:var(--loss);box-shadow:0 0 0 1px var(--loss)}
+.wl-ask{margin:0;font-weight:650;font-size:16.5px}
+.ferr{margin:0;min-height:0;color:var(--loss);font-size:14px}
+.ferr:empty{display:none}
+p.who{margin:0;font-size:15px;color:var(--muted)}
+p.who b{color:var(--ink);font-weight:650}
+.who .linkbtn,.who button.link{appearance:none;background:none;border:0;padding:10px 4px;margin:-10px 0;font:inherit;font-size:14.5px;color:var(--accent);text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:44px}
 .wl-list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
 .wl-list li{padding-left:18px;position:relative;font-size:16.5px}
 .wl-list li::before{content:"";position:absolute;left:0;top:.7em;width:8px;height:2px;background:var(--accent)}
@@ -2051,7 +2062,7 @@ function stockBlock(){
   let h='<div class="stock"><div class="stock-top"><div><div class="k">'+esc(c.ticker)+' share price'+(n?'':', at the start')+'</div><div class="px">'+fmtPx(m.px)+' <span class="'+(m.pct>=0?'up':'down')+'">'+(m.pct>=0?'▲ ':'▼ ')+fmtPct(m.pct).replace(/^[+−]/,'')+'</span></div></div>';
   h+='<span class="pill '+(gap.d>=0?'up':'down')+'">'+(n?esc(gap.txt):'Neck and neck with '+esc(c.ceoLast))+'</span></div>';
   h+='<div class="chartbox">'+stockChart()+'</div>';
-  h+='<div class="legend"><span><i style="border-color:var(--accent)"></i>You</span><span><i style="border-color:var(--ghost);border-top-style:dashed"></i>'+esc(c.ceo)+', what he really did</span><span><i style="border-color:var(--muted);border-top-style:dashed"></i>Starting price</span></div>';
+  h+='<div class="legend"><span><i style="border-color:var(--accent)"></i>You</span><span><i style="border-color:var(--ghost);border-top-style:dashed"></i>'+esc(c.ceo)+'’s announced plan</span><span><i style="border-color:var(--muted);border-top-style:dashed"></i>Starting price</span></div>';
   return h+'</div>';
 }
 function stockNote(){return '<p class="note">Starting price is the real close on '+PX_ASOF+'. After that the price follows how your decisions play out in the game, so it is a score you can read like a stock, not a forecast. Dividends are not counted. Not investment advice.</p>'}
@@ -2080,7 +2091,7 @@ function timelineHtml(){
 function deskHtml(){
   const c=co();
   let h='<div class="desk-back" data-act="deskx"></div><div class="desk-panel" role="dialog" aria-modal="true" aria-labelledby="desk-t" tabindex="-1">';
-  h+='<div class="desk-head"><div class="dh-id">'+logo(c.id,'sm',1)+'<div><div class="kicker">Live tracker</div><h2 id="desk-t" class="h2">You vs '+esc(c.ceo)+'</h2></div></div><button class="btn sec" data-act="deskx" id="deskclose">Close</button></div>';
+  h+='<div class="desk-head"><div class="dh-id">'+logo(c.id,'sm',1)+'<div><div class="kicker">Live tracker</div><h2 id="desk-t" class="h2">'+(PL()?esc(plFirst(PL().name)):'You')+' vs '+esc(c.ceo)+'</h2></div></div><button class="btn sec" data-act="deskx" id="deskclose">Close</button></div>';
   h+='<div class="stack">'+stockBlock()+'<section class="stack tight"><h3 class="h3">Your stock, if you had owned it</h3>'+pnlBlock()+stockNote()+'</section>';
   h+='<section class="stack tight"><h3 class="h3">Live scoreboard</h3>'+raceTable()+'</section>';
   h+='<section class="stack tight"><h3 class="h3">Timeline</h3><p class="note">Tap a quarter to see the decisions behind it.</p>'+timelineHtml()+'</section></div></div>';
@@ -2136,7 +2147,7 @@ function scoreboard(){
   const debrief=UI.screen==='debrief';
   const shownQ=Math.max(0,Math.min((UI.screen==='results'||UI.screen==='call')?G.q-1:G.q,d.quarters-1));
   const pm=pnlOf('st'),gp=raceGap();
-  let h='<div class="co-line"><div class="co-id">'+logo(c.id,'md',1)+'<div><div class="co-name">'+c.name+'</div><div class="co-sub">'+(debrief?'Final results':qLabel(shownQ)+', '+qMonths(shownQ))+'</div></div></div>';
+  let h='<div class="co-line"><div class="co-id">'+logo(c.id,'md',1)+'<div><div class="co-name">'+c.name+'</div><div class="co-sub">'+(PL()?plCEO()+', ':'')+(debrief?(PL()?'final results':'Final results'):qLabel(shownQ)+', '+qMonths(shownQ))+'</div></div></div>';
   h+='<div class="score"><div class="n">'+fmtPx(pm.px)+'</div><div class="k">'+esc(c.ticker)+' stock, '+fmtPct(pm.pct)+' since you started</div>'+(st.hist.length?'<div class="k gap '+(gp.d>=0?'up':'down')+'">'+esc(gp.txt)+'</div>':'')+'</div></div>';
   /* quarter track: one block per quarter, filled as played, coral when the index fell */
   h+='<div class="track-wrap"><div class="track" aria-label="Quarter '+Math.min(G.q+1,d.quarters)+' of '+d.quarters+'">';
@@ -2245,7 +2256,9 @@ function renderHome(){
   h+='</div></section>';
   h+='<section class="stack tight"><div class="step"><span class="n">03</span><h2 class="h3">Take the job</h2></div>';
   h+='<div class="field"><label for="seed">Scenario code. Share it so a friend faces the same events.</label><input id="seed" value="'+esc(s.seed)+'" autocomplete="off" spellcheck="false"></div>';
-  h+='<div class="actions"><button class="btn" data-act="start">Start as CEO of '+c.name+'</button></div></section>';
+  {const p=PL();
+  h+='<p class="who">'+(p?'You are <b>'+esc(p.name)+'</b>, taking the chair at <b>'+esc(c.name)+'</b>. <button class="link" data-act="plclear">Not you?</button>':'You will enter your name next, then take the chair at <b>'+esc(c.name)+'</b>.')+'</p>';}
+  h+='<div class="actions"><button class="btn" data-act="start">'+(PL()?esc(plFirst(PL().name))+', start as CEO of '+c.name:'Start as CEO of '+c.name)+'</button></div></section>';
   h+='<details class="fold"><summary>How it works</summary><ul class="list">';
   h+='<li>Each company starts from its latest annual and quarterly reports filed with the SEC. Every starting number links to its filing.</li>';
   h+='<li>You play as the real CEO. You make the calls that CEO faced, one quarter at a time, and watch the company’s stock price react. A live tracker compares you with what the real CEO actually did.</li>';
@@ -2257,7 +2270,7 @@ function renderHome(){
   h+='<li>The <b>stock price</b> starts at the real closing price on '+PX_ASOF+'. After that it moves with how your decisions play out in a simplified model of the company, so it is a score you can read like a stock, not a forecast. The <b>real playbook</b> plays the same scenario using the choices leadership actually announced.</li>';
   h+='<li>Photos and logos come from Wikimedia Commons. Credits are listed below.</li>';
   h+='<li>Leaderboard: after you finish a game you can post it under a name you choose. The server replays your choices to confirm the score, so numbers cannot be typed in. Only your name and result are saved.</li>';
-  h+='<li>Privacy: the site counts anonymous plays (which company and difficulty were picked, how far games got) and unique players using a random ID kept in your browser. No names, emails or addresses are stored. Turn on Do Not Track in your browser to opt out. An hour-long abuse limit uses a scrambled form of your connection address that is not kept.</li><li>Simulation only; not investment advice.</li></ul></details>';
+  h+='<li>Privacy: the site counts anonymous plays (which company and difficulty were picked, how far games got) and unique players using a random ID kept in your browser. These counts hold no names or emails. Separately, the name and email you type on the welcome screen are stored privately for the site owner and are never shown to other players. Do Not Track turns off the anonymous counts only. An hour-long abuse limit uses a scrambled form of your connection address that is not kept.</li><li>Simulation only; not investment advice.</li></ul></details>';
   h+=faceCredits();
   h+='</div>';
   $app.innerHTML=h;
@@ -2285,20 +2298,57 @@ const PRESS=['','Weak','Moderate','Strong'];
 function forceName(k){return FORCE_LABEL[k]}
 function postureName(k){return POSTURE_LABEL[k]}
 function faceLine(id){const f=FACE_CREDIT[id];return f?'<p class="note">Photo of '+esc(CO[id].ceo)+': '+esc(f.by)+', '+ext(f.url,esc(f.lic))+'.</p>':'<p class="note">No freely licensed photo of '+esc(CO[id].ceo)+' is available, so initials are shown.</p>'}
+/* the player: name and email collected on the welcome screen, kept on this device and sent once to the site owner */
+const PKEY='pseudoceo.player';
+function PL(){const p=store.get(PKEY);return p&&typeof p.name==='string'&&p.name.trim().length>=2?p:null}
+function plClean(n){return String(n||'').replace(/\s+/g,' ').trim()}
+function plNameOK(n){n=plClean(n);return n.length>=2&&n.length<=40&&/^\p{L}[\p{L}\p{M} .'’-]*$/u.test(n)}
+function plEmailOK(e){e=String(e||'').trim();return e.length<=120&&/^[^\s@<>(),;:"\\]+@[^\s@<>(),;:"\\]+\.[^\s@<>(),;:"\\.]{2,}$/.test(e)}
+function plLast(n){const w=plClean(n).split(' ').filter(Boolean);return w.length?w[w.length-1]:''}
+function plFirst(n){const w=plClean(n).split(' ').filter(Boolean);return w.length?w[0]:''}
+function plCEO(){const p=PL();return p?'CEO '+plLast(p.name):''}
+/* a starting leaderboard name that passes the server rules (letters, numbers, space . _ -, 2 to 16) */
+function plBoardName(){const p=PL();if(!p)return '';const f=plFirst(p.name).normalize('NFD').replace(/[^A-Za-z0-9]/g,''),l=plLast(p.name).normalize('NFD').replace(/[^A-Za-z0-9]/g,'');
+  const n=(f+(l&&l!==f?' '+l[0]+'.':'')).trim();return n.length>=2?n.slice(0,16):''}
+let leadBusy=false;
+async function sendLead(){
+  const p=store.get(PKEY);if(!p||p.sent||!p.email||!NET.ok||leadBusy)return;
+  leadBusy=true;
+  try{await NET.post('/api/leads',{name:p.name,email:p.email,co:G?G.coId:undefined,d:G?G.diffKey:undefined});const q=store.get(PKEY);if(q&&q.email===p.email){q.sent=true;store.set(PKEY,q)}}
+  catch(e){/* try again on the next start; play is never blocked */}
+  leadBusy=false;
+}
 /* ---------- WELCOME ---------- */
 function renderWelcome(){
-  const c=co(),d=D(),pxs=fmtPx(c.px0);
+  const c=co(),d=D(),pxs=fmtPx(c.px0),p=PL();
   let h='<div class="stack enter welcome">';
-  h+='<div class="wl-hero">'+logo(c.id,'lg')+'<div class="kicker">Welcome to the corner office</div><h1 class="h1">Welcome, CEO '+esc(c.ceoLast)+'.</h1></div>';
-  h+='<div class="wl-card">'+face(c.id,'xl')+'<div><div class="wl-name">'+esc(c.ceo)+'</div><div class="wl-role">'+esc(c.ceoRole)+' since '+esc(c.ceoSince)+'</div><div class="wl-stock">'+esc(c.ticker)+' closed at <b>'+pxs+'</b> on '+PX_ASOF+'</div></div></div>';
-  h+='<p class="lede">For the next '+d.quarters+' quarters, <b>you are '+esc(c.ceo)+'</b>. Same company, same starting numbers, same problems. You make the calls, and we play them forward.</p>';
+  h+='<div class="wl-hero">'+logo(c.id,'lg')+'<div class="kicker">Welcome to the corner office</div><h1 class="h1" id="wl-h">'+(p?'Welcome, CEO '+esc(plLast(p.name))+'.':'Welcome, future CEO.')+'</h1></div>';
+  h+='<p class="lede">For the next '+d.quarters+' quarters you run '+esc(c.name)+' from today’s numbers. '+esc(c.ceoLast)+'’s announced plan plays through the same scenario beside you, so you can see who does better.</p>';
+  h+='<form id="lead" class="wl-form" novalidate autocomplete="on"><p class="wl-ask">'+(p?'Welcome back. Check your details, then take the chair.':'Before you take the job, tell us who is taking it.')+'</p>';
+  h+='<div class="field"><label for="plname">Your name</label><input id="plname" name="name" maxlength="40" autocomplete="name" autocapitalize="words" spellcheck="false" aria-describedby="plname-e" value="'+esc(p?p.name:'')+'" placeholder="First and last name"><p class="ferr" id="plname-e" role="alert"></p></div>';
+  h+='<div class="field"><label for="plemail">Your email</label><input id="plemail" name="email" type="email" inputmode="email" maxlength="120" autocomplete="email" autocapitalize="off" spellcheck="false" aria-describedby="plemail-e" value="'+esc(p?p.email:'')+'" placeholder="you@example.com"><p class="ferr" id="plemail-e" role="alert"></p></div>';
+  h+='<p class="note">Your name goes on your scorecard. Your email is stored privately and is never shown to other players.</p>';
+  h+='<button class="btn" type="submit">Take the chair</button></form>';
+  h+='<div class="wl-card">'+face(c.id,'xl')+'<div><div class="kicker" style="margin:0 0 4px">You take the chair of</div><div class="wl-name">'+esc(c.ceo)+'</div><div class="wl-role">'+esc(c.ceoRole)+' since '+esc(c.ceoSince)+'</div><div class="wl-stock">'+esc(c.ticker)+' closed at <b>'+pxs+'</b> on '+PX_ASOF+'</div></div></div>';
   h+='<ul class="wl-list"><li><b>Your scoreboard is the stock price.</b> It starts at '+pxs+'. Put $10,000 in on day one and watch it grow or shrink with your decisions.</li>';
-  h+='<li><b>A live tracker shows how you compare</b> with what '+esc(c.ceoLast)+' really did in the same situation, quarter by quarter.</li>';
+  h+='<li><b>A live tracker shows how you compare</b> with '+esc(c.ceoLast)+'’s announced plan, quarter by quarter.</li>';
   h+='<li><b>It takes '+d.time.replace('About ','about ')+'.</b> First you pick a strategy, then you run the company one quarter at a time.</li></ul>';
   h+='<p class="note">'+esc(c.pitch)+'</p>';
-  h+='<div class="actions stick"><button class="btn" data-act="enter">Take the chair</button></div>';
   h+=faceLine(c.id)+'</div>';
   $app.innerHTML=h;
+}
+function enterGame(){
+  const n=document.getElementById('plname'),m=document.getElementById('plemail');if(!n||!m)return;
+  const en=document.getElementById('plname-e'),em=document.getElementById('plemail-e');
+  const name=plClean(n.value),email=m.value.trim();
+  const badN=!plNameOK(name),badM=!plEmailOK(email);
+  en.textContent=badN?'Enter your name, at least 2 letters.':'';em.textContent=badM?'Enter a valid email, like you@example.com.':'';
+  n.setAttribute('aria-invalid',badN);m.setAttribute('aria-invalid',badM);
+  if(badN){n.focus();return}if(badM){m.focus();return}
+  const old=store.get(PKEY);
+  store.set(PKEY,{name,email,sent:!!(old&&old.sent&&old.email===email&&old.name===name)});
+  sendLead();
+  go('strategy');
 }
 function renderStrategy(){
   const c=co(),S=c.strategy,F=isFull(),T=UI.strat;
@@ -2803,7 +2853,7 @@ function renderDebrief(){
   const dv=G.st.idx-G.ghost.idx,ds=me.overall-gh.overall;
   const title=fired?'The board replaced you after '+qLabel(G.firedAt)+'.':ds>=3?'You beat the real playbook.':ds<=-3?'The real playbook beat you.':'You finished close to the real playbook.';
   let h='<div class="stack enter">';
-  h+='<div class="kicker">'+LG()+'Debrief for '+c.name+' on '+d.name+', scenario '+esc(G.seed)+'</div><h1 class="h1">'+esc(title)+'</h1>';
+  h+='<div class="kicker">'+LG()+(PL()?esc(PL().name)+'’s debrief':'Debrief')+' for '+c.name+' on '+d.name+', scenario '+esc(G.seed)+'</div><h1 class="h1">'+esc(title)+'</h1>';
   h+='<p class="lede">You ran '+c.name+' for '+n+' quarter'+(n>1?'s':'')+'. Your stock finished at <b>'+fmtPx(pxOf('st'))+'</b>, '+fmtPct(pnlOf('st').pct)+' from where you started. '+esc(c.ceo)+'’s real playbook would have finished at '+fmtPx(pxOf('ghost'))+' in the same scenario.</p>';
   h+=shareBlock();
   h+='<div class="section scores">';
@@ -2899,7 +2949,7 @@ async function drawCard(cv){
   x.fillStyle=g;x.fillRect(0,0,W,H);
   x.fillStyle='#fff';x.textBaseline='alphabetic';
   x.font=F(700,34);x.fillText('Pseudo CEO',64,86);
-  x.globalAlpha=.8;x.font=F(500,30);x.fillText(i.c.name+', '+i.d.name+', '+i.n+' quarter'+(i.n>1?'s':''),64,150);x.globalAlpha=1;
+  x.globalAlpha=.8;x.font=F(500,30);{const t=(PL()?PL().name+', CEO of ':'')+i.c.name+', '+i.d.name+', '+i.n+' quarter'+(i.n>1?'s':'');let px=30;x.font=F(500,px);while(px>18&&x.measureText(t).width>W-128){px--;x.font=F(500,px)}x.fillText(t,64,150)}x.globalAlpha=1;
   x.font=F(800,i.fired?190:210);
   const big=i.fired?'Fired':fmtEdge(i.ds);
   x.fillText(big,56,360);
@@ -2942,7 +2992,7 @@ function postBlock(){
   if(!G.strategy)return '<section class="section stack tight"><h3 class="h3">Leaderboard</h3><p class="note">This run started before the Strategy room existed, so it cannot be posted. Start a new run to compete.</p></section>';
   if(G.status!=='done')return '<section class="section stack tight"><h3 class="h3">Leaderboard</h3><p class="note">Runs that end with the board replacing you are not ranked. Finish all '+D().quarters+' quarters to post a score.</p><div class="actions"><button class="btn sec" data-act="board">See the leaderboard</button></div></section>';
   return '<section class="section stack tight"><h3 class="h3">Post to the leaderboard</h3><p class="note">The server replays your choices to confirm the score. Only the name you enter and your result are saved, one row per player on each board.</p>'
-   +'<div class="field"><label for="lbname">Display name</label><input id="lbname" maxlength="16" autocomplete="nickname" spellcheck="false" value="'+esc(store.get('pseudoceo.name')||'')+'"></div>'
+   +'<div class="field"><label for="lbname">Display name</label><input id="lbname" maxlength="16" autocomplete="nickname" spellcheck="false" value="'+esc(store.get('pseudoceo.name')||plBoardName())+'"></div>'
    +'<div class="actions"><button class="btn" data-act="postscore">Post score</button><button class="btn sec" data-act="board">See the leaderboard</button></div><p class="note" id="lbmsg"></p></section>';
 }
 async function postScore(btn){
@@ -3001,7 +3051,7 @@ document.addEventListener('click',e=>{
     case 'pickco':keepSeed();UI.setup.co=v;render();break;
     case 'pickdiff':keepSeed();UI.setup.diff=v;render();break;
     case 'start':startGame();break;
-    case 'enter':go('strategy');break;
+    case 'plclear':store.del(PKEY);render();break;
     case 'desk':openDesk();break;
     case 'deskx':closeDesk();break;
     case 'resume':{const sv=store.get(SAVE);if(saveOK(sv)){G=sv.G;Object.assign(UI,sv.UI);if(UI.screen==='home')UI.screen='brief';if(G.coId&&CO[G.coId].strategy&&!G.strategy&&G.q===0){UI.screen='strategy';if(!UI.strat||!Array.isArray(UI.strat.top))UI.strat={top:[],posture:null,step:0}}render();window.scrollTo(0,0)}break}
@@ -3040,8 +3090,13 @@ document.addEventListener('click',e=>{
   }
 });
 
+document.addEventListener('submit',e=>{if(e.target&&e.target.id==='lead'){e.preventDefault();enterGame()}});
+document.addEventListener('input',e=>{
+  const t=e.target;if(t&&(t.id==='plname'||t.id==='plemail')){const er=document.getElementById(t.id+'-e');if(er)er.textContent='';t.removeAttribute('aria-invalid')}
+  if(e.target&&e.target.id==='plname'){const h=document.getElementById('wl-h'),l=plLast(e.target.value);if(h)h.textContent=l&&plNameOK(e.target.value)?'Welcome, CEO '+l+'.':'Welcome, future CEO.'}
+});
 /* ---------- boot ---------- */
-function boot(data){{const sv=store.get(SAVE);if(sv&&!saveOK(sv))store.del(SAVE)}if(data&&data.G&&saveOK(data)){G=data.G;UI=Object.assign(UI,data.UI)}if(UI.screen==='board')UI.screen='home';render();NET.ev('view')}
+function boot(data){{const sv=store.get(SAVE);if(sv&&!saveOK(sv))store.del(SAVE)}if(data&&data.G&&saveOK(data)){G=data.G;UI=Object.assign(UI,data.UI)}if(UI.screen==='board')UI.screen='home';render();NET.ev('view');sendLead()}
 if(window.claude&&window.claude.hot&&window.claude.hot.snapshot)window.claude.hot.snapshot(()=>({G,UI}));
 if(window.claude&&window.claude.hot&&window.claude.hot.ready)window.claude.hot.ready(boot);else boot((window.claude&&window.claude.hot&&window.claude.hot.data)||{});
 
