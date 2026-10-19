@@ -11,12 +11,14 @@ function replay(b) {
   const co = E.CO[b.co];
   const D = E.DIFF[b.d];
   if (!co || !D) throw bad('Unknown company or difficulty');
-  if (!E.validStrategy(b.strategy)) throw bad('Pick your strategy before you start');
+  /* The Strategy room is gone, so new games carry no strategy. A strategy is still honoured if a game that
+     started before the change sends one, so those games replay to the same score the player saw. */
+  const strategy = b.strategy == null ? null : b.strategy;
+  if (strategy !== null && !E.validStrategy(strategy)) throw bad('Bad strategy');
   if (typeof b.seed !== 'string' || !b.seed.trim() || b.seed.length > 40) throw bad('Bad scenario code');
   if (!Array.isArray(b.runs) || b.runs.length !== D.quarters) throw bad('Only finished games can be posted');
 
-  const g = E.newGame(b.co, b.d, b.seed, b.strategy);
-  if (!g.strategy) throw bad('Bad strategy');
+  const g = E.newGame(b.co, b.d, b.seed, strategy);
   for (let i = 0; i < b.runs.length; i++) {
     if (g.status !== 'play') throw bad('Run does not match the scenario');
     const r = b.runs[i];
