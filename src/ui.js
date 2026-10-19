@@ -573,7 +573,7 @@ function enterGame(){
   go('story');
 }
 /* ---------- WHY IS THE COMPANY STRUGGLING (replaces the old Strategy room) ---------- */
-/* Each point is [title, plain-English text, source refs, optional extra]. 'f0'..'f3' point at c.facts; 'r:<force>' at the five-forces evidence links. */
+/* Each point is [title, plain-English text, source refs, optional extra]. 'f0'.. point at c.facts; 'r:<force>' at the five-forces evidence links. */
 const STORY={
   intc:{head:'Intel’s chips are selling again, but the factories it built to make chips for other companies lose billions.',pts:[
     ['The chip business is coming back.','Intel made $16.1 billion last quarter, up 25% from a year ago.',['f0']],
@@ -595,11 +595,11 @@ const STORY={
     ['But it is getting smaller.','Its Medicare Advantage membership is down 935,000 since the end of 2025. Enrollment fell to about 7.6 million from 8.4 million a year ago.',['f2','r:rivalry']],
     ['The government sets the rules.','Medicare payments are about 44% of revenue, and the government sets the rates, so a change in Washington can move the whole business.',['r:buyers']]],
     job:'Keep winning back profit by dropping unprofitable members, or grow again and risk the margin?'},
-  nke:{head:'Nike’s sales are slipping. Running is growing, but lifestyle sneakers are fading and the company is changing its plan.',pts:[
-    ['Sales slipped.','Revenue fell 1% to $10.97 billion last quarter.',['f0']],
-    ['Profit looks better than it is.','Earnings were $0.72 a share, but that included a $986 million tariff recovery. Without it, they were $0.20.',['f1']],
-    ['More decline is expected.','Nike told investors to expect sales to fall by low to mid single digits over the next six months.',['f2']],
-    ['It is reversing a big bet.','Nike leaned toward selling straight to shoppers through its own stores and app. This year selling through retailers grew 6% while Nike Direct fell 6%, so the company is changing course.',['f3']],
+  nke:{head:'Nike’s sales are falling. Running is growing, but lifestyle sneakers and China are shrinking and the company is changing its plan.',pts:[
+    ['Sales fell again.','Revenue fell 4% to $11.2 billion last quarter. In Greater China it fell 26% once currency is stripped out.',['f0','f1']],
+    ['Profit held up only because costs fell.','Profit before tax was flat at $921 million on 4% less revenue. Gross margin rose 0.6 points and selling and admin costs fell 3%.',['f0']],
+    ['More decline is expected.','Nike told investors to expect fiscal 2027 sales to fall at a high single digit rate, with adjusted earnings of $1.15 to $1.35 a share. Last year it earned $2.10, helped by a one-time tariff refund.',['f2','f4']],
+    ['It is reversing a big bet.','Nike leaned toward selling straight to shoppers through its own stores and app. Last quarter Nike Direct fell 8% and wholesale fell 1% as Nike works with retailers to clear aged shoes, so the company is changing course. A $2.5 billion cost-savings program called Pace is just starting.',['f3']],
     ['Rivals and retailers have the upper hand.','Adidas, New Balance, On and others chase the same shoppers. The top three U.S. retailers make up about 29% of U.S. sales, and tariffs have raised the cost of making shoes.',['r:rivalry','r:buyers','r:suppliers']]],
     job:'Take short-term pain to reset the business, or protect this year’s numbers and risk falling further behind?'},
   khc:{head:'Kraft Heinz sells a little less every year, and its plan to split in two is on hold.',pts:[

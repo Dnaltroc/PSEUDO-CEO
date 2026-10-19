@@ -267,22 +267,23 @@ unh:{id:'unh',name:'UnitedHealth',ticker:'UNH',sector:'Health insurance',ceo:'St
   ]},
 
 nke:{id:'nke',name:'Nike',ticker:'NKE',sector:'Apparel and footwear',ceo:'Elliott Hill',dilemma:'Reversing a channel strategy',
-  pitch:'Revenue is flat, lifestyle sneakers are falling, and the CFO is leaving. Running is growing. The question is how much pain to take while you reset.',
-  start:{rev:11.213,g:-0.8,m:8.1,cash:6.9,debt:7.89,da:0.19,capex:0.17,wc:0,div:0.6,mult:1.4,kpi:6},
+  pitch:'Sales are falling, lifestyle sneakers and China are shrinking, and a big cost-cutting program is just starting. Running is growing. The question is how much pain to take while you reset.',
+  start:{rev:11.213,g:-1.6,m:8.1,cash:8.37,debt:7.89,da:0.19,capex:0.17,wc:0,div:0.6,mult:1.4,kpi:-1},
   est:[],
   meters:{inv:35,brd:50,emp:45,cus:50,reg:55,exe:45},
   kpi:{plain:'Store sales growth',plainS:'Sales to stores vs. last year',plainD:'Growth in sales to stores like Foot Locker and Dick\u2019s versus a year ago.',name:'Wholesale revenue growth',short:'Wholesale',unit:'% yoy',good:1,drift:0,min:-20,max:25,fmt:v=>(v>=0?'+':'')+v.toFixed(1)+'%'},
   real:{reinvest:'raise',ret:'hold',debt:'hold'},
   facts:[
-    ['Fiscal Q4 2026 revenue fell 1% to $10.97B.','https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000076/q4fy26exhibit991er.htm'],
-    ['EPS of $0.72 included a $0.52 benefit from a $986M expected tariff recovery; without it, EPS was $0.20.','https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000076/q4fy26exhibit991er.htm'],
-    ['Nike guided to revenue declines of low-to-mid single digits over the next six months.','https://s1.q4cdn.com/806093406/files/doc_financials/2026/q4/NIKE-Inc-Q4FY26-OFFICIAL-Transcript_-FINAL.pdf'],
-    ['Fiscal 2026 wholesale revenue grew 6% to $27.5B while Nike Direct fell 6% to $17.7B.','https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000076/q4fy26exhibit991er.htm']
+    ['Fiscal Q1 2027 revenue fell 4% to $11.21B (down 5% excluding currency). Profit before tax was flat at $0.92B.','https://investors.nike.com/news-events/press-releases/detail/575/nike-inc-reports-fiscal-2027-first-quarter-results'],
+    ['Greater China revenue fell 26% excluding currency, and Nike’s CFO said its outlook assumes China gets worse for the rest of the year.','https://s1.q4cdn.com/806093406/files/doc_financials/2027/q1/NIKE-Inc-Q1FY27-OFFICIAL-Transcript_-FINAL.pdf'],
+    ['Nike expects fiscal 2027 revenue to fall at a high-single-digit rate, with adjusted EPS of $1.15 to $1.35.','https://investors.nike.com/news-events/press-releases/detail/575/nike-inc-reports-fiscal-2027-first-quarter-results'],
+    ['Nike Direct revenue fell 8% and wholesale fell 1%. A $2.5B cost-savings program called Pace is just starting and will take years to pay off.','https://investors.nike.com/news-events/press-releases/detail/575/nike-inc-reports-fiscal-2027-first-quarter-results'],
+    ['Fiscal 2026 EPS was $2.10, helped by a one-time tariff recovery of about $986M.','https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000076/q4fy26exhibit991er.htm']
   ],
   deck:[
     {id:'nke-channel',cat:'Operating architecture',title:'How hard do you clean up the channel?',at:0,
-     body:'Nike is cutting wholesale supply and pulling back digital promotions to clean up retail channels. Revenue will fall before it recovers.',
-     src:'https://s1.q4cdn.com/806093406/files/doc_financials/2026/q4/NIKE-Inc-Q4FY26-OFFICIAL-Transcript_-FINAL.pdf',
+     body:'Nike is working with retailers to clear aged shoes, has deliberately cut supply in Sportswear, Jordan and China, and is pulling back digital discounting. Nike Direct fell 8% last quarter. Revenue will fall before it recovers.',
+     src:'https://s1.q4cdn.com/806093406/files/doc_financials/2027/q1/NIKE-Inc-Q1FY27-OFFICIAL-Transcript_-FINAL.pdf',
      why:'Discounted inventory in the channel trains customers to wait for sales; clearing it costs revenue now and restores full-price selling later.',
      opts:[
       {l:'Cut supply and promotions hard',d:'Two weak quarters. Full-price selling returns.',fx:[['g',-1.2,0,2],['m',1.0,2,99],['cus',4,2],['kpi',-4]],q:3,ghost:1,a:['Head of Marketplace','Clean channels are the only way back to full price.']},
@@ -290,8 +291,8 @@ nke:{id:'nke',name:'Nike',ticker:'NKE',sector:'Apparel and footwear',ceo:'Elliot
       {l:'Keep shipping to hit revenue',d:'Revenue holds. Discounts deepen.',fx:[['g',0.3,0,2],['m',-0.8,1,4],['cus',-6]],q:0,a:['Head of Sales','Our wholesale partners want product. Give it to them.']}
      ]},
     {id:'nke-franchise',cat:'Vision and product',title:'What to do with Dunk, Air Force 1 and Jordan 1',
-     body:'Nike Sportswear fell double digits last quarter. Nike expects Sportswear and Jordan Streetwear to stay negative this fiscal year, with improvement expected in the back half.',
-     src:'https://s1.q4cdn.com/806093406/files/doc_financials/2026/q4/NIKE-Inc-Q4FY26-OFFICIAL-Transcript_-FINAL.pdf',
+     body:'Nike Sportswear, just under half of revenue, fell at a low-double-digit rate last quarter. Nike cut Dunk revenue by nearly 50% (about a $200 million hit) and says it will cut the volume and frequency of Jordan retro releases.',
+     src:'https://s1.q4cdn.com/806093406/files/doc_financials/2027/q1/NIKE-Inc-Q1FY27-OFFICIAL-Transcript_-FINAL.pdf',
      why:'Over-distributed icons lose their pull; scarcity restores it, but only if you can live with the lost volume.',
      opts:[
       {l:'Pull back sharply on legacy franchises',d:'Volume falls. Demand recovers later.',fx:[['g',-0.8,0,3],['cus',6,3],['m',0.4,2,99]],q:3,ghost:1,a:['Chief Brand Officer','Scarcity made these shoes. Flooding the market broke them.']},
@@ -299,7 +300,7 @@ nke:{id:'nke',name:'Nike',ticker:'NKE',sector:'Apparel and footwear',ceo:'Elliot
       {l:'Discount to clear inventory',d:'Fast cash. Brand damage.',fx:[['g',0.4,0,1],['m',-1.2,0,2],['cus',-6]],q:0,a:['CFO','Inventory is cash sitting on shelves.']}
      ]},
     {id:'nke-cfo',cat:'People and governance',title:'Replace the departing CFO',
-     body:'Longtime CFO Matt Friend is stepping down amid rising tariffs and soft digital sales. Investors are watching who replaces him.',
+     body:'Longtime CFO Matt Friend has stepped down as Nike resets under tariffs and soft digital sales. The reset needs a finance chief the market trusts.',
      src:'https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000070/pressrelease062326.htm',ghostNote:'In the real event Nike named David Denton, a former finance chief at Pfizer and Lowe’s, as its new CFO.',
      why:'In a turnaround, an outside CFO with turnaround credibility can buy patience; an interim CFO signals drift.',
      opts:[
@@ -308,8 +309,8 @@ nke:{id:'nke',name:'Nike',ticker:'NKE',sector:'Apparel and footwear',ceo:'Elliot
       {l:'Leave it interim for a year',d:'No rush. Drift risk.',fx:[['exe',-6],['inv',-4]],q:0,a:['General Counsel','No need to decide during earnings season.']}
      ]},
     {id:'nke-running',cat:'Capital allocation',title:'Running is growing. Lifestyle is not.',
-     body:'Technical running footwear posted its fifth straight quarter of double-digit growth. Nike moved 8,000 employees into sport-based teams.',
-     src:'https://s1.q4cdn.com/806093406/files/doc_financials/2026/q4/NIKE-Inc-Q4FY26-OFFICIAL-Transcript_-FINAL.pdf',
+     body:'Running grew at a double-digit rate again last quarter, with share gains, and running in China has now grown six quarters in a row. Nike now organizes product, marketing and sales around sports.',
+     src:'https://s1.q4cdn.com/806093406/files/doc_financials/2027/q1/NIKE-Inc-Q1FY27-OFFICIAL-Transcript_-FINAL.pdf',
      why:'Concentrating resources where the brand is already winning compounds faster than spreading them evenly.',
      opts:[
       {l:'Double down on running',d:'Marketing and product money follows the growth.',fx:[['cr',-1.5,0,2],['g',0.5,2,99],['cus',5]],q:3,ghost:1,a:['Head of Running','We are winning athletes back one race at a time.']},
@@ -317,8 +318,8 @@ nke:{id:'nke',name:'Nike',ticker:'NKE',sector:'Apparel and footwear',ceo:'Elliot
       {l:'Bank the savings',d:'Margin now. Less momentum.',fx:[['m',0.4,0,2],['cus',-3]],q:1,a:['CFO','Show investors some margin.']}
      ]},
     {id:'nke-china',cat:'Vision and product',title:'Resetting Greater China',
-     body:'Greater China sales fell double digits in fiscal 2026. Analysts point to single-brand distribution, too little retail investment and price-driven competition.',
-     src:'https://www.tikr.com/blog/down-65-from-all-time-highs-can-nike-nyse-nke-stock-finally-recover-in-2026',
+     body:'Greater China revenue fell 26% last quarter excluding currency. Nike is cutting online distribution that hurt the brand, expects the cleanup to take several seasons, and says its outlook assumes China gets worse before it gets better.',
+     src:'https://s1.q4cdn.com/806093406/files/doc_financials/2027/q1/NIKE-Inc-Q1FY27-OFFICIAL-Transcript_-FINAL.pdf',
      why:'A structural problem needs a structural fix; price promotions treat the symptom.',
      opts:[
       {l:'Invest in local product and multi-brand partners',d:'Costs money. Fixes distribution.',fx:[['cr',-1,0,3],['g',0.4,4,99]],q:3,ghost:1,a:['Head of Greater China','Chinese consumers shop multi-brand. We should be there.']},
@@ -326,8 +327,8 @@ nke:{id:'nke',name:'Nike',ticker:'NKE',sector:'Apparel and footwear',ceo:'Elliot
       {l:'Run price promotions',d:'Quick volume. Brand damage.',fx:[['g',0.3,0,2],['m',-0.6,0,3],['cus',-4]],q:0,a:['Head of Sales','Local brands are winning on price.']}
      ]},
     {id:'nke-amazon',cat:'Operating architecture',title:'How far do you go with Amazon and big-box partners?',
-     body:'Nike rejoined Amazon and rebuilt relationships with Foot Locker and Dick\'s after years of pulling back.',
-     src:'https://www.fool.com/investing/2026/03/27/should-you-buy-nike-stock-before-march-31',
+     body:'Nike returned to selling directly on Amazon in 2025 after years away. Amazon and big-box partners add reach, but Nike Direct has been falling and leaning on partners again changes the economics.',
+     src:'https://www.fox29.com/news/nike-footwear-apparel-amazon',
      why:'Wholesale reach restores availability, but premium brands protect pricing by choosing where they appear.',
      opts:[
       {l:'Put the full line on Amazon',d:'Maximum reach. Some brand dilution.',fx:[['g',0.4,1,99],['m',-0.3,0,99],['kpi',3],['cus',-2]],q:2,a:['Head of Wholesale','Shoppers start their search on Amazon.']},
@@ -335,7 +336,7 @@ nke:{id:'nke',name:'Nike',ticker:'NKE',sector:'Apparel and footwear',ceo:'Elliot
       {l:'Pull back toward Nike Direct again',d:'Higher margins per pair. The old strategy.',fx:[['g',-0.4,0,99],['m',0.4,0,99],['kpi',-5]],q:0,a:['Head of Digital','Our app has the best customer data in retail.']}
      ]},
     {id:'nke-windfall',cat:'Financing',title:'What to do with the tariff refund',
-     body:'Nike booked a $986M one-time benefit from recovering past tariffs. It is already in the bank.',
+     body:'Nike booked a $986 million one-time benefit from recovering past tariffs. About $0.3 billion had been received by the end of May, and the rest was still expected.',
      src:'https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000076/q4fy26exhibit991er.htm',ghostNote:'The sources used here do not say how Nike will use the refund; the real playbook assumes it strengthens the balance sheet.',
      why:'One-time cash is best spent on one-time needs; using it for a buyback during a downturn gives up flexibility.',
      opts:[
@@ -478,7 +479,7 @@ unh:{k:['10-K, fiscal 2025 (Dec 31, 2025)','https://www.sec.gov/Archives/edgar/d
  rows:[['Revenue, Q2 2026',112.032,'q'],['Operating income, Q2 2026',7.991,'q'],['Cash + short-term investments',31.468,'q'],['Total debt',73.328,'q'],['Revenue, fiscal 2025',447.567,'k'],['Operating income, fiscal 2025',18.964,'k'],['Depreciation and amortization, FY',4.361,'k'],['Capital spending, FY',3.622,'k'],['Operating cash flow, FY',19.697,'k'],['Dividends paid, FY',7.916,'k']]},
 nke:{k:['10-K, fiscal 2026 (May 31, 2026)','https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000088/nke-20260531.htm'],q:['10-Q, Q1 fiscal 2027 (Aug 31, 2026)',SEC(320187,'0000320187-26-000193')],
  extra:['Nike does not report operating income; it is pre-tax income less net interest income ($0.921B − $0.014B).',null],
- rows:[['Revenue, latest quarter',11.213,'q'],['Operating income, latest quarter',0.907,'q'],['Cash and equivalents',6.903,'q'],['Total debt',7.893,'q'],['Revenue, fiscal 2026',46.398,'k'],['Pre-tax income, fiscal 2026',3.900,'k'],['Depreciation and amortization, FY',0.747,'k'],['Capital spending, FY',0.684,'k'],['Operating cash flow, FY',2.868,'k'],['Dividends paid, FY',2.407,'k']]},
+ rows:[['Revenue, latest quarter',11.213,'q'],['Operating income, latest quarter',0.907,'q'],['Cash + short-term investments',8.368,'q'],['Total debt',7.893,'q'],['Revenue, fiscal 2026',46.398,'k'],['Pre-tax income, fiscal 2026',3.900,'k'],['Depreciation and amortization, FY',0.747,'k'],['Capital spending, FY',0.684,'k'],['Operating cash flow, FY',2.868,'k'],['Dividends paid, FY',2.407,'k']]},
 khc:{k:['10-K, fiscal 2025 (Dec 27, 2025)','https://www.sec.gov/Archives/edgar/data/1637459/000163745926000009/khc-20251227.htm'],q:['10-Q, Q2 2026 (Jun 27, 2026)',SEC(1637459,'0001637459-26-000054')],
  extra:['Q2 2026 operating income was −$6.431B, including a $7.352B non-cash impairment. The game starts from the $0.921B before that charge.',null],
  rows:[['Revenue, latest quarter',6.262,'q'],['Operating income before impairment',0.921,'q'],['Cash + marketable securities',2.681,'q'],['Total debt',19.001,'q'],['Revenue, fiscal 2025',24.942,'k'],['Operating income, fiscal 2025',-4.669,'k'],['Depreciation and amortization, FY',0.968,'k'],['Capital spending, FY',0.801,'k'],['Operating cash flow, FY',4.462,'k'],['Dividends paid, FY',1.898,'k']]}
@@ -900,7 +901,7 @@ function step(game,who,ch,opt){
     st.kpi=clamp(st.kpi,K.min,K.max);
   }
   let kpiG=0,kpiM=0;
-  if(co.id==='nke')kpiG=(st.kpi-6)*0.04;
+  if(co.id==='nke')kpiG=(st.kpi-co.start.kpi)*0.04;
   if(co.id==='unh')kpiM=(co.start.kpi-st.kpi)*0.85;
   // revenue
   const M=st.meters;
@@ -1196,7 +1197,7 @@ const _SD={
    entrants:{p:2,line:'Nike says startup barriers in footwear and apparel are low and newer brands can react faster to trends.',src:'https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000088/nke-20260531.htm'},
    substitutes:{p:1,line:'The filing warns tastes could drift away from athletic goods, but it shows no concrete substitute taking share today.',src:'https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000088/nke-20260531.htm'}},
   ref:['rivalry','buyers'],refWhy:'Nike’s weak spots are where rivals and retail partners meet it: Sportswear is down and partners are clearing aged shoes, forcing tighter orders and discounts.',
-  lead:{line:'Leadership says it is rebuilding around specific sports to win back performance credibility first, with a multiyear cost and supply-chain program funding the turnaround.',src:'https://www.benzinga.com/news/26/10/62124853',posture:'differentiate'},
+  lead:{line:'Leadership says it is rebuilding around specific sports to win back performance credibility first, with a multiyear cost and supply-chain program funding the turnaround.',src:'https://s1.q4cdn.com/806093406/files/doc_financials/2027/q1/NIKE-Inc-Q1FY27-OFFICIAL-Transcript_-FINAL.pdf',posture:'differentiate'},
   pl:{cost:'Use sourcing scale and savings to undercut rivals and retail discounts, risking the premium image just when pricing power is needed.',
       differentiate:'Bet on performance innovation, athlete ties and scarcity in key sports, so shoppers pay up over On, New Balance or adidas.',
       focus:'Narrow to a few sports and segments such as running, basketball and football, and shrink lifestyle lines.',
