@@ -11,7 +11,7 @@ A CEO strategy game built on real company data. You take over a struggling Fortu
 | Intel | How much to bet on new chip factories |
 | Boeing | Production rate versus quality and cash |
 | UnitedHealth | Margin versus membership and trust |
-| Nike | Resetting a slowing brand |
+| Nike | Resetting a shrinking brand |
 | Kraft Heinz | Reviving mature food brands |
 
 Every starting number (revenue, margin, cash, debt, capital spending, dividends, headcount) comes from the company's SEC filings, with links to the filings inside the game.
