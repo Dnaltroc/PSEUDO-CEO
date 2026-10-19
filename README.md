@@ -42,24 +42,26 @@ When the board fires the player, the game shows a fake newspaper story, "CEO (pl
 ## Leaderboard, sharing and analytics
 
 - **Share card.** The debrief makes an image (and copyable text) with your result.
-- **Leaderboard.** One board per company and seat. Posting sends your choices to the server, which replays them through the same deterministic engine and computes the score itself, so numbers cannot be typed in. Ranked by points ahead of the real playbook. Only completed games are ranked. Rewinds used are self-reported.
+- **Leaderboard.** One board per company and seat. Ranked games start from a signed scenario code handed out by `/api/seed` (HMAC with `SEED_KEY`, or `STATS_KEY` if that is unset), so nobody can hunt for a lucky seed with the public engine. Custom or offline codes play fine as practice but cannot be posted. Posting sends your choices to the server, which replays them through the same deterministic engine and computes the score itself, so numbers cannot be typed in. Ranked by points ahead of the real playbook. Only completed games are ranked. Rewinds used are self-reported.
 - **Analytics.** Anonymous counts only: which company and difficulty were picked, how far games got, completions, shares. A random ID kept in the browser counts unique players. No names, emails or IP addresses are stored. Browsers with Do Not Track on are not counted. A one-hour abuse limit uses a scrambled form of the connection address that is not kept.
-- **Stats dashboard** at `/stats`, protected by a key only you know. It shows the anonymous counts, a Players tab (name, email, whether they ticked the updates box, games played, with a work-email filter and CSV download) and lets you remove leaderboard entries.
-- **Player list and privacy.** The welcome screen asks for a name and email and has an optional, unticked "Email me about new companies and features" box. Emails are stored privately and never shown. `/privacy` explains what is kept, and has a form that removes an email (`POST /api/leads` with `{"remove":true,"email":"..."}`; it always answers the same way, so it does not reveal who is on the list).
+- **Stats dashboard** at `/stats`. The public page is only a key box; the dashboard itself is served by `/api/stats?page=1` and only to a valid key (header `X-Stats-Key`, never in the URL). Its source is `src/stats-app.html`; run `node dev/gen-statsui.js` after editing it to regenerate `api/_statsui.js`. It shows the anonymous counts, a Players tab (name, email, whether they ticked the updates box, games played, with a work-email filter and CSV download) and lets you remove leaderboard entries.
+- **Player list and privacy.** The welcome screen asks only for a name, which stays on the device. After a game the debrief offers a plainly worded "note from the developer" form: leaving an email means you may write to them about your work and job search, with an unticked extra box for product updates. Emails are stored privately and never shown. `/privacy` explains what is kept, and has a form that removes an email (`POST /api/leads` with `{"remove":true,"email":"..."}`; it always answers the same way, so it does not reveal who is on the list).
 - **Link preview.** Open Graph and Twitter tags plus `og.png` (1200x630) give the site a share card on LinkedIn and elsewhere.
 
 ## Project layout
 
 ```
-src/        engine.js (simulation + data), ui.js (screens), shell.html (styles), photos.css, faces.css, stats.html, privacy.html, og.png
-api/        serverless functions: event, score, leaderboard, leads, stats, admin (+ _replay.js, _lib.js)
+src/        engine.js (simulation + data), ui.js (screens), shell.html (styles), photos.css, faces.css, stats.html (key box), stats-app.html (dashboard), privacy.html, method.html, og.png, robots.txt, fonts/
+api/        serverless functions: event, score, leaderboard, leads, stats, admin, seed (+ _replay.js, _lib.js, generated _statsui.js)
 dev/        local dev server with an in-memory database, and a replay self-test
-build.js    assembles src/ into public/index.html (the single-file game)
+build.js    assembles src/ into public/ (the game page, company photos in img/, fonts, other pages)
 ```
 
 Run locally: `node build.js && node dev/server.js`, then open http://localhost:3000. The dev server uses an in-memory stand-in for the database. `node dev/replay-test.js` checks that the server replay matches the browser engine exactly.
 
 Deploying (Vercel, Upstash Redis for storage): see [SETUP.md](SETUP.md).
+
+- **How the model works** at `/method`: the equations, scoring weights, what is editorial, and the model's limits.
 
 ## Data and sources
 

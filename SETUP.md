@@ -19,7 +19,7 @@ About 10 minutes. You need a GitHub account and the Vercel account that already 
 
 ## 4. Add your private stats key
 1. Project **Settings**, **Environment Variables**.
-2. Add `STATS_KEY` with a long random value (a password manager can generate one). Optionally add `IP_SALT` with another random value.
+2. Add `STATS_KEY` with a long random value (a password manager can generate one). Optionally add `IP_SALT` with another random value. `STATS_KEY` also signs the scenario codes that make leaderboard games rankable (set `SEED_KEY` to use a separate secret). Changing it later only invalidates codes already handed out.
 3. **Deployments**, open the latest, **Redeploy** so the variables apply.
 
 ## 5. Check it works
