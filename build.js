@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const read = (f) => fs.readFileSync(path.join(__dirname, 'src', f), 'utf8');
 let html = read('shell.html');
-for (const [token, file] of [['/*PHOTOS*/', 'photos.css'], ['/*ENGINE*/', 'engine.js'], ['/*UI*/', 'ui.js']]) {
+for (const [token, file] of [['/*PHOTOS*/', 'photos.css'], ['/*FACES*/', 'faces.css'], ['/*ENGINE*/', 'engine.js'], ['/*UI*/', 'ui.js']]) {
   if (!html.includes(token)) throw new Error('Missing ' + token + ' in shell.html');
   html = html.split(token).join(read(file));
 }

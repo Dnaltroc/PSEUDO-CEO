@@ -19,10 +19,11 @@ Every starting number (revenue, margin, cash, debt, capital spending, dividends,
 ## How it works
 
 - **Quarterly decisions** across finance, operations, strategy and people. Effects land over later quarters, so earlier choices come back to you.
-- **Scored against the real playbook.** A "ghost" plays the same scenario using what the real leadership announced. Your value index starts at 100 and is compared with theirs.
+- **Scored against the real playbook.** A "ghost" plays the same scenario using what the real leadership announced. Your scoreboard is the share price: it starts at the real Oct 16, 2026 close, and a live tracker, a $10,000 profit-and-loss and a quarter-by-quarter timeline show how you compare with the real CEO.
 - **Your leadership team.** Five fictional executives advise you. Overrule them and they lose trust; take their advice and they gain it.
 - **Earnings calls.** Answer analysts with confidence, candor or deflection. Overpromising has a cost.
-- **Three difficulties.** Guided (plain English, 8 quarters), Standard (12 quarters), Hot Seat (16 quarters, full numbers, one bad board quarter ends it).
+- **Welcome, CEO.** Each game opens with a welcome screen for the real CEO whose chair you take, with a photo where a free one exists (initials otherwise) and the company logo throughout. Photo and logo credits are listed in the game.
+- **Three difficulties.** Guided (plain English, 6 quarters, about 10 min), Standard (8 quarters, about 20 min), Hot Seat (12 quarters, about 30 min, full numbers, one bad board quarter ends it).
 - **Luck is separated from skill.** The debrief replays your choices without random noise.
 
 The real leadership's choices come from public reporting. The size of each choice's effect is modeled, so the comparison is "what would the real decisions have produced in this simulation", not a prediction of what actually would have happened.
