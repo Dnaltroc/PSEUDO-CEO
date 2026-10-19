@@ -39,7 +39,7 @@ const CO={
 intc:{id:'intc',name:'Intel',ticker:'INTC',sector:'Semiconductors',ceo:'Lip-Bu Tan',dilemma:'Bet-the-company capex',
   pitch:'The products business is recovering. The foundry still loses about $2 billion a quarter, and almost all of its revenue comes from Intel itself.',
   start:{rev:16.128,g:1.0,m:11.1,cash:29.73,debt:50.54,da:2.93,capex:3.66,wc:0,div:0,mult:6,gsens:0.013,kpi:0.29},
-  est:[],
+  est:['cash and debt are from the June 27 balance sheet, before the August 2026 share sale of about $23B'],
   meters:{inv:65,brd:55,emp:40,cus:50,reg:60,exe:50},
   kpi:{plain:'Outside chip sales',plainS:'Chips made for other companies',plainD:'Money from making chips for other companies, per quarter. Higher is better.',name:'External foundry revenue',short:'Ext. foundry',unit:'$B/qtr',good:1,drift:0.02,min:0,max:6,fmt:v=>'$'+v.toFixed(2)+'B'},
   real:{reinvest:'raise',ret:'none',debt:'hold'},
@@ -47,11 +47,11 @@ intc:{id:'intc',name:'Intel',ticker:'INTC',sector:'Semiconductors',ceo:'Lip-Bu T
     ['Q2 2026 revenue was $16.1B, up about 25% from a year earlier.','https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf'],
     ['Intel Foundry lost $2.1B on $5.8B of revenue in Q2 2026, about a −36% operating margin.','https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf'],
     ['About $293M of that foundry revenue came from outside customers.','https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf'],
-    ['14A high-volume manufacturing is targeted for 2028, and no external volume customer has been announced.','https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf']
+    ['14A high-volume manufacturing is targeted for 2028, and Intel has not announced a signed volume commitment from an outside customer.','https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf']
   ],
   deck:[
     {id:'intc-14a',cat:'Capital allocation',title:'How hard do you bet on 14A?',at:0,
-     body:'Your 14A process targets high-volume production in 2028. Outside customers are asking how much capacity they can reserve, but none has been announced as signing for volume. Each quarter of clean-room construction costs billions.',
+     body:'Your 14A process targets high-volume production in 2028. Outside customers are still evaluating it, and Intel has not announced a signed volume commitment. Each quarter of clean-room construction costs billions.',
      src:'https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf',
      why:'When a capex bet depends on customers you have not signed, staging spend against commitments keeps the option alive without betting the balance sheet.',
      opts:[
@@ -69,19 +69,19 @@ intc:{id:'intc',name:'Intel',ticker:'INTC',sector:'Semiconductors',ceo:'Lip-Bu T
      ]},
     {id:'intc-asic',cat:'Vision and product',title:'A hyperscaler wants custom chips at thin margins',
      body:'A large cloud company offers a multi-year order for custom AI silicon built in your fabs. The volume is real. The price is low, and they want priority on capacity.',
-     src:'https://seekingalpha.com/article/4926760-intels-turnaround-is-finally-backed-by-results',
+     src:'https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf',
      why:'Early foundry customers buy proof as much as wafers. Thin-margin volume that fills fabs and proves a node can be worth more than the margin it costs.',
      opts:[
       {l:'Accept their price',d:'Fills fabs and proves the node to other buyers.',fx:[['g',0.7,1,8],['m',-0.8,1,8],['kpi',0.35,2],['cus',6]],q:3,ghost:1,a:['Head of Foundry','Every other customer is watching who trusts us first.']},
       {l:'Counter at a higher price',d:'Better margin if they accept. They might walk.',out:[{p:0.55,t:'They accepted the counter.',fx:[['g',0.56,1,8],['m',-0.3,1,8],['kpi',0.28,2],['cus',3]]},{p:0.45,t:'They walked and signed elsewhere.',fx:[['cus',-4],['inv',-3]]}],q:2,a:['CFO','We are not a charity. If they need us, they will pay for it.']},
       {l:'Decline and protect product margins',d:'Keep capacity for your own x86 products.',fx:[['m',0.3,0,4],['kpi',-0.035],['cus',-5],['inv',-3]],q:1,a:['Head of Client Products','Our own chips earn more per wafer. Feed them first.']}
      ]},
-    {id:'intc-raise',cat:'Financing',title:'Bankers pitch another capital raise',
-     body:'The stock has rallied hard this year. Bankers say now is the time to raise money for the foundry build, either as new shares or as convertible debt.',
-     src:'https://www.webull.com/news/15685876526629888',
+    {id:'intc-raise',cat:'Financing',title:'Bankers pitch a big capital raise',
+     body:'Bankers say now is the time to raise money for the foundry build, either as new shares or as convertible debt.',
+     src:'https://www.sec.gov/Archives/edgar/data/50863/000119312526346806/d117670d8k.htm',ghostNote:'In the real event Intel sold about 242 million new shares at $95 in August 2026, roughly $23 billion before fees. Starting cash here is from the June 27 balance sheet, before that sale.',
      why:'Raising equity when the stock is strong dilutes less per dollar raised; the cost is a signal that management thinks the shares are fully priced.',
      opts:[
-      {l:'Sell $10B of new shares',d:'No new interest bill. Existing holders own less.',fx:[['cash',10,0],['shares',4],['inv',-5]],q:2,ghost:1,a:['Treasurer','Raise when you can, not when you must.']},
+      {l:'Sell $20B of new shares',d:'No new interest bill. Existing holders own less.',fx:[['cash',20,0],['shares',5],['inv',-5]],q:2,ghost:1,a:['Treasurer','Raise when you can, not when you must.']},
       {l:'Issue $8B of convertible debt',d:'Cheaper than straight debt today. Adds leverage.',fx:[['cash',8,0],['debt',8,0],['inv',-1]],q:2,a:['CFO','A convertible lets us borrow cheaply against the rally.']},
       {l:'Do not raise',d:'Fund the build from operations and existing cash.',fx:[['inv',2]],q:2,a:['Investor Relations','Every raise since 2024 has cost us credibility. Show we can fund ourselves.']}
      ]},
@@ -113,7 +113,7 @@ intc:{id:'intc',name:'Intel',ticker:'INTC',sector:'Semiconductors',ceo:'Lip-Bu T
 
 ba:{id:'ba',name:'Boeing',ticker:'BA',sector:'Aerospace',ceo:'Kelly Ortberg',dilemma:'Production rate vs. quality and cash',
   pitch:'Production is the highest since 2018 and the company expects to be cash-positive this year. Every rate increase is a bet on quality holding.',
-  start:{rev:24.56,g:1.8,m:0.6,cash:20.02,debt:50.16,da:0.49,capex:0.74,wc:1.17,div:0.08,mult:1.8,kpi:47},
+  start:{rev:24.56,g:1.8,m:0.6,cash:20.02,debt:45.9,da:0.49,capex:0.74,wc:1.17,div:0.09,mult:1.8,kpi:47},
   est:['working capital (set so 2026 free cash flow lands inside guidance)'],
   meters:{inv:50,brd:55,emp:45,cus:45,reg:35,exe:45},
   kpi:{plain:'Jets per month',plainS:'737 jets built each month',plainD:'How many 737 MAX planes the factory builds each month. More jets, more sales, but only if quality holds.',name:'737 MAX build rate',short:'737 rate',unit:'per month',good:1,drift:0,min:30,max:63,fmt:v=>Math.round(v)+'/mo'},
@@ -121,7 +121,7 @@ ba:{id:'ba',name:'Boeing',ticker:'BA',sector:'Aerospace',ceo:'Kelly Ortberg',dil
   facts:[
     ['Q2 2026 revenue was $24.56B. The core (adjusted) loss was $0.76 a share; the loss under standard accounting rules was $0.67.','https://www.sec.gov/Archives/edgar/data/0000012927/000162828026049929/a202606jun308kprex991.htm'],
     ['737 MAX production began moving to 47 a month in the quarter.','https://www.sec.gov/Archives/edgar/data/0000012927/000162828026049929/a202606jun308kprex991.htm'],
-    ['Boeing reaffirmed 2026 free cash flow of $1B to $3B and calls $10B attainable as it works through its backlog.','https://www.marketbeat.com/instant-alerts/boeing-q2-earnings-call-highlights-2026-07-28/'],
+    ['Boeing reaffirmed 2026 free cash flow of $1B to $3B and calls $10B attainable as it works through its backlog.','https://s2.q4cdn.com/661678649/files/doc_financials/2026/q2/Transcript.pdf'],
     ['Commercial backlog is $597B, more than 6,200 airplanes. First 777X delivery is planned for 2027.','https://www.sec.gov/Archives/edgar/data/0000012927/000162828026049929/a202606jun308kprex991.htm']
   ],
   deck:[
@@ -132,11 +132,11 @@ ba:{id:'ba',name:'Boeing',ticker:'BA',sector:'Aerospace',ceo:'Kelly Ortberg',dil
      opts:[
       {l:'Request 52 now',d:'More deliveries sooner. Strains a line that just stepped up.',fx:[['kpi',5,1],['exe',-6]],out:[{p:0.65,t:'The step-up held.',fx:[['reg',-2]]},{p:0.35,t:'A quality escape forced a slowdown.',fx:[['reg',-12],['exe',-8],['cus',-6],['kpi',-5,2]]}],q:1,a:['Head of Sales','Customers are short of jets. Every month we wait, they look at Airbus.']},
       {l:'Hold 47 for two more quarters, then ask',d:'Prove stability first.',fx:[['kpi',5,3],['exe',4],['reg',4]],q:3,ghost:1,a:['Head of Quality','Show the regulator two clean quarters. Then the next step is easy.']},
-      {l:'Hold until suppliers can support 55',d:'Slowest path. Biggest step when it comes.',fx:[['kpi',8,6],['exe',6],['inv',-4]],q:2,a:['Head of Supply Chain','Our suppliers are the constraint, not our line.']}
+      {l:'Hold until suppliers can support 57',d:'Slowest path. Biggest step when it comes.',fx:[['kpi',8,6],['exe',6],['inv',-4]],q:2,a:['Head of Supply Chain','Our suppliers are the constraint, not our line.']}
      ]},
     {id:'ba-newjet',cat:'Vision and product',title:'Launch a new single-aisle jet?',
-     body:'Early design work has started. Leadership has said a launch waits until the balance sheet is repaired and the technology is ready, which could take a couple of years.',
-     src:'https://www.webpronews.com/boeing-ceo-ortberg-draws-line-cash-first-then-a-new-jet/',
+     body:'Leadership says its strategy for a new airplane has not changed and will play out when the market is ready. Debt is still $45.9 billion.',
+     src:'https://s2.q4cdn.com/661678649/files/doc_financials/2026/q2/Transcript.pdf',
      why:'A clean-sheet program launched on a weak balance sheet can starve the existing programs that pay for it.',
      opts:[
       {l:'Launch the program now',d:'Tens of billions over a decade. Engineers and airlines cheer.',fx:[['cash',-2,0,8],['inv',-8],['emp',6],['cus',6]],q:0,a:['Chief Engineer','The 737 is a 1960s design. We cannot win the next 30 years with it.']},
@@ -144,8 +144,8 @@ ba:{id:'ba',name:'Boeing',ticker:'BA',sector:'Aerospace',ceo:'Kelly Ortberg',dil
       {l:'Shelve new-jet work entirely',d:'Saves money. Signals you have given up on the next generation.',fx:[['cash',0.2,0,8],['emp',-6],['cus',-6]],q:1,a:['Treasurer','Every dollar should go to the balance sheet.']}
      ]},
     {id:'ba-cert',cat:'Regulatory',title:'The FAA wants more certification data',at:2,
-     body:'Certification of the 737-7 and 737-10 is expected this year, with first deliveries in 2027. The FAA asks for additional test data, which could slip the schedule a quarter.',
-     src:'https://stocktwits.com/news-articles/markets/equity/boeing-ba-stock-climbs-after-ceo-says-production-at-levels-not-seen-since-2018/cZZCMQvRJbh',
+     body:'The FAA certified the 737-7 in August. Boeing is working to certify the 737-10 this year, with first deliveries of both planned for 2027. Suppose the FAA asks for more test data on the 737-10, which could slip the schedule a quarter.',
+     src:'https://investors.boeing.com/investors/news/press-release-details/2026/U-S--FAA-certifies-new-Boeing-737-7-airplane/default.aspx',
      why:'Rebuilding regulator trust is a long-term asset; a pushed schedule that fails costs more than a slip you chose.',
      opts:[
       {l:'Provide everything and accept the slip',d:'One quarter late. Regulator trust improves.',fx:[['g',-0.4,0,2],['reg',8],['cus',-3]],q:3,ghost:1,a:['General Counsel','Our relationship with the FAA is our license to operate.']},
@@ -191,30 +191,30 @@ ba:{id:'ba',name:'Boeing',ticker:'BA',sector:'Aerospace',ceo:'Kelly Ortberg',dil
 
 unh:{id:'unh',name:'UnitedHealth',ticker:'UNH',sector:'Health insurance',ceo:'Stephen Hemsley',dilemma:'Margin vs. membership and trust',
   pitch:'Profits are recovering after a cyberattack, missed targets and a withdrawn outlook. The margin has come back partly by shedding members.',
-  start:{rev:112.69,g:0.2,m:5.9,cash:31.47,minCash:0.035,debt:73.33,da:1.09,capex:0.91,wc:0,div:1.98,mult:0.85,kpi:88.4},
-  est:['balance sheet from the Q2 10-Q; the Q3 10-Q was not yet filed'],
+  start:{rev:112.69,g:0.2,m:5.8,cash:28.55,minCash:0.035,debt:74.33,da:1.09,capex:0.91,wc:0,div:2.08,mult:0.85,kpi:88.4},
+  est:['balance sheet from the Oct 13 earnings release; the Q3 10-Q was not yet filed'],
   meters:{inv:52,brd:55,emp:45,cus:38,reg:30,exe:50},
   kpi:{plain:'Care cost per $1',plainS:'Cents per premium $1 spent on care',plainD:'Cents of every premium dollar spent on members\u2019 medical care. Lower means more profit.',name:'Medical cost ratio',short:'Med. cost ratio',unit:'% of premiums',good:-1,drift:0.08,min:80,max:95,fmt:v=>v.toFixed(1)+'%'},
   real:{reinvest:'hold',ret:'hold',debt:'hold'},
   facts:[
     ['Q3 2026 revenue was $112.69B; the medical cost ratio was 88.4%, down from 89.9% a year earlier.','https://www.sec.gov/Archives/edgar/data/0000731766/000073176626000255/earningsrelease3q26unh.htm'],
     ['2026 adjusted EPS guidance was raised to at least $20.50.','https://www.sec.gov/Archives/edgar/data/0000731766/000073176626000255/earningsrelease3q26unh.htm'],
-    ['Medicare Advantage membership is down 935,000 since the end of 2025.','https://www.sec.gov/Archives/edgar/data/0000731766/000073176626000255/earningsrelease3q26unh.htm'],
+    ['Seniors served through Medicare Advantage, including some programs inside Medicaid, are down 935,000 since the end of 2025.','https://www.sec.gov/Archives/edgar/data/0000731766/000073176626000255/earningsrelease3q26unh.htm'],
     ['Q3 operating income was $6.6B, up from $4.3B a year earlier.','https://www.sec.gov/Archives/edgar/data/0000731766/000073176626000255/earningsrelease3q26unh.htm']
   ],
   deck:[
-    {id:'unh-ma',cat:'Vision and product',title:'Next year\'s Medicare Advantage bids',at:0,
-     body:'Benefit cuts and county exits restored margin, and 935,000 Medicare Advantage members have left since the end of 2025. Bids for next year are due.',
-     src:'https://www.bnnbloomberg.ca/business/company-news/2026/10/13/unitedhealth-raises-profit-forecast-again-as-turnaround-efforts-gather-pace/',
+    {id:'unh-ma',cat:'Vision and product',title:'Pricing the next Medicare Advantage bids',at:0,
+     body:'Benefit changes and pricing discipline restored margin, and the number of seniors served through Medicare Advantage is down 935,000 since the end of 2025. The 2027 plans are set; the next bids, for 2028, are due in mid-2027.',
+     src:'https://www.sec.gov/Archives/edgar/data/731766/000073176626000255/earningsrelease3q26unh.htm',
      why:'Shedding unprofitable members restores margin once; doing it every year shrinks the base the business earns on.',
      opts:[
-      {l:'Keep cutting benefits and exiting counties',d:'Margins keep improving. Membership keeps falling.',fx:[['kpi',-0.8,2],['g',-0.6,2,4],['cus',-8],['reg',-3]],q:2,ghost:1,a:['Head of Medicare','Price for the costs we actually see. Growth can come back later.']},
+      {l:'Keep trimming benefits and shrinking the footprint',d:'Margins keep improving. Membership keeps falling.',fx:[['kpi',-0.8,2],['g',-0.6,2,4],['cus',-8],['reg',-3]],q:2,ghost:1,a:['Head of Medicare','Price for the costs we actually see. Growth can come back later.']},
       {l:'Reinvest in benefits to win members back',d:'Growth returns. Costs rise first.',fx:[['kpi',0.6,2],['g',0.6,2,6],['cus',8],['inv',-6]],q:1,a:['Chief Growth Officer','We are losing members we spent decades winning.']},
       {l:'Hold benefits flat and compete on service',d:'Middle path. Slower margin gains.',fx:[['kpi',-0.2,2],['cus',2]],q:3,a:['COO','Faster approvals and fewer denials keep members without buying them.']}
      ]},
     {id:'unh-pa',cat:'Regulatory',title:'Prior authorization cuts',
      body:'The company committed to eliminating 30% of prior authorization volume by year-end. Doctors and regulators are watching whether it happens.',
-     src:'https://www.tikr.com/blog/unitedhealths-medical-cost-ratio-just-improved-to-86-7-heres-what-that-means-for-the-stock',
+     src:'https://www.sec.gov/Archives/edgar/data/731766/000073176626000255/earningsrelease3q26unh.htm',
      why:'A public promise kept quietly builds more trust than a bigger promise you cannot keep.',
      opts:[
       {l:'Deliver the 30% as promised',d:'Small cost increase. Trust improves.',fx:[['kpi',0.3,1],['cus',8],['reg',8],['emp',2]],q:3,ghost:1,a:['Chief Medical Officer','Doctors are counting. Hit the number.']},
@@ -222,8 +222,8 @@ unh:{id:'unh',name:'UnitedHealth',ticker:'UNH',sector:'Health insurance',ceo:'St
       {l:'Slow the rollout quietly',d:'Protects margins. Risky if noticed.',fx:[['kpi',-0.2,1]],out:[{p:0.5,t:'Nobody noticed yet.',fx:[]},{p:0.5,t:'Reporters noticed the missed pledge.',fx:[['reg',-12],['cus',-8],['inv',-4]]}],q:0,a:['CFO','The pledge was a target, not a contract.']}
      ]},
     {id:'unh-optum',cat:'Portfolio architecture',title:'Exit more Optum risk contracts?',
-     body:'Optum exited some unfavorable contracts that had dragged on earnings. Others still lose money.',
-     src:'https://www.bnnbloomberg.ca/business/company-news/2026/10/13/unitedhealth-raises-profit-forecast-again-as-turnaround-efforts-gather-pace/',
+     body:'Optum Health revenue fell 10% as it left markets where it lacked the scale to support its clinicians, and its operating profit rose from $41 million to $735 million. Some value-based contracts may still lose money.',
+     src:'https://www.sec.gov/Archives/edgar/data/731766/000073176626000255/earningsrelease3q26unh.htm',
      why:'Renegotiating before exiting preserves scale where the contract can be fixed; exit is the fallback, not the first move.',
      opts:[
       {l:'Exit the rest of the losing contracts',jobs:0.01,d:'Margin up. Revenue down.',fx:[['g',-0.4,0,4],['m',0.5,1,99],['cus',-3]],q:2,ghost:1,a:['Head of Optum Health','Every losing contract we keep funds someone else\'s growth.']},
@@ -239,8 +239,8 @@ unh:{id:'unh',name:'UnitedHealth',ticker:'UNH',sector:'Health insurance',ceo:'St
       {l:'Lobby for rule changes',d:'Change the rules instead of the practice.',fx:[['reg',-8],['inv',2]],q:0,a:['Head of Government Affairs','The rules are unclear. Make them clear in our favor.']}
      ]},
     {id:'unh-ai',cat:'Operating architecture',title:'How far do you automate claims?',
-     body:'The company credits technology investments, including AI, with lowering the cost of delivering care. The next step is automating claims decisions.',
-     src:'https://www.bnnbloomberg.ca/business/company-news/2026/10/13/unitedhealth-raises-profit-forecast-again-as-turnaround-efforts-gather-pace/',
+     body:'The company says Optum Insight is bringing AI-enabled tools to market to improve payment accuracy and speed. How far to automate claims decisions is your call.',
+     src:'https://www.sec.gov/Archives/edgar/data/731766/000073176626000255/earningsrelease3q26unh.htm',
      why:'Automation that speeds approvals builds trust; automation that speeds denials invites the scrutiny you are trying to escape.',
      opts:[
       {l:'Automate approvals, human review on every denial',d:'Steady savings. Safe.',fx:[['cr',-0.2,0,1],['m',0.4,2,99],['reg',2],['cus',3]],q:3,ghost:1,a:['Chief Medical Officer','Speed up yes. Slow down no.']},
@@ -347,39 +347,39 @@ nke:{id:'nke',name:'Nike',ticker:'NKE',sector:'Apparel and footwear',ceo:'Elliot
   ]},
 
 khc:{id:'khc',name:'Kraft Heinz',ticker:'KHC',sector:'Packaged food',ceo:'Steve Cahillane',dilemma:'Slow decline of legacy brands',
-  pitch:'Sales have shrunk for years, the planned breakup is on hold, and $600 million is going into marketing and R&D to prove the brands can grow again.',
-  start:{rev:6.262,g:-0.6,m:14.7,cash:2.68,debt:19.0,da:0.24,capex:0.2,wc:0,div:0.47,mult:2.2,kpi:-3.0},
+  pitch:'Sales have shrunk for years, the planned breakup is on hold, and about $700 million is going into marketing and R&D to prove the brands can grow again.',
+  start:{rev:6.262,g:-0.35,m:14.7,cash:2.68,debt:19.0,da:0.24,capex:0.2,wc:0,div:0.48,mult:2.2,kpi:-1.3},
   est:[],
   meters:{inv:35,brd:50,emp:50,cus:42,reg:60,exe:50},
   kpi:{plain:'Sales growth',plainS:'Same-brand sales vs. last year',plainD:'Sales growth versus a year ago, from the same brands.',name:'Organic sales growth',short:'Organic',unit:'% yoy',good:1,derived:true,min:-30,max:30,fmt:v=>(v>=0?'+':'')+v.toFixed(1)+'%'},
   real:{reinvest:'raise',ret:'hold',debt:'hold'},
   facts:[
     ['2025 net sales were $24.9B, down 3.5%, with $9.3B of non-cash impairment charges.','https://news.kraftheinzcompany.com/press-releases-details/2026/Kraft-Heinz-Reports-Fourth-Quarter-and-Full-Year-2025-Results/default.aspx'],
-    ['The planned split was paused; $600M is going into marketing, sales, R&D, product quality and select pricing.','https://news.kraftheinzcompany.com/press-releases-details/2026/Kraft-Heinz-Reports-Fourth-Quarter-and-Full-Year-2025-Results/default.aspx'],
-    ['2026 outlook: organic sales down 1.5% to 3.5%, adjusted EPS of $1.98 to $2.10.','https://news.kraftheinzcompany.com/press-releases-details/2026/Kraft-Heinz-Reports-Fourth-Quarter-and-Full-Year-2025-Results/default.aspx'],
-    ['Q1 2026 sales were $6.05B, up 0.8%.','https://www.sec.gov/Archives/edgar/data/0001637459/000163745926000020/ex991-erq12026.htm']
+    ['The planned split is paused. Kraft Heinz now plans about $700M of extra investment in 2026, up from $600M announced in February.','https://www.sec.gov/Archives/edgar/data/1637459/000163745926000052/ex991-erq22026.htm'],
+    ['2026 outlook, updated Aug 5: organic sales down 0.5% to 2.0% (was down 1.5% to 3.5%), adjusted EPS of $2.03 to $2.09 (was $1.98 to $2.10).','https://www.sec.gov/Archives/edgar/data/1637459/000163745926000052/ex991-erq22026.htm'],
+    ['Q2 2026 sales were $6.26B, down 1.4% (organic down 1.3%), and Kraft Heinz recorded a further $7.4B non-cash impairment.','https://www.sec.gov/Archives/edgar/data/1637459/000163745926000052/ex991-erq22026.htm']
   ],
   deck:[
-    {id:'khc-600',cat:'Capital allocation',title:'Where does the $600 million go?',at:0,
-     body:'You committed $600M across marketing, sales, R&D, product superiority and select pricing. The Taste Elevation brands, like Heinz and Philadelphia, gained share last quarter.',
-     src:'https://www.foodingredientsfirst.com/news/kraft-heinz-separation-pause-investment',
+    {id:'khc-600',cat:'Capital allocation',title:'Where does the $700 million go?',at:0,
+     body:'Kraft Heinz announced $600M of extra investment in February and raised it to about $700M in August, across marketing, sales, R&D, product superiority and select pricing. Share trends have improved, especially in Taste Elevation brands (condiments, sauces, dressings and spreads).',
+     src:'https://www.sec.gov/Archives/edgar/data/1637459/000163745926000052/ex991-erq22026.htm',
      why:'Marketing money compounds on brands that are already gaining share; price cuts on declining staples buy volume that leaves when the cuts end.',
      opts:[
-      {l:'Mostly marketing behind the growing brands',d:'Heinz, Philadelphia and condiments first.',fx:[['cr',-1.2,0,4],['g',0.35,1,99],['cus',4]],q:3,ghost:1,a:['Chief Marketing Officer','Back the winners. They are already gaining share.']},
+      {l:'Mostly marketing behind the growing brands',d:'Heinz and the other condiments first.',fx:[['cr',-1.2,0,4],['g',0.35,1,99],['cus',4]],q:3,ghost:1,a:['Chief Marketing Officer','Back the winners. Their share trends are improving.']},
       {l:'Mostly price cuts on grocery staples',d:'Volume returns while prices are low.',fx:[['g',0.4,0,4],['m',-1.2,0,4],['cus',2]],q:1,a:['Head of Sales','Shoppers are trading down. Meet them on price.']},
       {l:'Spread it evenly across everything',d:'Every brand gets a little.',fx:[['cr',-1.2,0,4],['g',0.2,1,99]],q:2,a:['Head of North America','Every brand team has a plan. Fund them all.']}
      ]},
     {id:'khc-split',cat:'Portfolio architecture',title:'Restart the breakup?',at:3,
-     body:'The split into a sauces company and a grocery company was paused in February. Leadership has kept the option open once the business is growing again.',
-     src:'https://www.foodingredientsfirst.com/news/kraft-heinz-separation-pause-investment',
+     body:'The split into two companies was paused in February. The work could resume, but it would need board approval and regulatory steps.',
+     src:'https://www.sec.gov/Archives/edgar/data/1637459/000163745926000052/ex991-erq22026.htm',
      why:'Breaking up a shrinking company splits the problem in two; fixing growth first makes any later separation worth more.',
      opts:[
-      {l:'Restart the split, targeting 2028',d:'Investors like it. Teams get distracted.',fx:[['cr',-1,0,4],['exe',-6],['inv',8]],out:[{p:0.5,t:'Investors stayed enthusiastic about the split.',fx:[['inv',6,6]]},{p:0.5,t:'Investors soured as the separation dragged.',fx:[['inv',-6,6]]}],q:1,a:['Activist shareholder','The sauces business deserves its own multiple.']},
+      {l:'Restart the split',d:'Investors like it. Teams get distracted.',fx:[['cr',-1,0,4],['exe',-6],['inv',8]],out:[{p:0.5,t:'Investors stayed enthusiastic about the split.',fx:[['inv',6,6]]},{p:0.5,t:'Investors soured as the separation dragged.',fx:[['inv',-6,6]]}],q:1,a:['Activist shareholder','The global condiments business deserves its own multiple.']},
       {l:'Stay together until growth returns',d:'Focus on the operating plan.',fx:[['inv',-2]],q:3,ghost:1,a:['CEO\'s chief of staff','Fix growth first. Then decide from strength.']},
       {l:'Sell a slow-growth brand group instead',d:'Smaller company. Better mix.',fx:[['cash',3,2],['g',-3,0,1],['g',0.2,1,99],['m',0.5,1,99],['inv',5]],q:2,a:['Head of Strategy','Selling one piece is faster than splitting in two.']}
      ]},
     {id:'khc-kids',cat:'Vision and product',title:'Lunchables and kids\' snacks',
-     body:'Brands like Lunchables have lost ground with shoppers looking for healthier options.',
+     body:'Press reports say brands like Lunchables have lost ground with shoppers looking for healthier options.',
      src:'https://www.channel3000.com/lifestyle/food/kraft-mac-cheese-and-heinz-ketchup-are-sticking-together-after-all/article_1563d43d-045e-52a7-8e7d-a1a827ee4c49.html',
      why:'Reformulating a known brand is slower but more reliable than launching a new one into a crowded shelf.',
      opts:[
@@ -389,7 +389,7 @@ khc:{id:'khc',name:'Kraft Heinz',ticker:'KHC',sector:'Packaged food',ceo:'Steve 
      ]},
     {id:'khc-private',cat:'Vision and product',title:'Store brands are taking share',
      body:'Packaged food companies are struggling with weak demand as shoppers look for cheaper alternatives to branded products.',
-     src:'https://www.foodingredientsfirst.com/news/kraft-heinz-separation-pause-investment',ghostNote:'The sources used here do not describe Kraft Heinz\'s response; the real playbook assumes value packs.',
+     src:'https://www.sec.gov/Archives/edgar/data/1637459/000163745926000009/khc-20251227.htm',ghostNote:'The sources used here do not describe Kraft Heinz\'s response; the real playbook assumes value packs.',
      why:'Value formats keep shoppers inside your brands; making store brands for retailers fills plants but funds your competitor.',
      opts:[
       {l:'Make store-brand products for retailers',d:'Fills plants. Lower margins.',fx:[['g',0.4,0,99],['m',-0.6,0,99],['cus',-2]],q:2,a:['Head of Supply Chain','Our plants are a third empty.']},
@@ -414,7 +414,7 @@ khc:{id:'khc',name:'Kraft Heinz',ticker:'KHC',sector:'Packaged food',ceo:'Steve 
      ]},
     {id:'khc-coffee',cat:'Vision and product',title:'Coffee costs keep rising',
      body:'Pricing added 0.7 points to sales last year, mostly from coffee price increases to offset higher costs.',
-     src:'https://www.foodingredientsfirst.com/news/kraft-heinz-separation-pause-investment',
+     src:'https://www.sec.gov/Archives/edgar/data/1637459/000163745926000006/ex991-erq42025.htm',
      why:'Passing costs through openly protects margin with modest volume loss; hidden shrinkflation saves the most and costs the most trust.',
      opts:[
       {l:'Raise coffee prices again',d:'Margin holds. Some volume lost.',fx:[['m',0.5,0,4],['g',-0.2,0,4],['cus',-3]],q:2,ghost:1,a:['Head of Revenue Management','Everyone else is raising too.']},
@@ -426,27 +426,27 @@ khc:{id:'khc',name:'Kraft Heinz',ticker:'KHC',sector:'Packaged food',ceo:'Steve 
 
 /* ---------- real workforce data (researched Oct 2026; every item links to its source) ---------- */
 const PEOPLE={
-intc:{employees:85100,asof:'Dec 2025',src:'https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/intc-20251227.htm',note:'Includes Mobileye. Intel targeted about 75,000 core employees by the end of 2025.',
- sites:[['Hillsboro and Aloha, OR','R&D hub for new process nodes; ramping Intel 18A','~18,000 in Oregon','https://www.klcc.org/economy-business/2025-11-17/intel-will-cut-another-669-workers-in-oregon-by-the-end-of-2025'],['Chandler, AZ','Leading-edge fabs, including Fab 52','~10,000','https://www.chandleraz.gov/business/economic-development/key-industries-and-employers/high-tech-manufacturing-and-development'],['Rio Rancho, NM','Fab 9 advanced packaging',null,'https://businesswire.com/news/home/20240124070327/en/5587037/Intel-Opens-Fab-9-in-New-Mexico'],['New Albany, OH','$28B fab, completion pushed to 2030–2031','3,000 jobs planned','https://www.manufacturingdive.com/news/intel-delays-new-albany-ohio-chip-manufacturing-project-again-2030-2031/741321/']],
- layoffs:[['Aug 2024','About 15,000 jobs','Cost cuts, buyouts; dividend suspended','https://www.fox10phoenix.com/news/intel-layoff-roughly-15000-workers-amid-revenue-slump-2024'],['Jul 2025','Core staff cut to 75,000','Layoffs plus attrition; Germany and Poland projects cancelled','https://www.ksat.com/business/2025/07/24/intel-cuts-back-spending-workforce-as-struggling-chip-maker-mounts-comeback/'],['Jul 2025','2,392 in Oregon','WARN notice for Hillsboro and Aloha','https://kval.com/news/local/intel-now-to-lay-off-nearly-2400-employees-in-oregon'],['Jul 2026','Undisclosed','Cuts in the Data Center group','https://www.tomshardware.com/tech-industry/policy/intel-layoffs-to-hit-data-center-group-division-focused-on-server-cpus-ai-chips-and-data-center-architecture-to-be-hit-by-an-unknown-number-of-cuts']],
+intc:{employees:82300,asof:'Jun 2026',src:'https://www.sec.gov/Archives/edgar/data/50863/000005086326000155/q226earningsrelease.htm',note:'Includes Mobileye. Core Intel is about 77,600; Intel targeted about 75,000 core employees by the end of 2025.',
+ sites:[['Hillsboro and Aloha, OR','R&D hub for new process nodes; ramping Intel 18A','~18,000 in Oregon','https://www.klcc.org/economy-business/2025-11-17/intel-will-cut-another-669-workers-in-oregon-by-the-end-of-2025'],['Chandler, AZ','Leading-edge fabs, including Fab 52','~10,000','https://www.chandleraz.gov/business/economic-development/key-industries-and-employers/high-tech-manufacturing-and-development'],['Rio Rancho, NM','Fab 9 advanced packaging',null,'https://businesswire.com/news/home/20240124070327/en/5587037/Intel-Opens-Fab-9-in-New-Mexico'],['New Albany, OH','$28B+ fab, first operations pushed to 2030–2031',null,'https://www.intel.com/content/www/us/en/newsroom/news/corporate/ohio-one-construction-timeline-update.html']],
+ layoffs:[['Aug 2024','More than 15% of staff','Cost cuts; dividend suspended','https://www.sec.gov/Archives/edgar/data/50863/000005086324000122/q224_earningsrelease.htm'],['Jul 2025','Plan to cut core staff to about 75,000 by year-end','Layoffs plus attrition; Germany and Poland projects cancelled','https://www.sec.gov/Archives/edgar/data/50863/000005086325000107/q225_earningsrelease.htm'],['Jul 2025','2,392 in Oregon','WARN notice for Hillsboro and Aloha','https://kval.com/news/local/intel-now-to-lay-off-nearly-2400-employees-in-oregon'],['Jul 2026','Undisclosed','Cuts in the Data Center group','https://www.tomshardware.com/tech-industry/policy/intel-layoffs-to-hit-data-center-group-division-focused-on-server-cpus-ai-chips-and-data-center-architecture-to-be-hit-by-an-unknown-number-of-cuts']],
  unions:[],earnings:['Oct 29, 2026','https://www.intc.com/news-events/press-releases/detail/1782/intel-to-report-third-quarter-2026-financial-results'],ir:'https://www.intc.com',cik:'50863'},
 ba:{employees:182000,asof:'Dec 2025',src:'https://www.sec.gov/Archives/edgar/data/12927/000162828026004357/ba-20251231.htm',note:'About 40% of employees are represented by unions.',
- sites:[['Renton, WA','737 MAX final assembly, cleared for 47 a month',null,'https://migflug.com/jetflights/boeing-737-max-production-47-per-month-faa-may-2026/'],['Everett, WA','767, KC-46 and 777/777X; a fourth 737 line','30,000+ (Boeing page, may be dated)','https://www.boeing.com/company/about-bca/everett-production-facility'],['North Charleston, SC','787 Dreamliner final assembly; non-union','9,059 in South Carolina','https://www.postandcourier.com/business/aerospace/boeing-sc-hired-workers-payroll-2025/article_356964af-461f-4b8d-aeb1-6c309c94824b.html'],['St. Louis, MO','Defense: F-15, F/A-18, T-7A, MQ-25 and the F-47','18,000+','https://defence-industry.eu/boeing-st-louis-campus-to-build-f-47-sixth-generation-fighter-as-schmitt-highlights-jobs-investment-and-pacific-deterrence/']],
- layoffs:[['Oct 2024','About 17,000 jobs (10%)','Global cut during the machinists’ strike','https://washingtonstatestandard.com/briefs/boeing-to-cut-17000-workers/'],['Nov 2024','2,199 in Washington','First WARN notices, incl. 438 engineers','https://www.fortune.com/2024/11/19/boeing-starts-sending-2199-layoff-notices-washington-state-where-founded'],['Feb 2026','About 300','Defense supply-chain roles','https://www.storyboard18.com/brand-marketing/boeing-to-layoff-around-300-roles-across-multiple-us-sites-88879.htm']],
+ sites:[['Renton, WA','737 MAX final assembly, on track to stabilize at 47 a month',null,'https://www.boeing.com/features/2026/05/737-off-and-rolling-toward-higher-production-rate-ceo-says'],['Everett, WA','767, KC-46 and 777/777X; a new 737 North Line','30,000+ (Boeing page, may be dated)','https://www.boeing.com/company/about-bca/everett-production-facility'],['North Charleston, SC','787 Dreamliner final assembly; non-union','9,059 in South Carolina','https://www.postandcourier.com/business/aerospace/boeing-sc-hired-workers-payroll-2025/article_356964af-461f-4b8d-aeb1-6c309c94824b.html'],['St. Louis, MO','Defense: F-15, F/A-18, T-7A, MQ-25 and the F-47','18,000+','https://defence-industry.eu/boeing-st-louis-campus-to-build-f-47-sixth-generation-fighter-as-schmitt-highlights-jobs-investment-and-pacific-deterrence/']],
+ layoffs:[['Oct 2024','About 17,000 jobs (10%)','Global cut during the machinists’ strike','https://washingtonstatestandard.com/briefs/boeing-to-cut-17000-workers/'],['Nov 2024','2,199 in Washington','First WARN notices, incl. 438 engineers','https://www.fortune.com/2024/11/19/boeing-starts-sending-2199-layoff-notices-washington-state-where-founded'],['Feb 2026','About 300 (reported)','Defense supply-chain roles, per press reports','https://www.storyboard18.com/brand-marketing/boeing-to-layoff-around-300-roles-across-multiple-us-sites-88879.htm']],
  unions:[['IAM District 751','33,000 struck Sept–Nov 2024 and won a 38% raise over four years','https://www.manufacturing.net/operations/news/22925404/boeing-factory-strike-ends-as-workers-vote-to-accept-contract'],['IAM District 837','3,200 St. Louis workers struck Aug–Nov 2025','https://missouriindependent.com/2025/11/13/boeing-strike-in-st-louis-ends-after-union-approves-new-contract/'],['SPEEA','About 17,000 engineers ratified a four-year deal on Oct 1, 2026','https://lynnwoodtimes.com/2026/10/02/speea-contract/']],
  earnings:['Oct 27, 2026','https://investors.boeing.com/investors/news/press-release-details/2026/Boeing-to-Release-Third-Quarter-Results-on-October-27/default.aspx'],ir:'https://investors.boeing.com',cik:'12927'},
 unh:{employees:390000,asof:'Dec 2025',src:'https://www.sec.gov/Archives/edgar/data/731766/000073176626000062/unh-20251231.htm',note:'About 165,000 are clinicians.',
  sites:[['Eden Prairie, MN','Corporate headquarters and Optum campus',null,'https://www.sec.gov/Archives/edgar/data/731766/000073176626000062/unh-20251231.htm'],['Washington, DC','Second executive office',null,'https://www.sec.gov/Archives/edgar/data/731766/000073176626000062/unh-20251231.htm'],['Hudson Valley, NY','Optum primary care sites','~1,700 union caregivers','https://www.1199seiu.org/magazine/more-optum-caregivers-unite-1199seiu']],
- layoffs:[['Jul 2024','524 in California','Optum urgent-care closures','https://www.healthcarefinancenews.com/news/optum-reports-524-layoffs-california'],['Oct 2025','572 in New Jersey','Optum medical offices closing','https://arcxp-prod.modernhealthcare.com/providers/staffing/mh-optum-united-health-group-layoffs-new-jersey'],['Feb 2026','Unspecified','Layoffs under way; raises capped at 0–2%','https://www.beckerspayer.com/workforce/unitedhealth-pay-raises-not-to-exceed-2-amid-layoffs-bloomberg']],
+ layoffs:[['Jul 2024','524 in California','Mostly urgent-care and clinic closures, per press reports','https://www.healthcarefinancenews.com/news/optum-reports-524-layoffs-california'],['Oct 2025','572 in New Jersey','Nearly 90 Optum clinics closing','https://www.cbsnews.com/newyork/news/optum-new-jersey-medical-offices-closing'],['Feb 2026','Unspecified','Layoffs under way; raises capped at 0–2%','https://www.beckerspayer.com/workforce/unitedhealth-pay-raises-not-to-exceed-2-amid-layoffs-bloomberg']],
  unions:[['1199SEIU','Represents about 1,700 Optum caregivers in New York','https://www.1199seiu.org/magazine/more-optum-caregivers-unite-1199seiu']],earnings:null,ir:'https://www.unitedhealthgroup.com/investors.html',cik:'731766'},
 nke:{employees:73000,asof:'May 2026',src:'https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000088/nke-20260531.htm',note:'Includes retail and part-time staff.',
  sites:[['Beaverton, OR','World Headquarters',null,'https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000088/nke-20260531.htm'],['Memphis, TN','Major distribution hub','583 laid off in 2026','https://www.aol.com/articles/nike-layoffs-hit-583-workers-151142974.html'],['Byhalia, MS','Distribution center',null,'https://www.freightwaves.com/news/nike-to-lay-off-hundreds-of-distribution-workers-in-mississippi-tennessee']],
  layoffs:[['Feb 2024','About 1,600 (2%)','Part of a $2B savings plan','https://www.retailgazette.co.uk/blog/2024/02/nike-cut-jobs/'],['Apr 2024','About 740 in Beaverton','Headquarters cuts','https://www.opb.org/article/2024/04/19/nike-layoffs-740-beaverton-oregon/'],['Jan 2026','About 775','Distribution consolidation and automation','https://www.wlbt.com/2026/01/27/nike-confirms-100s-layoffs-across-tennessee-mississippi/'],['Apr 2026','About 1,400','Global Operations, mostly technology','https://www.kptv.com/2026/04/24/nike-lay-off-1400-workers-worldwide-including-beaverton-headquarters/']],
  unions:[],earnings:null,ir:'https://investors.nike.com',cik:'320187'},
 khc:{employees:35000,asof:'Dec 2025',src:'https://www.sec.gov/Archives/edgar/data/1637459/000163745926000009/khc-20251227.htm',note:'About 16,000 in the US; about 62% work in production.',
- sites:[['Pittsburgh, PA','Co-headquarters',null,'https://www.sec.gov/Archives/edgar/data/1637459/000163745926000009/khc-20251227.htm'],['Chicago, IL','Co-headquarters, Aon Center',null,'https://rejournals.com/the-kraft-heinz-company-signs-long-term-lease-at-aon-center-in-chicago/'],['Dover, DE','JELL-O, Kool-Aid and Shake ’N Bake plant','~400 union workers','https://ufcwlocal152.org/news/kraft-heinz-workers-in-dover-de-ratify-new-union-contract/'],['Davenport, IA','Automated Oscar Mayer deli-meat plant',null,'https://businessrecord.com/?p=13540']],
- layoffs:[['Mar 2026','About 350 in New Zealand','Three Heinz Wattie’s factories closing','https://www.just-food.com/news/kraft-heinz-nz-factories-closure/'],['May 2026','400','Roles outside North America, per SEC filing','https://gvwire.com/2026/05/06/kraft-heinz-plans-400-job-cuts-in-2026/']],
- unions:[['UFCW Local 152','About 400 Dover workers ratified a contract in June 2025','https://ufcwlocal152.org/news/kraft-heinz-workers-in-dover-de-ratify-new-union-contract/']],
+ sites:[['Pittsburgh, PA','Co-headquarters',null,'https://www.sec.gov/Archives/edgar/data/1637459/000163745926000009/khc-20251227.htm'],['Chicago, IL','Co-headquarters',null,'https://www.sec.gov/Archives/edgar/data/1637459/000163745926000009/khc-20251227.htm'],['Dover, DE','JELL-O, Kool-Aid and Shake ’N Bake plant','More than 400 union workers','https://ufcwlocal152.org/news/kraft-heinz-workers-in-dover-de-ratify-new-union-contract/'],['Davenport, IA','Automated Oscar Mayer deli-meat plant',null,'https://businessrecord.com/?p=13540']],
+ layoffs:[['Mar 2026','About 300 in New Zealand (350 proposed)','Three Heinz Wattie’s factories closing; frozen veg, coffee and dips exited','https://www.scoop.co.nz/stories/BU2603/S00491/heinz-watties-confirms-changes-to-operations-in-new-zealand.htm'],['May 2026','400','Roles outside North America, per SEC filing','https://www.sec.gov/Archives/edgar/data/1637459/000163745926000022/khc-20260328.htm']],
+ unions:[['UFCW Local 152','More than 400 Dover workers ratified a contract in June 2025','https://ufcwlocal152.org/news/kraft-heinz-workers-in-dover-de-ratify-new-union-contract/']],
  earnings:['Nov 4, 2026','https://finviz.com/news/401206/the-kraft-heinz-company-to-report-third-quarter-2026-results-on-november-4-2026'],ir:'https://ir.kraftheinzcompany.com',cik:'1637459'}
 };
 for(const k in PEOPLE){CO[k].workforce=PEOPLE[k].employees;CO[k].people=PEOPLE[k]}
@@ -473,10 +473,10 @@ const FILINGS={
 intc:{k:['10-K, fiscal 2025 (Dec 27, 2025)','https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/intc-20251227.htm'],q:['10-Q, Q2 2026 (Jun 27, 2026)',SEC(50863,'0000050863-26-000157')],
  rows:[['Revenue, latest quarter',16.128,'q'],['Operating income, latest quarter',1.796,'q'],['Cash + short-term investments',29.727,'q'],['Total debt',50.537,'q'],['Revenue, fiscal 2025',52.853,'k'],['Operating income, fiscal 2025',-2.214,'k'],['Depreciation and amortization, FY',11.706,'k'],['Capital spending, FY',14.646,'k'],['Operating cash flow, FY',9.697,'k'],['Dividends paid, FY',0,'k']]},
 ba:{k:['10-K, fiscal 2025 (Dec 31, 2025)','https://www.sec.gov/Archives/edgar/data/12927/000162828026004357/ba-20251231.htm'],q:['10-Q, Q2 2026 (Jun 30, 2026)',SEC(12927,'0001628280-26-050038')],
- rows:[['Revenue, latest quarter',24.560,'q'],['Operating income, latest quarter',0.156,'q'],['Cash + short-term investments',20.022,'q'],['Total debt',50.161,'q'],['Revenue, fiscal 2025',89.463,'k'],['Operating income, fiscal 2025',4.281,'k'],['Depreciation and amortization, FY',1.953,'k'],['Capital spending, FY',2.942,'k'],['Operating cash flow, FY',1.065,'k'],['Dividends paid, FY',0.331,'k']]},
+ rows:[['Revenue, latest quarter',24.560,'q'],['Operating income, latest quarter',0.156,'q'],['Cash + short-term investments',20.022,'q'],['Total debt',45.900,'q'],['Revenue, fiscal 2025',89.463,'k'],['Operating income, fiscal 2025',4.281,'k'],['Depreciation and amortization, FY',1.953,'k'],['Capital spending, FY',2.942,'k'],['Operating cash flow, FY',1.065,'k'],['Preferred dividends paid, FY',0.331,'k']]},
 unh:{k:['10-K, fiscal 2025 (Dec 31, 2025)','https://www.sec.gov/Archives/edgar/data/731766/000073176626000062/unh-20251231.htm'],q:['10-Q, Q2 2026 (Jun 30, 2026)',SEC(731766,'0000731766-26-000197')],
- extra:['Q3 2026 revenue ($112.69B) and operating income ($6.6B) come from the Oct 13 earnings release, before the Q3 10-Q was filed.','https://www.bnnbloomberg.ca/business/company-news/2026/10/13/unitedhealth-raises-profit-forecast-again-as-turnaround-efforts-gather-pace/'],
- rows:[['Revenue, Q2 2026',112.032,'q'],['Operating income, Q2 2026',7.991,'q'],['Cash + short-term investments',31.468,'q'],['Total debt',73.328,'q'],['Revenue, fiscal 2025',447.567,'k'],['Operating income, fiscal 2025',18.964,'k'],['Depreciation and amortization, FY',4.361,'k'],['Capital spending, FY',3.622,'k'],['Operating cash flow, FY',19.697,'k'],['Dividends paid, FY',7.916,'k']]},
+ extra:['Q3 2026 revenue ($112.69B), operating income ($6.6B) and the Sept 30 balance sheet come from the Oct 13 earnings release, before the Q3 10-Q was filed.','https://www.sec.gov/Archives/edgar/data/731766/000073176626000255/earningsrelease3q26unh.htm'],
+ rows:[['Revenue, Q2 2026',112.032,'q'],['Operating income, Q2 2026',7.991,'q'],['Cash + short-term investments',28.549,'q'],['Total debt',74.331,'q'],['Revenue, fiscal 2025',447.567,'k'],['Operating income, fiscal 2025',18.964,'k'],['Depreciation and amortization, FY',4.361,'k'],['Capital spending, FY',3.622,'k'],['Operating cash flow, FY',19.697,'k'],['Dividends paid, FY',7.916,'k']]},
 nke:{k:['10-K, fiscal 2026 (May 31, 2026)','https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000088/nke-20260531.htm'],q:['10-Q, Q1 fiscal 2027 (Aug 31, 2026)',SEC(320187,'0000320187-26-000193')],
  extra:['Nike does not report operating income; it is pre-tax income less net interest income ($0.921B − $0.014B).',null],
  rows:[['Revenue, latest quarter',11.213,'q'],['Operating income, latest quarter',0.907,'q'],['Cash + short-term investments',8.368,'q'],['Total debt',7.893,'q'],['Revenue, fiscal 2026',46.398,'k'],['Pre-tax income, fiscal 2026',3.900,'k'],['Depreciation and amortization, FY',0.747,'k'],['Capital spending, FY',0.684,'k'],['Operating cash flow, FY',2.868,'k'],['Dividends paid, FY',2.407,'k']]},
@@ -1154,24 +1154,24 @@ const _SD={
   forces:{
    rivalry:{p:3,line:'AMD contests x86 chips, Arm designers and hyperscaler custom silicon attack share, Nvidia leads AI, and TSMC leads contract manufacturing.',src:'https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/intc-20251227.htm'},
    buyers:{p:2,line:'Big cloud and PC customers hold some leverage, but demand is outrunning supply and Intel has signed long-term deals and raised prices.',src:'https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf'},
-   suppliers:{p:3,line:'ASML is the sole source of EUV tools, TSMC makes some Intel chips, and substrates, memory and wafers are short.',src:'https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/intc-20251227.htm'},
+   suppliers:{p:3,line:'ASML is the sole source of EUV tools, TSMC makes some Intel chips, and substrates, memory and wafers are short.',src:'https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf'},
    entrants:{p:2,line:'Leading-edge fabs cost enormous sums, so few can enter; the newer threat is Arm and RISC-V designers and custom chips from the cloud giants.',src:'https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/intc-20251227.htm'},
-   substitutes:{p:2,line:'GPU systems and custom chips can divert spending from CPUs, though management says AI inference is now lifting server CPU demand.',src:'https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/intc-20251227.htm'}},
+   substitutes:{p:2,line:'GPU systems and custom chips can divert spending from CPUs, though management says AI inference is now lifting server CPU demand.',src:'https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf'}},
   ref:['rivalry','suppliers'],refWhy:'Intel fights AMD, Arm designers, Nvidia and TSMC on every front while depending on ASML, TSMC and scarce supply to ship what customers want.',
-  lead:{line:'Leadership says it is rebuilding the balance sheet and execution, proving 18A with internal volume to win outside customers for 14A, and pairing CPUs with GPUs and custom chips for AI.',src:'https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf',posture:'reinvent'},
+  lead:{line:'Leadership says it is focused on execution, proving 18A with internal volume to win outside customers for 14A, and pairing CPUs with GPUs and custom chips for AI.',src:'https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf',posture:'reinvent'},
   pl:{cost:'Squeeze fab and packaging costs, but TSMC’s scale makes undercutting it very hard.',
       differentiate:'Win on x86 compatibility, advanced packaging and tightly paired CPU, GPU and custom-chip systems for AI.',
       focus:'Retreat to core client and server CPUs on mature in-house nodes, and pause 14A if no big outside customer signs.',
       reinvent:'Become a trusted leading-edge foundry for outside designers while also supplying AI systems. Costly, and it hinges on landing 14A customers.'}},
  ba:{
   forces:{
-   rivalry:{p:2,line:'Airbus and Chinese makers challenge in jets and Lockheed, Northrop, RTX and SpaceX in defense, but a backlog near twelve years of output softens price fights.',src:'https://www.sec.gov/Archives/edgar/data/12927/000162828026004357/ba-20251231.htm'},
+   rivalry:{p:2,line:'Airbus and Chinese makers challenge in jets and Lockheed, Northrop, RTX and SpaceX in defense, but a backlog of more than 6,200 planes softens price fights.',src:'https://www.sec.gov/Archives/edgar/data/12927/000162828026004357/ba-20251231.htm'},
    buyers:{p:2,line:'A 6,200-plane backlog gives Boeing leverage, but delays let airlines claim compensation or cancel, and fixed-price defense contracts have cost billions.',src:'https://www.sec.gov/Archives/edgar/data/12927/000162828026004357/ba-20251231.htm'},
    suppliers:{p:3,line:'Many parts are sole-sourced and slow to requalify; engine delays hold up 787 output and Boeing bought Spirit to regain control.',src:'https://www.sec.gov/Archives/edgar/data/12927/000162828026004357/ba-20251231.htm'},
    entrants:{p:1,line:'Certification hurdles keep new jet makers out; China’s COMAC delivered only eight aircraft in the first half of 2026.',src:'https://aircargoweek.com/?p=110037'},
    substitutes:{p:1,line:'The 10-K names no substitute threat; fuel prices and environmental rules sway demand more than any alternative to flying.',src:'https://www.sec.gov/Archives/edgar/data/12927/000162828026004357/ba-20251231.htm'}},
   ref:['suppliers','buyers'],refWhy:'A sold-out order book makes rivalry mild, so profit is squeezed by parts and engine bottlenecks and by customers’ delay remedies and fixed-price government terms.',
-  lead:{line:'Leadership says it will stabilize around safety and quality, ramp 737 and 787 output step by step, turn cash flow positive, stop signing loss-making fixed-price deals, sell Jeppesen and take Spirit back in.',src:'https://leehamnews.com/2026/07/28/boeing-losses-narrow-cash-flow-positive/',posture:'focus'},
+  lead:{line:'Leadership says it will stabilize around safety and quality, ramp 737 and 787 output step by step, turn cash flow positive, work through its fixed-price defense programs and keep integrating Spirit, which it bought in December 2025.',src:'https://s2.q4cdn.com/661678649/files/doc_financials/2026/q2/Transcript.pdf',posture:'focus'},
   pl:{cost:'Squeeze the 737 and 787 lines and suppliers for lower unit costs. Risky for a company whose past cost-cutting is blamed for quality crises.',
       differentiate:'Win on proven safety, quality and delivery reliability plus the widebody range, so airlines pay for dependability.',
       focus:'Concentrate on core jets, chosen defense programs and services, sell non-core units and walk away from loss-making bids.',
@@ -1180,8 +1180,8 @@ const _SD={
   forces:{
    rivalry:{p:2,line:'Rivals range from startups to giant insurers; Medicare Advantage enrollment fell to about 7.6M from 8.4M, though margins are recovering.',src:'https://www.sec.gov/Archives/edgar/data/0000731766/000073176626000255/earningsrelease3q26unh.htm'},
    buyers:{p:3,line:'Medicare premiums from CMS are about 44% of revenue and the government sets rates, while employers and states hold the contracts.',src:'https://www.sec.gov/Archives/edgar/data/731766/000073176626000062/unh-20251231.htm'},
-   suppliers:{p:3,line:'Hospitals, physician groups and drug makers hold leverage: cost trend ran above plan and out-of-network awards can far exceed Medicare rates.',src:'https://www.webull.com/news/15741091905627136'},
-   entrants:{p:1,line:'Heavy regulation and scale protect it; the 10-K flags provider-run groups and tech entrants as possible disruptors.',src:'https://www.sec.gov/Archives/edgar/data/731766/000073176626000062/unh-20251231.htm'},
+   suppliers:{p:3,line:'Hospitals, physician groups and drug makers hold leverage: commercial cost trend is running above the 11% UnitedHealth planned for, and out-of-network arbitration awards can approach 6% of medical spend in some regions.',src:'https://www.webull.com/news/15741091905627136'},
+   entrants:{p:1,line:'Heavy regulation and scale protect it; the 10-K flags startups, new technologies and disruptive new entrants.',src:'https://www.sec.gov/Archives/edgar/data/731766/000073176626000062/unh-20251231.htm'},
    substitutes:{p:2,line:'Traditional Medicare and provider-run care groups can replace Medicare Advantage plans, though over half of eligible seniors still choose Advantage.',src:'https://www.webull.com/news/15741091905627136'}},
   ref:['buyers','suppliers'],refWhy:'Premiums are set by government and employer buyers while medical costs are set largely by providers and drug makers, squeezing the margin between them.',
   lead:{line:'Leadership says it is repairing margins through discipline and simpler operations, exiting weak markets, cutting prior authorizations, shifting toward integrated value-based care and building AI tools.',src:'https://www.webull.com/news/15741091905627136',posture:'focus'},
@@ -1206,11 +1206,11 @@ const _SD={
   forces:{
    rivalry:{p:3,line:'National food giants, regional players and retailer private labels fight on price, promotion and innovation.',src:'https://www.sec.gov/Archives/edgar/data/1637459/000163745926000009/khc-20251227.htm'},
    buyers:{p:3,line:'Walmart alone is about 21% of sales and the top five North America customers make about 46% of segment sales.',src:'https://www.sec.gov/Archives/edgar/data/1637459/000163745926000009/khc-20251227.htm'},
-   suppliers:{p:2,line:'It buys huge volumes of dairy, meat, coffee, sweeteners and packaging at volatile, partly hedged prices.',src:'https://www.marketbeat.com/instant-alerts/kraft-heinz-q2-earnings-call-highlights-2026-08-05/'},
-   entrants:{p:1,line:'The 10-K treats new entrants as a minor risk; shelf space and scale distribution do most of the blocking.',src:'https://www.sec.gov/Archives/edgar/data/1637459/000163745926000009/khc-20251227.htm'},
+   suppliers:{p:2,line:'It buys huge volumes of dairy, meat, coffee, sweeteners and packaging at volatile, partly hedged prices.',src:'https://www.sec.gov/Archives/edgar/data/1637459/000163745926000009/khc-20251227.htm'},
+   entrants:{p:1,line:'The 10-K does not name new entrants as a risk; shelf space and scale distribution do most of the blocking.',src:'https://www.sec.gov/Archives/edgar/data/1637459/000163745926000009/khc-20251227.htm'},
    substitutes:{p:2,line:'Weight-loss drugs, ingredient worries and health trends could pull shoppers toward fresher or store-brand options; the 10-K flags it without a number.',src:'https://www.sec.gov/Archives/edgar/data/1637459/000163745926000009/khc-20251227.htm'}},
   ref:['buyers','rivalry'],refWhy:'A few big retailers and a crowded field of brand and store-brand rivals cap pricing and force promotions, and volume fell even as price rose.',
-  lead:{line:'Leadership says it is spending more, about $700M extra in 2026 mostly on marketing and innovation, to rebuild its brands and return to volume-led growth after pausing the planned split.',src:'https://businesswire.com/news/home/20260805074009/en/Kraft-Heinz-Reports-Second-Quarter-2026-Results-Updates-2026-Full-Year-Outlook',posture:'differentiate'},
+  lead:{line:'Leadership says it is spending more, about $700M of extra investment in 2026 across marketing, sales, R&D, product quality and select pricing, to rebuild its brands and return to volume-led growth after pausing the planned split.',src:'https://www.sec.gov/Archives/edgar/data/1637459/000163745926000052/ex991-erq22026.htm',posture:'differentiate'},
   pl:{cost:'Use scale in sourcing, plants and logistics to cut prices against Walmart and private label, squeezing margins already under input inflation.',
       differentiate:'Fund Heinz, Kraft, Philadelphia, Oscar Mayer and Capri Sun with more marketing and innovation so shoppers pay a premium.',
       focus:'Concentrate on a few winning platforms and prune or sell weaker areas like meats.',

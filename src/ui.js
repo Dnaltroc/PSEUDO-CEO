@@ -576,24 +576,24 @@ function enterGame(){
 /* Each point is [title, plain-English text, source refs, optional extra]. 'f0'.. point at c.facts; 'r:<force>' at the five-forces evidence links. */
 const STORY={
   intc:{head:'Intel’s chips are selling again, but the factories it built to make chips for other companies lose billions.',pts:[
-    ['The chip business is coming back.','Intel made $16.1 billion last quarter, up 25% from a year ago.',['f0']],
+    ['The chip business is coming back.','Intel made $16.1 billion in the quarter ended June 27, up 25% from a year ago.',['f0']],
     ['Making chips for other companies is the money pit.','Intel Foundry, the part that runs the factories, lost $2.1 billion in one quarter on $5.8 billion of sales.',['f1']],
     ['Almost nobody outside Intel is buying.','Only about $293 million of that factory revenue came from outside customers. Nearly all the rest came from Intel’s own chip designers.',['f2']],
-    ['The next big bet has no customer yet.','Intel’s next chip-making process, called 14A, is aimed at 2028. No outside company has been announced as a big-volume buyer.',['f3']],
+    ['The next big bet has no announced volume customer.','Intel’s next chip-making process, called 14A, is aimed at 2028. Intel has not announced a signed volume commitment from an outside customer.',['f3']],
     ['Rivals are strong on every side.','AMD fights for PC and server chips, Nvidia leads in AI, and TSMC leads in making chips for other companies. Intel also buys its most advanced machines from a single supplier, ASML.',['r:rivalry','r:suppliers']]],
     job:'Keep spending billions on factories that lose money, or protect cash for the chip products that are finally selling?'},
   ba:{head:'Boeing is building planes faster again, but it still loses money and one quality slip could undo the progress.',pts:[
-    ['It is still losing money.','Boeing had $24.56 billion in sales last quarter and still lost money: $0.76 a share on a core (adjusted) basis, or $0.67 under standard accounting rules.',['f0']],
-    ['Production is climbing.','Boeing began moving the 737 MAX to 47 planes a month last quarter.',['f1']],
+    ['It is still losing money.','Boeing had $24.56 billion in sales in the quarter ended June 30 and still lost money: $0.76 a share on a core (adjusted) basis, or $0.67 under standard accounting rules.',['f0']],
+    ['Production is climbing.','Boeing began moving the 737 MAX to 47 planes a month in the quarter ended June 30.',['f1']],
     ['Cash is the scoreboard.','Boeing expects to keep only $1 billion to $3 billion of free cash this year, which is the cash left after paying its bills and buying equipment. It calls $10 billion attainable as it works through its backlog.',['f2']],
     ['Customers are waiting, but not forever.','Commercial orders on hand come to $597 billion, more than 6,200 planes. Delays let airlines ask for payback or cancel. The first 777X is not due until 2027.',['f3','r:buyers']],
     ['Boeing depends on a few suppliers.','Many parts come from a single source and take a long time to approve. Engine delays hold up the 787, and Boeing bought Spirit to get more control.',['r:suppliers']]],
     job:'Build faster to bring in cash, or slow down to protect quality?'},
   unh:{head:'UnitedHealth is recovering from a cyberattack and missed targets. Its profit is coming back, partly because it let customers go.',pts:[
-    ['Profit is bouncing back.','Operating profit was $6.6 billion last quarter, up from $4.3 billion a year ago. UnitedHealth raised its 2026 forecast to at least $20.50 a share.',['f3','f1']],
-    ['It is paying out less of each premium dollar.','On $112.69 billion of sales, its medical cost ratio fell to 88.4% from 89.9%. That ratio is the share of premiums spent on patients’ care, so lower is better for UnitedHealth.',['f0']],
-    ['But it is getting smaller.','Its Medicare Advantage membership is down 935,000 since the end of 2025. Enrollment fell to about 7.6 million from 8.4 million a year ago.',['f2','r:rivalry']],
-    ['The government sets the rules.','Medicare payments are about 44% of revenue, and the government sets the rates, so a change in Washington can move the whole business.',['r:buyers']]],
+    ['Profit is bouncing back.','Operating profit was $6.6 billion last quarter, up from $4.3 billion a year ago. UnitedHealth raised its 2026 forecast to at least $20.50 a share in adjusted earnings.',['f3','f1']],
+    ['It is paying out less of each premium dollar.','On $112.69 billion of sales, its medical cost ratio fell to 88.4% from 89.9%, helped by $610 million of favorable reserve adjustments. That ratio is the share of premiums spent on patients’ care, so lower is better for UnitedHealth.',['f0']],
+    ['But it is getting smaller.','The number of seniors it serves through Medicare Advantage, including some programs inside Medicaid, is down 935,000 since the end of 2025. Reported Medicare Advantage enrollment is about 7.6 million, down from 8.4 million a year ago.',['f2','r:rivalry']],
+    ['The government sets the rules.','Premiums from the Medicare agency are about 44% of revenue, and the government sets the rates, so a change in Washington can move the whole business.',['r:buyers']]],
     job:'Keep winning back profit by dropping unprofitable members, or grow again and risk the margin?'},
   nke:{head:'Nike’s sales are falling. Running is growing, but lifestyle sneakers and China are shrinking and the company is changing its plan.',pts:[
     ['Sales fell again.','Revenue fell 4% to $11.2 billion last quarter. In Greater China it fell 26% once currency is stripped out.',['f0','f1']],
@@ -603,10 +603,10 @@ const STORY={
     ['Rivals and retailers have the upper hand.','Adidas, New Balance, On and others chase the same shoppers. The top three U.S. retailers make up about 29% of U.S. sales, and tariffs have raised the cost of making shoes.',['r:rivalry','r:buyers','r:suppliers']]],
     job:'Take short-term pain to reset the business, or protect this year’s numbers and risk falling further behind?'},
   khc:{head:'Kraft Heinz sells a little less every year, and its plan to split in two is on hold.',pts:[
-    ['Sales are shrinking.','2025 sales were $24.9 billion, down 3.5%. The company also wrote down $9.3 billion of what it paid for its brands and businesses. That is a paper loss, not cash out the door.',['f0']],
-    ['The breakup is paused.','Kraft Heinz planned to split in two, then stopped. It is putting $600 million into marketing, sales, research, product quality and select price moves instead.',['f1']],
-    ['More shrinking is expected.','For 2026 it expects sales to fall 1.5% to 3.5%, not counting buyouts and currency swings, with profit of $1.98 to $2.10 a share.',['f2']],
-    ['There was one good sign.','First-quarter 2026 sales were $6.05 billion, up 0.8% from a year earlier.',['f3']],
+    ['Sales are shrinking.','2025 sales were $24.9 billion, down 3.5%. The company wrote down $9.3 billion of what it paid for its brands and businesses, then another $7.4 billion in the second quarter of 2026. Those are paper losses, not cash out the door.',['f0','f3']],
+    ['The breakup is paused.','Kraft Heinz planned to split in two, then paused the work in February. It is putting about $700 million this year into marketing, sales, research, product quality and select price moves instead.',['f1']],
+    ['More shrinking is expected.','For 2026 it now expects sales to fall 0.5% to 2.0%, not counting business sales and currency swings, with profit of $2.03 to $2.09 a share. That is a better outlook than it gave in February.',['f2']],
+    ['The outlook got a little better.','In August Kraft Heinz raised its 2026 sales outlook, even though second-quarter sales fell 1.4% to $6.26 billion.',['f3']],
     ['Stores hold the power.','Walmart alone is about 21% of sales. Store brands fight on price, and health trends could pull shoppers toward fresher food.',['r:buyers','r:rivalry','r:substitutes']]],
     job:'Spend to make the old brands grow again, or protect profit while sales slowly decline?'}
 };
