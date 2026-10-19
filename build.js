@@ -11,4 +11,8 @@ fs.mkdirSync(path.join(__dirname, 'public'), { recursive: true });
 fs.writeFileSync(path.join(__dirname, 'public', 'index.html'), html);
 const stats = path.join(__dirname, 'src', 'stats.html');
 if (fs.existsSync(stats)) fs.copyFileSync(stats, path.join(__dirname, 'public', 'stats.html'));
+for (const f of ['og.png', 'privacy.html']) {
+  const src = path.join(__dirname, 'src', f);
+  if (fs.existsSync(src)) fs.copyFileSync(src, path.join(__dirname, 'public', f));
+}
 console.log('Built public/index.html', (html.length / 1024).toFixed(0) + ' KB');

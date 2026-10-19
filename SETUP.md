@@ -30,6 +30,7 @@ About 10 minutes. You need a GitHub account and the Vercel account that already 
 - Push to GitHub and Vercel redeploys on its own.
 - Download the names and emails players typed on the welcome screen as a spreadsheet file:
   `curl -H "Authorization: Bearer YOUR_STATS_KEY" "https://YOUR-SITE/api/leads?format=csv" -o players.csv`
-  (leave off `?format=csv` for JSON). They are stored once per email address in the same Upstash database, are never returned by a public route, and the key is required. Treat the file as private.
+  (leave off `?format=csv` for JSON). They are stored once per email address in the same Upstash database, are never returned by a public route, and the key is required. Treat the file as private. The CSV has a `wants_updates` column: only email people who said yes, one at a time, from your own address. The `/stats` Players tab shows the same list.
+- Someone asks to be removed: they can use the form at `/privacy`, or delete them yourself by removing the email from the `leads:e` hash in Upstash.
 - Remove a bad leaderboard name: `/stats`, Moderation, Load board, Remove.
 - Free-tier Upstash allows roughly 500,000 commands a month. A game uses about 30, so that is thousands of plays a month.

@@ -37,19 +37,21 @@ Before Quarter 1 the player reads a one-page briefing in plain English on why th
 
 ## Getting fired
 
-When the board fires the player, the game shows a fake newspaper story, "CEO (player name) fired from (company)", written from the run's real numbers: quarters served, misses, stock move, what $10,000 became, board support, jobs cut. It is labeled as fiction on the page. The paper is the invented "Pseudo Post", the only quote comes from one of the game's invented analysts, and nothing is attributed to the real company, its board or its leaders. The picture is the player's initials, not a photo.
+When the board fires the player, the game shows a fake newspaper story, "CEO (player name) fired from (company)", written from the run's real numbers: quarters served, misses, stock move, what $10,000 became, board support, jobs cut. It is labeled as fiction on the page. The paper is the invented "Pseudo Post", the only quote comes from one of the game's invented analysts, and nothing is attributed to the real company, its board or its leaders. The page is laid out like a front page with a giant FIRED! banner, and the picture is a stock photo of a man in distress with the face blurred.
 
 ## Leaderboard, sharing and analytics
 
 - **Share card.** The debrief makes an image (and copyable text) with your result.
 - **Leaderboard.** One board per company and seat. Posting sends your choices to the server, which replays them through the same deterministic engine and computes the score itself, so numbers cannot be typed in. Ranked by points ahead of the real playbook. Only completed games are ranked. Rewinds used are self-reported.
 - **Analytics.** Anonymous counts only: which company and difficulty were picked, how far games got, completions, shares. A random ID kept in the browser counts unique players. No names, emails or IP addresses are stored. Browsers with Do Not Track on are not counted. A one-hour abuse limit uses a scrambled form of the connection address that is not kept.
-- **Stats dashboard** at `/stats`, protected by a key only you know. It also lets you remove leaderboard entries.
+- **Stats dashboard** at `/stats`, protected by a key only you know. It shows the anonymous counts, a Players tab (name, email, whether they ticked the updates box, games played, with a work-email filter and CSV download) and lets you remove leaderboard entries.
+- **Player list and privacy.** The welcome screen asks for a name and email and has an optional, unticked "Email me about new companies and features" box. Emails are stored privately and never shown. `/privacy` explains what is kept, and has a form that removes an email (`POST /api/leads` with `{"remove":true,"email":"..."}`; it always answers the same way, so it does not reveal who is on the list).
+- **Link preview.** Open Graph and Twitter tags plus `og.png` (1200x630) give the site a share card on LinkedIn and elsewhere.
 
 ## Project layout
 
 ```
-src/        engine.js (simulation + data), ui.js (screens), shell.html (styles), photos.css, stats.html
+src/        engine.js (simulation + data), ui.js (screens), shell.html (styles), photos.css, faces.css, stats.html, privacy.html, og.png
 api/        serverless functions: event, score, leaderboard, leads, stats, admin (+ _replay.js, _lib.js)
 dev/        local dev server with an in-memory database, and a replay self-test
 build.js    assembles src/ into public/index.html (the single-file game)
@@ -63,6 +65,7 @@ Deploying (Vercel, Upstash Redis for storage): see [SETUP.md](SETUP.md).
 
 - Financials: SEC EDGAR filings (10-K and 10-Q) via the SEC's XBRL data.
 - Workforce, layoff and site information: company filings and public reporting, linked from inside the game.
+- The headline figures for each company link to the primary document where one exists (earnings releases and SEC filings). A few claims drawn from earnings calls or leadership news still link to secondary reports.
 
 ## Photo credits
 
@@ -75,6 +78,8 @@ Photos are from Wikimedia Commons and credited in the game and on share cards.
 | UnitedHealth | Optum headquarters, Eden Prairie | Chad Davis | CC BY 2.0 |
 | Nike | Nike World Headquarters, Beaverton | Brandon Carson | CC BY 2.0 |
 | Kraft Heinz | PPG Place, Pittsburgh | Derek Jensen (Tysto) | Public domain |
+
+The "FILE PHOTO" on the fired front page is "Man Stressed At Work" by CIPHR Connect, CC BY 2.0, via Wikimedia Commons (https://commons.wikimedia.org/wiki/File:Man_Stressed_At_Work.jpg). The face is blurred and the image is cropped and made black and white before it is stored in `src/faces.css`. It shows no one connected to the story, and the caption says so.
 
 ## Disclaimer
 
