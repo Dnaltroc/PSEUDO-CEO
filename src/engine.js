@@ -44,9 +44,9 @@ intc:{id:'intc',name:'Intel',ticker:'INTC',sector:'Semiconductors',ceo:'Lip-Bu T
   kpi:{plain:'Outside chip sales',plainS:'Chips made for other companies',plainD:'Money from making chips for other companies, per quarter. Higher is better.',name:'External foundry revenue',short:'Ext. foundry',unit:'$B/qtr',good:1,drift:0.02,min:0,max:6,fmt:v=>'$'+v.toFixed(2)+'B'},
   real:{reinvest:'raise',ret:'none',debt:'hold'},
   facts:[
-    ['Q2 2026 revenue was $16.1B, up 25% from a year earlier.','https://cryptobriefing.com/intel-earnings-operational-turnaround-q2-2026/'],
-    ['Intel Foundry lost $2.1B on $5.8B of revenue in Q2 2026, a −36% operating margin.','https://fourweekmba.com/ai-intel-foundry-q2-2026-losses-narrowing/'],
-    ['About $293M of that foundry revenue came from outside customers.','https://www.webull.com/news/15685876526629888'],
+    ['Q2 2026 revenue was $16.1B, up about 25% from a year earlier.','https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf'],
+    ['Intel Foundry lost $2.1B on $5.8B of revenue in Q2 2026, about a −36% operating margin.','https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf'],
+    ['About $293M of that foundry revenue came from outside customers.','https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf'],
     ['14A high-volume manufacturing is targeted for 2028, with no confirmed external volume customer.','https://fourweekmba.com/ai-intel-foundry-q2-2026-losses-narrowing/']
   ],
   deck:[
@@ -119,10 +119,10 @@ ba:{id:'ba',name:'Boeing',ticker:'BA',sector:'Aerospace',ceo:'Kelly Ortberg',dil
   kpi:{plain:'Jets per month',plainS:'737 jets built each month',plainD:'How many 737 MAX planes the factory builds each month. More jets, more sales, but only if quality holds.',name:'737 MAX build rate',short:'737 rate',unit:'per month',good:1,drift:0,min:30,max:63,fmt:v=>Math.round(v)+'/mo'},
   real:{reinvest:'hold',ret:'none',debt:'pay'},
   facts:[
-    ['Q2 2026 revenue was $24.56B, with a loss of $0.76 a share.','https://stocktwits.com/news-articles/markets/equity/boeing-ba-stock-climbs-after-ceo-says-production-at-levels-not-seen-since-2018/cZZCMQvRJbh'],
-    ['737 MAX production is moving to 47 a month; the 787 has stabilized at 8.','https://stocktwits.com/news-articles/markets/equity/boeing-ba-stock-climbs-after-ceo-says-production-at-levels-not-seen-since-2018/cZZCMQvRJbh'],
-    ['2026 free cash flow guidance is $1B to $3B; the long-term target is $10B.','https://stocktwits.com/news-articles/markets/equity/boeing-ba-stock-climbs-after-ceo-says-production-at-levels-not-seen-since-2018/cZZCMQvRJbh'],
-    ['Commercial backlog is a record $597B, more than 6,200 airplanes. First 777X delivery is planned for 2027.','https://stocktwits.com/news-articles/markets/equity/boeing-ba-stock-climbs-after-ceo-says-production-at-levels-not-seen-since-2018/cZZCMQvRJbh']
+    ['Q2 2026 revenue was $24.56B. The core (adjusted) loss was $0.76 a share; the loss under standard accounting rules was $0.67.','https://www.sec.gov/Archives/edgar/data/0000012927/000162828026049929/a202606jun308kprex991.htm'],
+    ['737 MAX production began moving to 47 a month in the quarter.','https://www.sec.gov/Archives/edgar/data/0000012927/000162828026049929/a202606jun308kprex991.htm'],
+    ['Boeing reaffirmed 2026 free cash flow of $1B to $3B and calls $10B attainable as it works through its backlog.','https://www.marketbeat.com/instant-alerts/boeing-q2-earnings-call-highlights-2026-07-28/'],
+    ['Commercial backlog is $597B, more than 6,200 airplanes. First 777X delivery is planned for 2027.','https://www.sec.gov/Archives/edgar/data/0000012927/000162828026049929/a202606jun308kprex991.htm']
   ],
   deck:[
     {id:'ba-rate',cat:'Operating architecture',title:'Ask the FAA for 52 a month?',at:1,
@@ -197,10 +197,10 @@ unh:{id:'unh',name:'UnitedHealth',ticker:'UNH',sector:'Health insurance',ceo:'St
   kpi:{plain:'Care cost per $1',plainS:'Cents per premium $1 spent on care',plainD:'Cents of every premium dollar spent on members\u2019 medical care. Lower means more profit.',name:'Medical cost ratio',short:'Med. cost ratio',unit:'% of premiums',good:-1,drift:0.08,min:80,max:95,fmt:v=>v.toFixed(1)+'%'},
   real:{reinvest:'hold',ret:'hold',debt:'hold'},
   facts:[
-    ['Q3 2026 revenue was $112.69B; the medical cost ratio was 88.4%, down from 89.9% a year earlier.','https://www.bnnbloomberg.ca/business/company-news/2026/10/13/unitedhealth-raises-profit-forecast-again-as-turnaround-efforts-gather-pace/'],
-    ['2026 adjusted EPS guidance was raised to at least $20.50.','https://www.bnnbloomberg.ca/business/company-news/2026/10/13/unitedhealth-raises-profit-forecast-again-as-turnaround-efforts-gather-pace/'],
-    ['935,000 members have left its Medicare Advantage business since the end of 2025.','https://www.bnnbloomberg.ca/business/company-news/2026/10/13/unitedhealth-raises-profit-forecast-again-as-turnaround-efforts-gather-pace/'],
-    ['Q3 operating income was $6.6B, up from $4.3B a year earlier.','https://www.bnnbloomberg.ca/business/company-news/2026/10/13/unitedhealth-raises-profit-forecast-again-as-turnaround-efforts-gather-pace/']
+    ['Q3 2026 revenue was $112.69B; the medical cost ratio was 88.4%, down from 89.9% a year earlier.','https://www.sec.gov/Archives/edgar/data/0000731766/000073176626000255/earningsrelease3q26unh.htm'],
+    ['2026 adjusted EPS guidance was raised to at least $20.50.','https://www.sec.gov/Archives/edgar/data/0000731766/000073176626000255/earningsrelease3q26unh.htm'],
+    ['Medicare Advantage membership is down 935,000 since the end of 2025.','https://www.sec.gov/Archives/edgar/data/0000731766/000073176626000255/earningsrelease3q26unh.htm'],
+    ['Q3 operating income was $6.6B, up from $4.3B a year earlier.','https://www.sec.gov/Archives/edgar/data/0000731766/000073176626000255/earningsrelease3q26unh.htm']
   ],
   deck:[
     {id:'unh-ma',cat:'Vision and product',title:'Next year\'s Medicare Advantage bids',at:0,
@@ -274,10 +274,10 @@ nke:{id:'nke',name:'Nike',ticker:'NKE',sector:'Apparel and footwear',ceo:'Elliot
   kpi:{plain:'Store sales growth',plainS:'Sales to stores vs. last year',plainD:'Growth in sales to stores like Foot Locker and Dick\u2019s versus a year ago.',name:'Wholesale revenue growth',short:'Wholesale',unit:'% yoy',good:1,drift:0,min:-20,max:25,fmt:v=>(v>=0?'+':'')+v.toFixed(1)+'%'},
   real:{reinvest:'raise',ret:'hold',debt:'hold'},
   facts:[
-    ['Fiscal Q4 2026 revenue fell 1% to $10.97B.','https://www.benzinga.com/node/60207942'],
-    ['EPS of $0.72 included a $986M tariff recovery; without it, EPS was $0.20.','https://www.benzinga.com/node/60207942'],
+    ['Fiscal Q4 2026 revenue fell 1% to $10.97B.','https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000076/q4fy26exhibit991er.htm'],
+    ['EPS of $0.72 included a $0.52 benefit from a $986M expected tariff recovery; without it, EPS was $0.20.','https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000076/q4fy26exhibit991er.htm'],
     ['Nike guided to revenue declines of low-to-mid single digits over the next six months.','https://www.benzinga.com/node/60207942'],
-    ['Wholesale revenue grew 6% for fiscal 2026 while Nike Direct fell 6%.','https://www-statista-com.libproxy.pcc.edu/chart/27372/nikes-global-sales/']
+    ['Fiscal 2026 wholesale revenue grew 6% to $27.5B while Nike Direct fell 6% to $17.7B.','https://www.sec.gov/Archives/edgar/data/0000320187/000032018726000076/q4fy26exhibit991er.htm']
   ],
   deck:[
     {id:'nke-channel',cat:'Operating architecture',title:'How hard do you clean up the channel?',at:0,
@@ -353,10 +353,10 @@ khc:{id:'khc',name:'Kraft Heinz',ticker:'KHC',sector:'Packaged food',ceo:'Steve 
   kpi:{plain:'Sales growth',plainS:'Same-brand sales vs. last year',plainD:'Sales growth versus a year ago, from the same brands.',name:'Organic sales growth',short:'Organic',unit:'% yoy',good:1,derived:true,min:-30,max:30,fmt:v=>(v>=0?'+':'')+v.toFixed(1)+'%'},
   real:{reinvest:'raise',ret:'hold',debt:'hold'},
   facts:[
-    ['2025 net sales were $24.9B, down 3.5%, with $9.3B of non-cash impairment charges.','https://www.foodingredientsfirst.com/news/kraft-heinz-separation-pause-investment'],
-    ['The planned split was paused; $600M is going into marketing, sales and R&D.','https://www.foodingredientsfirst.com/news/kraft-heinz-separation-pause-investment'],
-    ['2026 outlook: organic sales down 1.5% to 3.5%, adjusted EPS of $1.98 to $2.10.','https://www.foodingredientsfirst.com/news/kraft-heinz-separation-pause-investment'],
-    ['Q1 2026 sales were $6.05B, ahead of estimates.','https://www.esmmagazine.com/a-brands/kraft-heinz-tops-us-sales-estimates-as-ceo-cahillanes-turnaround-efforts-take-root-311362']
+    ['2025 net sales were $24.9B, down 3.5%, with $9.3B of non-cash impairment charges.','https://news.kraftheinzcompany.com/press-releases-details/2026/Kraft-Heinz-Reports-Fourth-Quarter-and-Full-Year-2025-Results/default.aspx'],
+    ['The planned split was paused; $600M is going into marketing, sales, R&D, product quality and select pricing.','https://news.kraftheinzcompany.com/press-releases-details/2026/Kraft-Heinz-Reports-Fourth-Quarter-and-Full-Year-2025-Results/default.aspx'],
+    ['2026 outlook: organic sales down 1.5% to 3.5%, adjusted EPS of $1.98 to $2.10.','https://news.kraftheinzcompany.com/press-releases-details/2026/Kraft-Heinz-Reports-Fourth-Quarter-and-Full-Year-2025-Results/default.aspx'],
+    ['Q1 2026 sales were $6.05B, up 0.8%.','https://www.sec.gov/Archives/edgar/data/0001637459/000163745926000020/ex991-erq12026.htm']
   ],
   deck:[
     {id:'khc-600',cat:'Capital allocation',title:'Where does the $600 million go?',at:0,

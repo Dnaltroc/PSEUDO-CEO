@@ -42,7 +42,7 @@ svg{display:block;width:100%;height:auto}
 </head>
 <body>
 <main class="wrap">
-  <div><h1>Pseudo CEO stats</h1><p>Anonymous play counts. Private to you: needs your STATS_KEY.</p></div>
+  <div><h1>Pseudo CEO stats</h1><p>Play counts and your player list. Private to you: needs your STATS_KEY.</p></div>
   <form class="row" id="gate">
     <input id="key" type="password" placeholder="STATS_KEY" autocomplete="current-password" aria-label="Stats key" style="min-width:240px">
     <select id="days" aria-label="Range"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option></select>
@@ -56,6 +56,11 @@ svg{display:block;width:100%;height:auto}
     <section style="margin-top:28px"><h2>Moderation</h2>
       <div class="row"><select id="mco"></select><select id="md"><option value="easy">Guided</option><option value="medium">Standard</option><option value="hard">Hot Seat</option></select><button class="sec" id="mload" type="button">Load board</button></div>
       <div class="card" style="margin-top:10px"><table id="mod"></table></div>
+    </section>
+    <section style="margin-top:28px"><h2>Players</h2>
+      <p style="font-size:13px;margin:0 0 8px">Names and emails typed on the welcome screen. Private to you. Work addresses (not Gmail, Yahoo and similar) are marked, since those are the people most worth a personal note. Contact people one at a time, and only the ones who ticked "wants updates" for anything bulk.</p>
+      <div class="row"><button class="sec" id="pload" type="button">Load players</button><label style="display:flex;gap:6px;align-items:center;font-size:14px"><input type="checkbox" id="ponly"> Wants updates only</label><label style="display:flex;gap:6px;align-items:center;font-size:14px"><input type="checkbox" id="pwork"> Work emails only</label><button class="sec" id="pcsv" type="button">Download CSV</button></div>
+      <div class="card" style="margin-top:10px;overflow-x:auto"><table id="players"></table></div>
     </section>
   </div>
 </main>
@@ -107,6 +112,17 @@ async function modLoad(){
 }
 $('mod').addEventListener('click',async e=>{const b=e.target.closest('button[data-k]');if(!b||!confirm('Remove this entry from the leaderboard?'))return;
   try{await api('/api/admin',{method:'POST',headers:{'X-Stats-Key':KEY,'Content-Type':'application/json'},body:JSON.stringify({co:$('mco').value,d:$('md').value,k:b.dataset.k})});modLoad()}catch(er){$('msg').textContent=er.message}});
+const FREE=/^(gmail|googlemail|yahoo|ymail|hotmail|outlook|live|msn|icloud|me|mac|aol|proton|protonmail|pm|gmx|mail|zoho|comcast|att|verizon|sbcglobal|bellsouth|cox)\./i;
+let PLAYERS=[];
+function renderPlayers(){
+  const only=$('ponly').checked,work=$('pwork').checked;
+  const dom=e=>String(e).split('@')[1]||'';
+  const rows=PLAYERS.filter(r=>(!only||r.u)&&(!work||!FREE.test(dom(r.e))));
+  $('players').innerHTML=rows.length?'<thead><tr><th>Name</th><th>Email</th><th>Updates</th><th>Games</th><th>First game</th><th>Last seen</th></tr></thead><tbody>'+rows.map(r=>{const w=!FREE.test(dom(r.e));return '<tr><td>'+esc(r.n)+'</td><td><a href="mailto:'+esc(r.e)+'">'+esc(r.e)+'</a>'+(w?' <b title="Not a common personal email provider" style="color:var(--bar)">work</b>':'')+'</td><td>'+(r.u?'yes':'no')+'</td><td>'+n(r.times||1)+'</td><td>'+esc((CO[r.co]||'')+(r.d?', '+(DF[r.d]||r.d):''))+'</td><td>'+new Date(r.last||r.ts||0).toLocaleDateString()+'</td></tr>'}).join('')+'</tbody>':'<tbody><tr><td class="faint">No players match.</td></tr></tbody>';
+}
+$('pload').onclick=async()=>{try{const j=await api('/api/leads');PLAYERS=j.rows||[];renderPlayers();$('pload').textContent='Reload players ('+j.total+')'}catch(e){$('msg').textContent=e.message}};
+$('ponly').onchange=$('pwork').onchange=renderPlayers;
+$('pcsv').onclick=async()=>{try{const r=await fetch('/api/leads?format=csv',{headers:{'X-Stats-Key':KEY}});if(!r.ok)throw new Error((await r.json().catch(()=>({}))).error||('Error '+r.status));const b=await r.blob(),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='pseudo-ceo-players.csv';document.body.appendChild(a);a.click();a.remove()}catch(e){$('msg').textContent=e.message}};
 if(KEY)load();
 </script>
 </body>

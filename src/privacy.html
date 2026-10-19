@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy | Pseudo CEO</title>
+<meta name="description" content="What Pseudo CEO collects, where it is kept, and how to have your name and email removed.">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://pseudo-ceo.vercel.app/privacy">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#EDEFF4;--sheet:#fff;--ink:#12162B;--muted:#555C72;--rule:#D3D7E2;--accent:#2B3BD1;--ok:#0B7A5C;--bad:#C23A22}
+@media (prefers-color-scheme:dark){:root{--bg:#0E1120;--sheet:#171B30;--ink:#E7E9F3;--muted:#A0A7C2;--rule:#2B3150;--accent:#8FA0FF;--ok:#52C99F;--bad:#F2806A}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif}
+main{max-width:680px;margin:0 auto;padding:28px 18px 64px}
+a{color:var(--accent)}
+.back{display:inline-block;margin-bottom:18px;font-weight:600;text-decoration:none}
+h1{font-size:clamp(30px,8vw,44px);line-height:1.05;margin:0 0 6px;font-weight:800;letter-spacing:-.02em}
+.upd{color:var(--muted);margin:0 0 22px;font-size:14px}
+h2{font-size:21px;margin:30px 0 6px;font-weight:800}
+p,ul{margin:8px 0}
+ul{padding-left:20px}
+li{margin:5px 0}
+.box{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:18px;margin-top:12px}
+label{display:block;font-weight:600;margin-bottom:6px}
+input[type=email]{width:100%;font:inherit;padding:11px 12px;border:1px solid var(--rule);border-radius:4px;background:var(--bg);color:var(--ink)}
+button{margin-top:12px;font:inherit;font-weight:700;padding:12px 18px;border:0;border-radius:4px;background:var(--accent);color:#fff;cursor:pointer}
+@media (prefers-color-scheme:dark){button{color:#0E1120}}
+button:disabled{opacity:.6;cursor:default}
+#msg{margin:10px 0 0;font-size:15px;min-height:1.4em}
+#msg.ok{color:var(--ok)} #msg.bad{color:var(--bad)}
+.small{font-size:14px;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+<a class="back" href="/">&larr; Back to the game</a>
+<h1>Privacy</h1>
+<p class="upd">Last updated October 19, 2026. This is a plain-language summary, not legal advice.</p>
+
+<p>Pseudo CEO is a free game made by one person. It collects as little as it can. Here is exactly what it keeps.</p>
+
+<h2>What you give it</h2>
+<ul>
+<li><b>Your name and email</b>, typed on the welcome screen before you play. They are stored privately for the site owner. They are never shown to other players, sold or shared. The site owner may email you directly about this project.</li>
+<li><b>An optional box</b> asking if you want emails about new companies and features. It starts unticked. If you tick it, that is recorded next to your email.</li>
+<li><b>A leaderboard name and score</b>, only if you choose to post one after finishing a game. The name is whatever you type, and it is shown publicly on the leaderboard.</li>
+</ul>
+
+<h2>What it counts without asking who you are</h2>
+<ul>
+<li>Anonymous play counts: which company and difficulty were picked, how far games got, and whether a game finished or was shared. A random ID kept in your browser lets the site count unique players. These counts hold no names or emails.</li>
+<li>If your browser sends Do Not Track or Global Privacy Control, these anonymous counts are switched off for you.</li>
+<li>To stop abuse, the server limits how often one connection can send requests. It uses a scrambled form of the connection address for an hour. That value is not kept after that.</li>
+</ul>
+
+<h2>Kept on your own device</h2>
+<p>Your name, email, saved game and settings are kept in your browser's local storage so the game can greet you and resume. Clearing your browser data or choosing "Not you?" in the game removes them from that device.</p>
+
+<h2>Who else touches it</h2>
+<ul>
+<li><b>Vercel</b> hosts the site and the server code.</li>
+<li><b>Upstash</b> holds the database where names, emails and counts are stored. Servers may be outside your country.</li>
+<li><b>Google Fonts</b> supplies the typeface, so your browser contacts Google when the page loads.</li>
+<li>Source links in the game open other websites with their own policies.</li>
+</ul>
+
+<h2>Keeping and removing your data</h2>
+<p>Your name and email stay until you ask for them to be removed. To remove them now, enter the email you used. This deletes the saved name and email from the database. It does not delete a leaderboard entry. To have one of those removed, contact the site owner through <a href="https://cortlandclarke.com">cortlandclarke.com</a>.</p>
+<form class="box" id="rm" novalidate>
+<label for="em">Email to remove</label>
+<input id="em" type="email" inputmode="email" autocomplete="email" maxlength="120" placeholder="you@example.com" required>
+<button type="submit" id="go">Remove my email</button>
+<p id="msg" role="status"></p>
+<p class="small">For privacy, this always shows the same message whether or not the address was on the list.</p>
+</form>
+
+<h2>Children</h2>
+<p>The game is not meant for children under 13, and it does not knowingly collect their information.</p>
+
+<h2>Not affiliated</h2>
+<p>Intel, Boeing, UnitedHealth Group, Nike and Kraft Heinz are real companies used as settings. They have no connection to this game and did not endorse it. The newspaper that appears when the board fires you is fictional, and so are the advisors and analysts. Nothing in the game is investment advice.</p>
+
+<h2>Photo credit</h2>
+<p>The blurred stock photo on the "fired" front page is "Man Stressed At Work" by CIPHR Connect, <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a>, from <a href="https://commons.wikimedia.org/wiki/File:Man_Stressed_At_Work.jpg">Wikimedia Commons</a>. It was cropped, blurred and made black and white. It shows no one connected to the story. Other photo and logo credits are listed inside the game.</p>
+
+<h2>Changes</h2>
+<p>If this page changes in a way that matters, the date at the top will change.</p>
+</main>
+<script>
+(function(){
+  var f=document.getElementById('rm'),em=document.getElementById('em'),msg=document.getElementById('msg'),go=document.getElementById('go');
+  var ok=/^[^\s@<>(),;:"\\]+@[^\s@<>(),;:"\\]+\.[^\s@<>(),;:"\\.]{2,}$/;
+  f.addEventListener('submit',function(e){
+    e.preventDefault();
+    var v=em.value.trim().toLowerCase();
+    if(v.length>120||!ok.test(v)){msg.className='bad';msg.textContent='Enter a valid email address.';em.focus();return}
+    go.disabled=true;msg.className='';msg.textContent='Removing…';
+    fetch('/api/leads',{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({remove:true,email:v})})
+      .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j}})})
+      .then(function(x){
+        if(x.ok){
+          msg.className='ok';msg.textContent='Done. If that address was on the list, it has been removed.';em.value='';
+          try{var k='pseudoceo.player',p=JSON.parse(localStorage.getItem(k)||'null');if(p&&String(p.email||'').toLowerCase()===v)localStorage.removeItem(k)}catch(e){}
+        }else{msg.className='bad';msg.textContent=(x.j&&x.j.error)||'Something went wrong. Try again in a minute.'}
+      })
+      .catch(function(){msg.className='bad';msg.textContent='Could not reach the server. Try again in a minute.'})
+      .then(function(){go.disabled=false});
+  });
+})();
+</script>
+</body>
+</html>

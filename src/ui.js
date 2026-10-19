@@ -459,7 +459,7 @@ function renderHome(){
   h+='<li>The <b>stock price</b> starts at the real closing price on '+PX_ASOF+'. After that it moves with how your decisions play out in a simplified model of the company, so it is a score you can read like a stock, not a forecast. The <b>real playbook</b> plays the same scenario using the choices leadership actually announced.</li>';
   h+='<li>Photos and logos come from Wikimedia Commons. Credits are listed below.</li>';
   h+='<li>Leaderboard: after you finish a game you can post it under a name you choose. The server replays your choices to confirm the score, so numbers cannot be typed in. Only your name and result are saved.</li>';
-  h+='<li>Privacy: the site counts anonymous plays (which company and difficulty were picked, how far games got) and unique players using a random ID kept in your browser. These counts hold no names or emails. Separately, the name and email you type on the welcome screen are stored privately for the site owner and are never shown to other players. Do Not Track turns off the anonymous counts only. An hour-long abuse limit uses a scrambled form of your connection address that is not kept.</li><li>Simulation only; not investment advice.</li></ul></details>';
+  h+='<li>Privacy: the site counts anonymous plays (which company and difficulty were picked, how far games got) and unique players using a random ID kept in your browser. These counts hold no names or emails. Separately, the name and email you type on the welcome screen are stored privately for the site owner, who may email you about this project. They are never shown to other players, sold or shared, and you can have them removed on the <a href="/privacy" target="_blank" rel="noopener">privacy page</a>. Do Not Track turns off the anonymous counts only. An hour-long abuse limit uses a scrambled form of your connection address that is not kept.</li><li>Simulation only; not investment advice.</li></ul></details>';
   h+=faceCredits();
   h+='</div>';
   $app.innerHTML=h;
@@ -494,7 +494,7 @@ let leadBusy=false;
 async function sendLead(){
   const p=store.get(PKEY);if(!p||p.sent||!p.email||!NET.ok||leadBusy)return;
   leadBusy=true;
-  try{await NET.post('/api/leads',{name:p.name,email:p.email,co:G?G.coId:undefined,d:G?G.diffKey:undefined});const q=store.get(PKEY);if(q&&q.email===p.email){q.sent=true;store.set(PKEY,q)}}
+  try{await NET.post('/api/leads',{name:p.name,email:p.email,updates:!!p.updates,co:G?G.coId:undefined,d:G?G.diffKey:undefined});const q=store.get(PKEY);if(q&&q.email===p.email){q.sent=true;store.set(PKEY,q)}}
   catch(e){/* try again on the next start; play is never blocked */}
   leadBusy=false;
 }
@@ -507,7 +507,8 @@ function renderWelcome(){
   h+='<form id="lead" class="wl-form" novalidate autocomplete="on"><p class="wl-ask">'+(p?'Welcome back. Check your details, then take the chair.':'Before you take the job, tell us who is taking it.')+'</p>';
   h+='<div class="field"><label for="plname">Your name</label><input id="plname" name="name" maxlength="40" autocomplete="name" autocapitalize="words" spellcheck="false" aria-describedby="plname-e" value="'+esc(p?p.name:'')+'" placeholder="First and last name"><p class="ferr" id="plname-e" role="alert"></p></div>';
   h+='<div class="field"><label for="plemail">Your email</label><input id="plemail" name="email" type="email" inputmode="email" maxlength="120" autocomplete="email" autocapitalize="off" spellcheck="false" aria-describedby="plemail-e" value="'+esc(p?p.email:'')+'" placeholder="you@example.com"><p class="ferr" id="plemail-e" role="alert"></p></div>';
-  h+='<p class="note">Your name goes on your scorecard. Your email is stored privately and is never shown to other players.</p>';
+  h+='<label class="chk"><input type="checkbox" id="plupd" '+(p&&p.updates?'checked':'')+'><span>Email me about new companies and features. Optional.</span></label>';
+  h+='<p class="note">Your name goes on your scorecard. Your email is stored privately. It is never shown to other players, sold or shared. The site owner may email you directly about this project. You can have it removed any time on the <a href="/privacy" target="_blank" rel="noopener">privacy page</a>.</p>';
   h+='<button class="btn" type="submit">Take the chair</button></form>';
   h+='<div class="wl-card">'+face(c.id,'xl')+'<div><div class="kicker" style="margin:0 0 4px">You take the chair of</div><div class="wl-name">'+esc(c.ceo)+'</div><div class="wl-role">'+esc(c.ceoRole)+' since '+esc(c.ceoSince)+'</div><div class="wl-stock">'+esc(c.ticker)+' closed at <b>'+pxs+'</b> on '+PX_ASOF+'</div></div></div>';
   h+='<ul class="wl-list"><li><b>Your scoreboard is the stock price.</b> It starts at '+pxs+'. Put $10,000 in on day one and watch it grow or shrink with your decisions.</li>';
@@ -525,8 +526,8 @@ function enterGame(){
   en.textContent=badN?'Enter your name, at least 2 letters.':'';em.textContent=badM?'Enter a valid email, like you@example.com.':'';
   n.setAttribute('aria-invalid',badN);m.setAttribute('aria-invalid',badM);
   if(badN){n.focus();return}if(badM){m.focus();return}
-  const old=store.get(PKEY);
-  store.set(PKEY,{name,email,sent:!!(old&&old.sent&&old.email===email&&old.name===name)});
+  const old=store.get(PKEY),upd=!!(document.getElementById('plupd')&&document.getElementById('plupd').checked);
+  store.set(PKEY,{name,email,updates:upd,sent:!!(old&&old.sent&&old.email===email&&old.name===name&&!!old.updates===upd)});
   sendLead();
   go('story');
 }
@@ -541,30 +542,30 @@ const STORY={
     ['Rivals are strong on every side.','AMD fights for PC and server chips, Nvidia leads in AI, and TSMC leads in making chips for other companies. Intel also buys its most advanced machines from a single supplier, ASML.',['r:rivalry','r:suppliers']]],
     job:'Keep spending billions on factories that lose money, or protect cash for the chip products that are finally selling?'},
   ba:{head:'Boeing is building planes faster again, but it still loses money and one quality slip could undo the progress.',pts:[
-    ['It is still losing money.','Boeing had $24.56 billion in sales last quarter and still lost $0.76 a share.',['f0']],
-    ['Production is climbing.','The 737 MAX is heading to 47 planes a month. The 787 has settled at 8 a month.',['f1']],
-    ['Cash is the scoreboard.','Boeing expects to keep only $1 billion to $3 billion of free cash this year, which is the cash left after paying its bills and buying equipment. Its long-term goal is $10 billion.',['f2']],
-    ['Customers are waiting, but not forever.','Orders are at a record $597 billion, more than 6,200 planes. Delays let airlines ask for payback or cancel. The first 777X is not due until 2027.',['f3','r:buyers']],
+    ['It is still losing money.','Boeing had $24.56 billion in sales last quarter and still lost money: $0.76 a share on a core (adjusted) basis, or $0.67 under standard accounting rules.',['f0']],
+    ['Production is climbing.','Boeing began moving the 737 MAX to 47 planes a month last quarter.',['f1']],
+    ['Cash is the scoreboard.','Boeing expects to keep only $1 billion to $3 billion of free cash this year, which is the cash left after paying its bills and buying equipment. It calls $10 billion attainable as it works through its backlog.',['f2']],
+    ['Customers are waiting, but not forever.','Commercial orders on hand come to $597 billion, more than 6,200 planes. Delays let airlines ask for payback or cancel. The first 777X is not due until 2027.',['f3','r:buyers']],
     ['Boeing depends on a few suppliers.','Many parts come from a single source and take a long time to approve. Engine delays hold up the 787, and Boeing bought Spirit to get more control.',['r:suppliers']]],
     job:'Build faster to bring in cash, or slow down to protect quality?'},
   unh:{head:'UnitedHealth is recovering from a cyberattack and missed targets. Its profit is coming back, partly because it let customers go.',pts:[
     ['Profit is bouncing back.','Operating profit was $6.6 billion last quarter, up from $4.3 billion a year ago. UnitedHealth raised its 2026 forecast to at least $20.50 a share.',['f3','f1']],
     ['It is paying out less of each premium dollar.','On $112.69 billion of sales, its medical cost ratio fell to 88.4% from 89.9%. That ratio is the share of premiums spent on patients’ care, so lower is better for UnitedHealth.',['f0']],
-    ['But it is getting smaller.','935,000 people have left its Medicare Advantage plans since the end of 2025. Enrollment fell to about 7.6 million from 8.4 million.',['f2','r:rivalry']],
-    ['The government sets the rules.','Medicare payments are about 44% of revenue, and the government sets the rates. Hospitals, doctors and drug makers hold leverage too, and costs have run higher than planned.',['r:buyers','r:suppliers']]],
+    ['But it is getting smaller.','Its Medicare Advantage membership is down 935,000 since the end of 2025. Enrollment fell to about 7.6 million from 8.4 million a year ago.',['f2','r:rivalry']],
+    ['The government sets the rules.','Medicare payments are about 44% of revenue, and the government sets the rates, so a change in Washington can move the whole business.',['r:buyers']]],
     job:'Keep winning back profit by dropping unprofitable members, or grow again and risk the margin?'},
   nke:{head:'Nike’s sales are slipping. Running is growing, but lifestyle sneakers are fading and the company is changing its plan.',pts:[
     ['Sales slipped.','Revenue fell 1% to $10.97 billion last quarter.',['f0']],
     ['Profit looks better than it is.','Earnings were $0.72 a share, but that included a $986 million tariff recovery. Without it, they were $0.20.',['f1']],
     ['More decline is expected.','Nike told investors to expect sales to fall by low to mid single digits over the next six months.',['f2']],
-    ['It is reversing a big bet.','Nike leaned toward selling straight to shoppers through its own stores and app. This year selling through retailers grew 6% while Nike Direct fell 6%, so the company is changing course.',[],'Figures from Statista.'],
+    ['It is reversing a big bet.','Nike leaned toward selling straight to shoppers through its own stores and app. This year selling through retailers grew 6% while Nike Direct fell 6%, so the company is changing course.',['f3']],
     ['Rivals and retailers have the upper hand.','Adidas, New Balance, On and others chase the same shoppers. The top three U.S. retailers make up about 29% of U.S. sales, and tariffs have raised the cost of making shoes.',['r:rivalry','r:buyers','r:suppliers']]],
     job:'Take short-term pain to reset the business, or protect this year’s numbers and risk falling further behind?'},
   khc:{head:'Kraft Heinz sells a little less every year, and its plan to split in two is on hold.',pts:[
     ['Sales are shrinking.','2025 sales were $24.9 billion, down 3.5%. The company also wrote down $9.3 billion of what it paid for its brands and businesses. That is a paper loss, not cash out the door.',['f0']],
-    ['The breakup is paused.','Kraft Heinz planned to split in two, then stopped. It is putting $600 million into marketing, sales and research instead.',['f1']],
+    ['The breakup is paused.','Kraft Heinz planned to split in two, then stopped. It is putting $600 million into marketing, sales, research, product quality and select price moves instead.',['f1']],
     ['More shrinking is expected.','For 2026 it expects sales to fall 1.5% to 3.5%, not counting buyouts and currency swings, with profit of $1.98 to $2.10 a share.',['f2']],
-    ['There was one good sign.','First-quarter 2026 sales were $6.05 billion, ahead of what analysts expected.',['f3']],
+    ['There was one good sign.','First-quarter 2026 sales were $6.05 billion, up 0.8% from a year earlier.',['f3']],
     ['Stores hold the power.','Walmart alone is about 21% of sales. Store brands fight on price, and health trends could pull shoppers toward fresher food.',['r:buyers','r:rivalry','r:substitutes']]],
     job:'Spend to make the old brands grow again, or protect profit while sales slowly decline?'}
 };
@@ -591,6 +592,7 @@ function renderStory(){
 }
 
 /* ---------- FIRED: a fake newspaper story ---------- */
+const PHOTO_DISTRESS={by:'CIPHR Connect',lic:'CC BY 2.0',url:'https://commons.wikimedia.org/wiki/File:Man_Stressed_At_Work.jpg'};
 const FIRED_QUOTE={inv:'The market stopped believing the story',brd:'The directors had seen enough',emp:'The people inside the company lost faith in the leadership',cus:'Customers were walking away',reg:'Regulators were closing in',exe:'The company simply could not carry out the plan'};
 function firedWorst(){
   let wk='inv',wv=101;
@@ -602,19 +604,20 @@ function renderFired(){
   const n=G.log.length,pm=pnlOf('st'),gm=pnlOf('ghost'),fire=d.fire;
   const miss=G.st.hist.filter(r=>r.s<-0.02).length,rec=lastRec(G.st);
   const wk=firedWorst(),an=ANALYSTS[hashStr(G.seed+'|'+G.coId)%ANALYSTS.length];
-  const down=pm.pct<0,ini=initials(nm).toUpperCase();
-  const dir=down?'down':'up';
+  const dir=pm.pct<0?'down':'up',ed=1+(hashStr(G.seed+'|'+G.coId)%97);
+  const ph=PHOTO_DISTRESS;
   let h='<div class="stack enter">';
   h+='<article class="paper" aria-labelledby="pp-h">';
-  h+='<div class="pp-top"><span>Fictional news from the Pseudo CEO game</span><span>Not a real article</span></div>';
-  h+='<div class="pp-mast">The Pseudo Post</div>';
-  h+='<div class="pp-meta"><span>Late edition</span><span>After '+esc(qLabel(G.firedAt))+' results</span><span>Business</span></div>';
+  h+='<div class="pp-banner" aria-hidden="true">FIRED!</div>';
+  h+='<header class="pp-head"><div class="pp-ear"><b>Late Edition</b><span>After '+esc(qLabel(G.firedAt))+' results</span></div><div class="pp-mast">The Pseudo Post</div><div class="pp-ear r"><b>Price</b><span>One lost job</span></div></header>';
+  h+='<div class="pp-rule"><span>Business</span><span class="pp-fic">Fictional news from the Pseudo CEO game. Not a real article.</span><span>Vol. 1, No. '+ed+'</span></div>';
   h+='<h1 class="pp-h" id="pp-h">CEO '+esc(nm)+' fired from '+esc(c.name)+'</h1>';
   h+='<p class="pp-deck">The board ran out of patience after '+n+' quarter'+(n>1?'s':'')+'. The stock is '+dir+' '+Math.abs(pm.pct).toFixed(1)+'% since the new chief took over.</p>';
+  h+='<div class="pp-grid"><div class="pp-main">';
+  h+='<figure class="pp-fig"><div class="pp-photo" role="img" aria-label="A man in a suit sitting with his head in his hands. His face is blurred."></div><figcaption><b>FILE PHOTO.</b> A man in distress. Stock image with the face blurred. It is not '+esc(nm)+' or anyone connected to '+esc(c.name)+'. Photo: '+esc(ph.by)+', '+ext(ph.url,esc(ph.lic))+'. Cropped, blurred and made black and white.</figcaption></figure>';
   h+='<p class="pp-by">By the Pseudo Post staff</p>';
-  h+='<figure class="pp-fig"><div class="pp-mono" aria-hidden="true">'+esc(ini)+'</div><figcaption>'+esc(nm)+', in better days. The picture is the initials the game made up. It is not a photo.</figcaption></figure>';
   h+='<div class="pp-body">';
-  h+='<p>The board of '+esc(c.name)+' ('+esc(c.ticker)+') voted to remove '+esc(nm)+' as chief executive after '+n+' quarter'+(n>1?'s':'')+' in the job. '+(miss>0?(miss===1?'One quarter':miss+' quarters')+' came in below what Wall Street expected. ':'')+'Directors lost patience with the results.</p>';
+  h+='<p><span class="pp-dl">THE BOARD —</span> The board of '+esc(c.name)+' ('+esc(c.ticker)+') voted to remove '+esc(nm)+' as chief executive after '+n+' quarter'+(n>1?'s':'')+' in the job. '+(miss>0?(miss===1?'One quarter':miss+' quarters')+' came in below what Wall Street expected. ':'')+'Directors lost patience with the results.</p>';
   h+='<p>Shares of '+esc(c.name)+' closed at '+fmtPx(pm.px)+', '+dir+' '+Math.abs(pm.pct).toFixed(1)+'% from '+fmtPx(c.px0)+' when '+esc(first)+' started. An investor who put $10,000 into the stock on day one would have '+usd(pm.val)+' left.</p>';
   if(rec)h+='<p>In its last quarter the company sold '+fmtB(rec.rev)+' and '+(rec.op>=0?'kept '+fmtB(rec.op)+' in operating profit':'lost '+fmtB(Math.abs(rec.op))+' running the business')+'. It ended the quarter with '+fmtB(rec.cash)+' in cash.</p>';
   h+='<p>“'+esc(FIRED_QUOTE[wk])+',” said '+esc(an[0])+', an analyst at '+esc(an[1])+'. Both are made up for this game.</p>';
@@ -622,9 +625,14 @@ function renderFired(){
   if(G.st.jobsCut>0)h+='<p>Decisions made during the tenure cut about '+jobsFmt(G.st.jobsCut)+' jobs.</p>';
   h+='<p>In the game’s model of '+esc(c.ceo)+'’s announced plan, the same scenario would have left the stock at '+fmtPx(gm.px)+'.</p>';
   h+='<p>'+esc(first)+' could not be reached for comment. The board has not named a successor.</p>';
-  h+='</div>';
-  h+='<div class="pp-stats"><div><span>'+esc(c.ticker)+' stock</span><b>'+fmtPx(pm.px)+'</b></div><div><span>$10,000 became</span><b>'+usd(pm.val)+'</b></div><div><span>Quarters served</span><b>'+n+' of '+d.quarters+'</b></div></div>';
-  h+='<p class="pp-disc"><b>This is fiction.</b> The Pseudo Post is not a real newspaper. The game wrote this from your results. '+esc(c.name)+' is a real company used as the setting. Nothing here was said or decided by the real company, its board or its leaders. The analyst is invented.</p>';
+  h+='</div></div>';
+  h+='<aside class="pp-side">';
+  h+='<div class="pp-box"><h2>Stock watch</h2><div class="pp-big">'+fmtPx(pm.px)+'</div><div class="pp-sm">'+esc(c.ticker)+', '+(pm.pct<0?'−':'+')+Math.abs(pm.pct).toFixed(1)+'% since '+esc(first)+' started</div></div>';
+  h+='<div class="pp-box"><h2>$10,000 became</h2><div class="pp-big">'+usd(pm.val)+'</div><div class="pp-sm">The real playbook: '+fmtPx(gm.px)+' a share</div></div>';
+  h+='<div class="pp-box"><h2>Time in the chair</h2><div class="pp-big">'+n+' of '+d.quarters+'</div><div class="pp-sm">quarters served</div></div>';
+  h+='<div class="pp-box"><h2>Weather</h2><div class="pp-sm" style="font-size:15px">Cloudy in the corner office. Chance of layoffs: high.</div></div>';
+  h+='</aside></div>';
+  h+='<p class="pp-disc"><b>This is fiction.</b> The Pseudo Post is not a real newspaper. The game wrote this page from your results. '+esc(c.name)+' is a real company used as the setting. Nothing here was said or decided by the real company, its board or its leaders. The analyst is invented, and the photo shows no one connected to this story.</p>';
   h+='</article>';
   h+='<div class="actions stick"><button class="btn" data-act="debrief">See your debrief</button>';
   if(G.rewinds>0&&G.snap)h+='<button class="btn sec" data-act="rewind">Undo it: rewind ('+G.rewinds+' left)</button>';
