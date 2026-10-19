@@ -3,7 +3,7 @@ const E = require('../src/engine.js');
 const { replay } = require('../api/_replay.js');
 let n = 0, bad = 0;
 for (const co of Object.keys(E.CO)) for (const d of ['easy', 'medium', 'hard']) for (let s = 0; s < 6; s++) {
-  const seed = 'rt-' + s, strategy = { top: E.FORCES.map(f => f[0]).sort(() => Math.random() - 0.5).slice(0, 2), posture: E.POSTURES[Math.floor(Math.random() * 4)][0] }, g = E.newGame(co, d, seed, strategy), runs = [], c = E.CO[co];
+  const seed = 'rt-' + s, useStrat = s % 3 === 0, strategy = !useStrat ? null : { top: E.FORCES.map(f => f[0]).sort(() => Math.random() - 0.5).slice(0, 2), posture: E.POSTURES[Math.floor(Math.random() * 4)][0] }, g = E.newGame(co, d, seed, strategy), runs = [], c = E.CO[co];
   const r = Math.random;
   while (g.status === 'play') {
     const pq = g.plan.quarters[g.q], cards = {};
@@ -26,6 +26,5 @@ for (const co of Object.keys(E.CO)) for (const d of ['easy', 'medium', 'hard']) 
 }
 console.log('checked', n, 'completed games;', bad, 'problems');
 // tampering must fail
-const g0 = { co: 'intc', d: 'easy', seed: 'x', runs: [] };
-try { replay(g0); console.log('BAD: empty run accepted'); } catch (e) { console.log('empty run rejected:', e.message); }
-try { replay({ co: 'intc', d: 'easy', seed: 'x', runs: [] , strategy: { top: ['rivalry','rivalry'], posture: 'cost' } }); console.log('BAD: duplicate forces accepted'); } catch (e) { console.log('bad strategy rejected:', e.message); }
+try { replay({ co: 'intc', d: 'easy', seed: 'x', runs: [] }); console.log('BAD: empty run accepted'); } catch (e) { console.log('empty run rejected:', e.message); }
+try { replay({ co: 'intc', d: 'easy', seed: 'x', runs: [], strategy: { top: ['rivalry','rivalry'], posture: 'cost' } }); console.log('BAD: duplicate forces accepted'); } catch (e) { console.log('bad strategy rejected:', e.message); }
