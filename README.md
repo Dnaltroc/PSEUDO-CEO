@@ -28,15 +28,16 @@ Every starting number (revenue, margin, cash, debt, capital spending, dividends,
 
 The real leadership's choices come from public reporting. The size of each choice's effect is modeled, so the comparison is "what would the real decisions have produced in this simulation", not a prediction of what actually would have happened.
 
-## Strategy room
+## Why is the company struggling
 
-Before Quarter 1 the player reads the industry with Porter's Five Forces (a sourced one-line read per force, from each company's latest 10-K and recent earnings commentary), picks the two pressures that worry them most, then picks a way to win: cost leader, differentiator, focused niche or reinventor.
+Before Quarter 1 the player reads a one-page briefing in plain English on why the company is struggling. Each company has five or fewer points (`STORY` in `src/ui.js`), each linked to a source taken from the company's facts and five-forces evidence links in `src/engine.js`. The page ends with the decision the player is about to face.
 
-- Every decision option is hand-tagged to a posture (`FIT_TAG` in `src/engine.js`). An option that fits the chosen posture adds a little execution and investor confidence; one that fights it subtracts. The effect is small: about 4 to 5 points of overall score between a fully aligned and a fully conflicting run.
-- Shock events are tagged to a force. A shock tied to a force the player watched hits about a third softer.
-- The reference read and the leadership posture for each company are our reading of its filings and public statements. They are judgment, not fact. The real playbook gets the same fit effect using the leadership posture.
-- The strategy is sent with the score, and the server replays it, so it cannot be changed after the fact.
-- Hot Seat hides the pressure ratings so the player has to judge from the evidence.
+- This replaced the old Strategy room (Porter's Five Forces and a strategic posture). The strategy code in the engine is still there but unused. New games carry no strategy.
+- The server still accepts a strategy when a game started before the change sends one, so those runs replay to the score the player saw.
+
+## Getting fired
+
+When the board fires the player, the game shows a fake newspaper story, "CEO (player name) fired from (company)", written from the run's real numbers: quarters served, misses, stock move, what $10,000 became, board support, jobs cut. It is labeled as fiction on the page. The paper is the invented "Pseudo Post", the only quote comes from one of the game's invented analysts, and nothing is attributed to the real company, its board or its leaders. The picture is the player's initials, not a photo.
 
 ## Leaderboard, sharing and analytics
 
