@@ -1,10 +1,12 @@
 /* POST /api/score: post a finished run to the leaderboard. The server re-plays it first. */
 const crypto = require('crypto');
-const { redis, HttpError, readBody, limit, route } = require('./_lib');
+const { redis, HttpError, readBody, limit, route, seedOK } = require('./_lib');
 const { replay } = require('./_replay');
 
 const BLOCK = ['fuck', 'shit', 'cunt', 'bitch', 'whore', 'slut', 'pussy', 'nigg', 'fagg', 'retard', 'nazi', 'hitler', 'kkk', 'porn'];
 const KEEP_TOP = 100;
+/* names that could be mistaken for the site owner or for staff */
+const RESERVED = ['admin', 'administrator', 'moderator', 'mod', 'owner', 'staff', 'official', 'support', 'pseudoceo', 'pseudo ceo', 'cortland', 'cortland clarke', 'claude', 'anthropic'];
 
 function cleanName(raw) {
   const n = String(raw || '').replace(/\s+/g, ' ').trim();
@@ -13,6 +15,7 @@ function cleanName(raw) {
   }
   const flat = n.toLowerCase().replace(/[^a-z]/g, '').replace(/0/g, 'o');
   if (BLOCK.some((w) => flat.includes(w))) throw new HttpError(400, 'Please pick a different name');
+  if (RESERVED.includes(n.toLowerCase().replace(/[^a-z ]/g, '').trim())) throw new HttpError(400, 'Please pick a different name');
   return n;
 }
 
@@ -22,6 +25,7 @@ module.exports = route(['POST'], async (req, res) => {
   const name = cleanName(b.name);
   if (typeof b.pid !== 'string' || !/^[a-f0-9]{16,32}$/.test(b.pid)) throw new HttpError(400, 'Missing player id');
 
+  if (!seedOK(b.seed)) throw new HttpError(400, 'This scenario code was not issued by the server, so it cannot be ranked. Start a new game from the home screen to get a ranked code.');
   const r = replay(b);
   const k = crypto.createHash('sha256').update([b.pid, b.co, b.d].join('|')).digest('hex').slice(0, 12);
   const rewinds = Math.max(0, Math.min(r.maxRewinds, Number.isInteger(b.rewinds) ? b.rewinds : 0));

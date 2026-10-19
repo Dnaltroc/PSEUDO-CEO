@@ -1,11 +1,17 @@
 /* GET /api/stats?days=30: aggregate analytics for the owner. Needs the STATS_KEY. */
 const { redis, requireKey, day, route, pairs } = require('./_lib');
+const UI = require('./_statsui');
 
 const COS = ['intc', 'ba', 'unh', 'nke', 'khc'];
 const DIFFS = ['easy', 'medium', 'hard'];
 
 module.exports = route(['GET'], async (req, res) => {
   requireKey(req);
+  if ((req.query || {}).page) {
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    return res.status(200).send(UI);
+  }
   const days = Math.max(1, Math.min(90, parseInt((req.query || {}).days, 10) || 30));
   const dayList = Array.from({ length: days }, (_, i) => day(i)).reverse();
   const cmds = [['HGETALL', 'ev:total'], ['PFCOUNT', 'uv:all']];

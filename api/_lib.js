@@ -44,7 +44,9 @@ const day = (offset) => new Date(Date.now() - (offset || 0) * 864e5).toISOString
 /* A scrambled, short-lived stand-in for the caller's address, used only for rate limits.
    The raw address is never stored, and the counter expires. */
 function who(req) {
-  const ip = String((req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '')).split(',')[0].trim();
+  /* On Vercel the platform sets x-vercel-forwarded-for and x-real-ip itself, so a caller cannot choose them.
+     The client-supplied x-forwarded-for is only a last resort (local development). */
+  const ip = String(req.headers['x-vercel-forwarded-for'] || req.headers['x-real-ip'] || req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '').split(',')[0].trim();
   const salt = process.env.IP_SALT || 'pseudo-ceo';
   return crypto.createHash('sha256').update(salt + '|' + day() + '|' + ip).digest('hex').slice(0, 16);
 }
@@ -65,7 +67,7 @@ function requireKey(req) {
   const key = process.env.STATS_KEY;
   if (!key) throw new HttpError(503, 'STATS_KEY is not set in Vercel yet');
   const auth = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
-  const given = auth || req.headers['x-stats-key'] || (req.query && req.query.key) || '';
+  const given = auth || req.headers['x-stats-key'] || '';
   if (!given || !safeEqual(given, key)) throw new HttpError(401, 'Wrong key');
 }
 
@@ -85,10 +87,29 @@ function route(methods, fn) {
   };
 }
 
+/* Scenario codes look like "harbor-482-9f3a1c". The last part is a signature only the server can make, so every
+   ranked game starts from a code the server handed out and nobody can hunt through the public engine for a lucky one. */
+const SEED_WORDS = ['ledger', 'harbor', 'granite', 'cobalt', 'summit', 'tandem', 'meridian', 'quarry', 'lantern', 'pivot', 'anchor', 'vector', 'orchard', 'forge', 'beacon', 'delta'];
+function seedSecret() {
+  const k = process.env.SEED_KEY || process.env.STATS_KEY;
+  if (!k) throw new HttpError(503, 'Scenario codes are not set up yet');
+  return k;
+}
+const seedTag = (base) => crypto.createHmac('sha256', seedSecret()).update('seed|' + base).digest('hex').slice(0, 6);
+function newSeed() {
+  const r = (n) => crypto.randomInt(n);
+  const base = SEED_WORDS[r(SEED_WORDS.length)] + '-' + (100 + r(900));
+  return base + '-' + seedTag(base);
+}
+function seedOK(seed) {
+  const m = /^([a-z]{3,10}-\d{3})-([0-9a-f]{6})$/.exec(String(seed));
+  return !!m && safeEqual(m[2], seedTag(m[1]));
+}
+
 const pairs = (flat) => {
   const o = {};
   for (let i = 0; i < (flat || []).length; i += 2) o[flat[i]] = Number(flat[i + 1]);
   return o;
 };
 
-module.exports = { redis, HttpError, cors, readBody, day, who, limit, requireKey, route, pairs };
+module.exports = { redis, HttpError, cors, readBody, day, who, limit, requireKey, route, pairs, newSeed, seedOK };
