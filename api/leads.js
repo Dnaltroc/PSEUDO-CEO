@@ -1,5 +1,6 @@
 /* /api/leads
-   POST: the welcome screen sends the player's name and email here before a game starts.
+   POST: the welcome screen sends the player's name and email here before a game starts. It also carries an optional
+         "updates" flag (the player ticked the box). POST with {remove:true,email} deletes that address (privacy page).
    GET:  the site owner lists them (needs the STATS_KEY). Add &format=csv for a spreadsheet file.
    Emails are stored once per address in a private hash and are never returned by any public route. */
 const { redis, HttpError, readBody, requireKey, limit, route } = require('./_lib');
@@ -44,9 +45,9 @@ module.exports = route(['GET', 'POST'], async (req, res) => {
     rows.sort((a, b) => (b.ts || 0) - (a.ts || 0));
     const out = rows.slice(0, MAX_ROWS);
     if ((req.query || {}).format === 'csv') {
-      const head = ['name', 'email', 'first_seen', 'last_seen', 'first_company', 'first_difficulty', 'times_started'];
+      const head = ['name', 'email', 'wants_updates', 'first_seen', 'last_seen', 'first_company', 'first_difficulty', 'times_started'];
       const lines = [head.join(',')].concat(out.map((r) => [
-        r.n, r.e, new Date(r.ts || 0).toISOString(), new Date(r.last || r.ts || 0).toISOString(), r.co || '', r.d || '', r.times || 1,
+        r.n, r.e, r.u ? 'yes' : 'no', new Date(r.ts || 0).toISOString(), new Date(r.last || r.ts || 0).toISOString(), r.co || '', r.d || '', r.times || 1,
       ].map(csvCell).join(',')));
       res.setHeader('Content-Type', 'text/csv; charset=utf-8');
       res.setHeader('Content-Disposition', 'attachment; filename="pseudo-ceo-players.csv"');
@@ -55,21 +56,29 @@ module.exports = route(['GET', 'POST'], async (req, res) => {
     return res.status(200).json({ total: rows.length, rows: out });
   }
 
-  await limit(req, 'lead', 12, 3600);
   const b = readBody(req);
+  if (b.remove === true) {
+    /* Removal is always answered the same way, so the route cannot be used to check who is on the list. */
+    await limit(req, 'leadrm', 8, 3600);
+    const gone = cleanEmail(b.email);
+    await redis([['HDEL', KEY, gone]]);
+    return res.status(200).json({ ok: true });
+  }
+  await limit(req, 'lead', 12, 3600);
   const name = cleanName(b.name);
+  const updates = b.updates === true;
   const email = cleanEmail(b.email);
   const co = COS.includes(b.co) ? b.co : '';
   const d = DIFFS.includes(b.d) ? b.d : '';
   const now = Date.now();
 
   const [prev] = await redis([['HMGET', KEY, email]]);
-  let rec = { n: name, ts: now, last: now, co, d, times: 1 };
+  let rec = { n: name, ts: now, last: now, co, d, times: 1, u: updates };
   let fresh = true;
   if (prev && prev[0]) {
     try {
       const o = JSON.parse(prev[0]);
-      rec = { n: name, ts: o.ts || now, last: now, co: o.co || co, d: o.d || d, times: (o.times || 1) + 1 };
+      rec = { n: name, ts: o.ts || now, last: now, co: o.co || co, d: o.d || d, times: (o.times || 1) + 1, u: updates };
       fresh = false;
     } catch (e) { /* overwrite an unreadable row */ }
   }
