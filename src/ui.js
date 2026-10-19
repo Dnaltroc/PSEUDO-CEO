@@ -25,6 +25,7 @@ function randSeed(){const w=['ledger','harbor','granite','cobalt','summit','tand
 
 /* ---------- helpers ---------- */
 function co(){return CO[G.coId]}
+function saveOK(sv){return !!(sv&&sv.G&&CO[sv.G.coId]&&DIFF[sv.G.diffKey]&&sv.G.plan&&sv.G.plan.quarters&&sv.G.plan.quarters.length===DIFF[sv.G.diffKey].quarters)}
 function D(){return DIFF[G.diffKey]}
 function lastRec(st){return st.hist.length?st.hist[st.hist.length-1]:null}
 function curMargin(st){const r=lastRec(st);return r?r.margin:CO[G.coId].start.m}
@@ -32,18 +33,19 @@ function kpiFmt(c,v){return c.kpi.fmt(v)}
 function lvl(){return D().hints}
 function isPlain(){return lvl()==='plain'}
 function isFull(){return lvl()==='numbers'}
+function isSimple(){return !isFull()}
 function save(){if(G)store.set(SAVE,{G,UI:{strat:UI.strat,screen:UI.screen,card:UI.card,picks:UI.picks,alloc:UI.alloc,last:UI.last,prevMeters:UI.prevMeters,prevIdx:UI.prevIdx,answers:UI.answers,callRes:UI.callRes}})}
 function go(screen){UI.screen=screen;render();window.scrollTo(0,0);save()}
 function initials(n){return n.split(/\s+/).map(w=>w[0]).slice(0,2).join('')}
 const ROLE_CLS={cfo:'',coo:'r2',cco:'r3',gc:'r4',cpo:'r5'};
-function avatar(name,k,sm){return '<span class="av '+(k?ROLE_CLS[k]||'':'ext')+(sm?' sm':'')+'" aria-hidden="true">'+esc(initials(name))+'</span>'}
+function avatar(name,k,sm){return '<span class="av pic'+(k&&ROLE_CLS[k]?' '+ROLE_CLS[k]:'')+(sm?' sm':'')+'" aria-hidden="true">'+portrait(name)+'</span>'}
 function jobsFmt(n){return n>=1000?(Math.round(n/100)*100).toLocaleString('en-US'):Math.round(n).toLocaleString('en-US')}
 
 /* plain-English vocabulary for Easy */
 const PLAIN={g:'Sales growth',m:'Profit per sale',cash:'Cash',cr:'Cash',debt:'Debt',dr:'Debt',inv:'Investor mood',brd:'Board support',emp:'Employee morale',cus:'Customer happiness',reg:'Government goodwill',exe:'How smoothly things run',shares:'Shares outstanding',div:'Dividend'};
 const METER_PLAIN={inv:['Investor mood','How Wall Street feels about the stock'],brd:['Board support','Your bosses. Too low and they replace you'],emp:['Employee morale','Low morale slows everything down'],cus:['Customer happiness','Happy customers buy more'],reg:['Government goodwill','Regulators can help or hurt you'],exe:['Execution','How smoothly the company runs']};
-function meterName(k){if(isPlain())return METER_PLAIN[k][0];return METERS.find(m=>m[0]===k)[1]}
-function varName(k){const c=co();if(k==='kpi')return isPlain()?c.kpi.plain:c.kpi.short;return isPlain()?PLAIN[k]:VAR_LABEL[k]}
+function meterName(k){if(isSimple())return METER_PLAIN[k][0];return METERS.find(m=>m[0]===k)[1]}
+function varName(k){const c=co();if(k==='kpi')return isSimple()?c.kpi.plain:c.kpi.short;return isSimple()?PLAIN[k]:VAR_LABEL[k]}
 
 /* glossary for Easy */
 const GLOSS=[
@@ -117,7 +119,7 @@ function spark(a,b,W,H){
   const pts=s=>s.map((v,i)=>X(i).toFixed(1)+','+Y(v).toFixed(1)).join(' ');
   let out='<svg viewBox="0 0 '+W+' '+H+'" aria-hidden="true">';
   const base=Y(100);if(base>0&&base<H)out+='<line x1="0" x2="'+W+'" y1="'+base.toFixed(1)+'" y2="'+base.toFixed(1)+'" stroke="var(--line)" stroke-dasharray="2 3"/>';
-  if(b)out+='<polyline points="'+pts(b)+'" fill="none" stroke="var(--brass)" stroke-width="1.5" stroke-dasharray="3 2"/>';
+  if(b)out+='<polyline points="'+pts(b)+'" fill="none" stroke="var(--ghost)" stroke-width="1.5" stroke-dasharray="3 2"/>';
   out+='<polyline points="'+pts(a)+'" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
   out+='<circle cx="'+X(a.length-1).toFixed(1)+'" cy="'+Y(a[a.length-1]).toFixed(1)+'" r="2.6" fill="var(--accent)"/></svg>';
   return out;
@@ -133,6 +135,176 @@ const PHOTO={
 };
 const HUE={intc:'#0B4FB3',ba:'#14325E',unh:'#0A6658',nke:'#B83A0B',khc:'#A3201C'};
 function credit(k){const p=PHOTO[k];return '<div class="credit">'+esc(p.what)+'. Photo: '+ext(p.url,esc(p.by)+', '+esc(p.lic))+'</div>'}
+/* ---------- real people, company logos, illustrated portraits ---------- */
+const FACE_CREDIT={
+ intc:{by:'U.S. Department of Commerce',lic:'Public domain',url:'https://commons.wikimedia.org/wiki/File:Intel_CEO_Lip-Bu_Tan_(2025)_(cropped).jpg'},
+ ba:{by:'U.S. Senate Committee on Commerce, Science, and Transportation',lic:'Public domain',url:'https://commons.wikimedia.org/wiki/File:Ortberg-Senate_(cropped).png'},
+ unh:{by:'U.S. House Committee on Ways and Means',lic:'Public domain',url:'https://commons.wikimedia.org/wiki/File:Stephen_Hemsley.jpg'}
+};
+const LOGO_CREDIT={
+ intc:'https://commons.wikimedia.org/wiki/File:Intel_logo_(2020,_dark_blue).svg',
+ ba:'https://commons.wikimedia.org/wiki/File:Boeing_full_logo.svg',
+ unh:'https://commons.wikimedia.org/wiki/File:UnitedHealth_Group_logo.svg',
+ nke:'https://commons.wikimedia.org/wiki/File:Logo_NIKE.svg',
+ khc:'https://commons.wikimedia.org/wiki/File:KraftHeinz.svg'
+};
+/* decorative marks next to a company name use deco=1 so screen readers do not read the name twice */
+function logo(id,sz,deco){return '<span class="logo logo-'+id+(sz?' '+sz:'')+'"'+(deco?' aria-hidden="true"':' role="img" aria-label="'+esc(CO[id].name)+' logo"')+'></span>'}
+function LG(){return G?logo(G.coId,'xs',1):''}
+function face(id,sz){
+  const c=CO[id];
+  if(FACE_CREDIT[id])return '<span class="face face-'+id+(sz?' '+sz:'')+'" role="img" aria-label="Photo of '+esc(c.ceo)+'"></span>';
+  return '<span class="face mono'+(sz?' '+sz:'')+'" style="--c:'+HUE[id]+'" role="img" aria-label="'+esc(c.ceo)+'">'+esc(initials(c.ceo))+'</span>';
+}
+/* small illustrated portraits for the fictional executives and analysts, drawn from their names */
+function portrait(name){
+  const h=hashStr(String(name)),p=(m,s)=>((h>>>s)%m);
+  const skin=['#F2CDAA','#E6B58B','#CC9468','#A96E46','#7C4B2E','#573322'][p(6,0)];
+  const hair=['#1C1612','#3A2A1F','#5C3F26','#9C6B35','#C8B07A','#8A8A90','#2A2A33'][p(7,3)];
+  const bg=['#CFDDF3','#F3DDC9','#D9EBD8','#EEDAEC','#F6EBB9','#D3E7EA'][p(6,6)];
+  const shirt=['#26364F','#3C4250','#5A3A3A','#2F4F4F','#4A416B','#6B5028','#1F2A44'][p(7,9)];
+  const style=p(4,12),glasses=p(3,15)===0,smile=p(2,17)===0;
+  let s='<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" fill="'+bg+'"/>';
+  if(style===1)s+='<path d="M12 25c0-11 5-16 12-16s12 5 12 16v11h-5V25H17v11h-5z" fill="'+hair+'"/>';
+  s+='<path d="M5 49c0-9 8-14 19-14s19 5 19 14z" fill="'+shirt+'"/><path d="M19.5 35l4.5 7 4.5-7z" fill="#fff" opacity=".92"/>';
+  s+='<rect x="20.5" y="27" width="7" height="10" rx="2.5" fill="'+skin+'"/><ellipse cx="24" cy="21" rx="8.5" ry="10" fill="'+skin+'"/>';
+  if(style===0||style===1)s+='<path d="M15.5 20c-.6-7.4 3-11.6 8.5-11.6s9.1 4.2 8.5 11.6c-1.5-3.8-4-5.3-8.5-5.3s-7 1.5-8.5 5.3z" fill="'+hair+'"/>';
+  if(style===3)s+='<path d="M15.2 21c-1.2-8.6 3-13.6 9.3-13.6 5.2 0 8.9 3.8 8.3 13.6-.8-4.4-2.6-7-5.2-8-2.2 2.2-6.6 3.2-12.4 8z" fill="'+hair+'"/>';
+  if(style===2)s+='<path d="M15.6 21c0-2.4.6-3.6 1.5-4.2V22zM32.4 21c0-2.4-.6-3.6-1.5-4.2V22z" fill="'+hair+'" opacity=".8"/>';
+  s+='<circle cx="20.5" cy="21.8" r="1.05" fill="#2A211C"/><circle cx="27.5" cy="21.8" r="1.05" fill="#2A211C"/>';
+  if(glasses)s+='<g fill="none" stroke="#2A211C" stroke-width="1"><rect x="17.2" y="19.4" width="6.6" height="4.8" rx="2"/><rect x="24.2" y="19.4" width="6.6" height="4.8" rx="2"/><path d="M23.8 21.4h.4"/></g>';
+  s+=smile?'<path d="M21.3 27c1.6 1.8 3.8 1.8 5.4 0" fill="none" stroke="#7A3B2E" stroke-width="1.2" stroke-linecap="round"/>':'<path d="M21.8 27.6h4.4" fill="none" stroke="#7A3B2E" stroke-width="1.2" stroke-linecap="round"/>';
+  return s+'</svg>';
+}
+
+/* ---------- stock price, profit and loss, and the race against the real CEO ---------- */
+const STAKE=10000,WK=13;
+const usd=(v,d)=>(v<0?'−':'')+'$'+Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:d||0,maximumFractionDigits:d||0});
+const sUsd=(v,d)=>(v>=0?'+':'−')+'$'+Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:d||0,maximumFractionDigits:d||0});
+function gameOf(who){return who==='ghost'?G.ghost:G.st}
+function pxOf(who){return stockPx(co(),gameOf(who).idx)}
+function pnlOf(who){const c=co(),px=pxOf(who),sh=STAKE/c.px0,val=sh*px;return {sh,px,val,pl:val-STAKE,pct:(val/STAKE-1)*100}}
+/* weekly closes inside each quarter. Display only: each quarter ends exactly on the simulated price,
+   and the wiggle in between is a seeded random walk pulled back to that end point. */
+function stockPath(who){
+  const c=co(),pts=[{t:0,v:c.px0}];let prev=100;
+  gameOf(who).hist.forEach((rec,q)=>{
+    const end=rec.idx,r=rngFor(G.seed,'tick',who,q),raw=[0];
+    for(let i=1;i<=WK;i++)raw.push(raw[i-1]+gauss(r));
+    for(let i=1;i<=WK;i++){
+      const lin=prev+(end-prev)*i/WK,br=raw[i]-raw[WK]*i/WK;
+      pts.push({t:q+i/WK,v:(i===WK?end:Math.max(2,lin+br*prev*0.011))*c.px0/100});
+    }
+    prev=end;
+  });
+  return pts;
+}
+function niceTicks(lo,hi,n){const raw=(hi-lo)/n,mag=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/mag,s=(f<1.5?1:f<3?2:f<7?5:10)*mag,out=[];for(let v=Math.ceil(lo/s)*s;v<=hi+1e-9;v+=s)out.push(v);return out}
+function stockChart(){
+  const nar=(window.innerWidth||800)<600,c=co(),N=D().quarters,W=nar?360:680,H=nar?230:250,L=nar?46:56,R=12,T=14,B=28,FS=nar?11:12;
+  const you=stockPath('st'),gh=stockPath('ghost');
+  const vs=you.concat(gh).map(p=>p.v).concat([c.px0]);
+  let lo=Math.min.apply(null,vs),hi=Math.max.apply(null,vs);const pad=(hi-lo)*0.14||c.px0*0.06;lo=Math.max(0,lo-pad);hi+=pad;
+  const X=t=>L+(t/N)*(W-L-R),Y=v=>T+(1-(v-lo)/(hi-lo))*(H-T-B);
+  const fv=v=>'$'+(v>=100?v.toFixed(0):v>=20?v.toFixed(1):v.toFixed(2));
+  const eu=you[you.length-1].v,eg=gh[gh.length-1].v;
+  let h='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Share price by week. You: '+fmtPx(eu)+'. '+esc(c.ceoLast)+': '+fmtPx(eg)+'. Started at '+fmtPx(c.px0)+'.">';
+  for(const v of niceTicks(lo,hi,4))h+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(v).toFixed(1)+'" y2="'+Y(v).toFixed(1)+'" stroke="var(--line)"/><text x="'+(L-7)+'" y="'+(Y(v)+4).toFixed(1)+'" text-anchor="end" font-size="'+FS+'" fill="var(--muted)" font-family="Geist Mono, monospace">'+fv(v)+'</text>';
+  h+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(c.px0).toFixed(1)+'" y2="'+Y(c.px0).toFixed(1)+'" stroke="var(--muted)" stroke-dasharray="4 4"/>';
+  for(let i=0;i<=N;i+=nar?Math.ceil(N/3):Math.max(1,Math.round(N/6)))h+='<text x="'+X(i).toFixed(1)+'" y="'+(H-9)+'" text-anchor="'+(i===N?'end':'middle')+'" font-size="'+FS+'" fill="var(--muted)" font-family="Geist Mono, monospace">'+(i===0?'start':qLabel(i-1))+'</text>';
+  const line=(pts,col,w,dash)=>'<polyline points="'+pts.map(p=>X(p.t).toFixed(1)+','+Y(p.v).toFixed(1)).join(' ')+'" fill="none" stroke="'+col+'" stroke-width="'+w+'" stroke-linejoin="round" stroke-linecap="round"'+(dash?' stroke-dasharray="'+dash+'"':'')+'/>';
+  h+=line(gh,'var(--ghost)',2,'6 4')+line(you,'var(--accent)',2.6);
+  const ex=X(you[you.length-1].t);
+  h+='<circle cx="'+ex.toFixed(1)+'" cy="'+Y(eg).toFixed(1)+'" r="3.5" fill="var(--ghost)"/><circle cx="'+ex.toFixed(1)+'" cy="'+Y(eu).toFixed(1)+'" r="4.2" fill="var(--accent)"/>';
+  return h+'</svg>';
+}
+function raceGap(){const c=co(),d=pxOf('st')-pxOf('ghost');return {d,pts:G.st.idx-G.ghost.idx,txt:(d>=0?'You lead ':'You trail ')+c.ceoLast+' by '+usd(Math.abs(d),2)+' a share'}}
+function raceTable(){
+  const c=co(),a=G.st,b=G.ghost,P=(x,y,fmt,better,lab)=>{
+    const d=x-y,win=Math.abs(d)<1e-6?0:(d>0?1:-1)*better;
+    return '<tr><td>'+lab+'</td><td class="n">'+fmt(x)+'</td><td class="n">'+fmt(y)+'</td><td class="n '+(win>0?'up':win<0?'down':'faint')+'">'+(win>0?'You':win<0?esc(c.ceoLast):'Even')+'</td></tr>'};
+  const sa=scorecard(a,c).overall,sb=scorecard(b,c).overall,n0=v=>v.toFixed(0),n1=v=>v.toFixed(1);
+  let h='<div class="tblwrap"><table class="tbl race"><thead><tr><th>Right now</th><th>You</th><th>'+esc(c.ceoLast)+'</th><th>Ahead</th></tr></thead><tbody>';
+  h+=P(pxOf('st'),pxOf('ghost'),v=>fmtPx(v),1,'Stock price');
+  h+=P(a.rev,b.rev,fmtB,1,'Sales this quarter');
+  h+=P(curMargin(a),curMargin(b),v=>v.toFixed(1)+'%',1,'Profit per sale');
+  h+=P(a.cash,b.cash,fmtB,1,'Cash in the bank');
+  h+=P(a.debt,b.debt,fmtB,-1,'Debt owed');
+  h+=P(a.meters.brd,b.meters.brd,n0,1,'Board support');
+  h+=P(a.meters.cus,b.meters.cus,n0,1,'Customer happiness');
+  h+=P(a.meters.emp,b.meters.emp,n0,1,'Employee morale');
+  h+=P(sa,sb,n0,1,'Overall score, 0 to 100');
+  return h+'</tbody></table></div>';
+}
+function pnlBlock(){
+  const c=co(),m=pnlOf('st'),g=pnlOf('ghost');
+  const cell=(k,v,sub,cls)=>'<div class="pc"><span class="k">'+k+'</span><b class="'+(cls||'')+'">'+v+'</b>'+(sub?'<span class="sub">'+sub+'</span>':'')+'</div>';
+  let h='<div class="pnl">';
+  h+=cell('You put in',usd(STAKE),'on day one, at '+fmtPx(c.px0)+' a share');
+  h+=cell('Worth now',usd(m.val),fmtPx(m.px)+' a share');
+  h+=cell('Your profit or loss',sUsd(m.pl)+' ('+fmtPct(m.pct)+')','',m.pl>=0?'up':'down');
+  h+=cell(esc(c.ceoLast)+'’s path would be',usd(g.val),sUsd(g.pl)+' ('+fmtPct(g.pct)+')',g.pl>=0?'up':'down');
+  return h+'</div>';
+}
+function stockBlock(){
+  const c=co(),m=pnlOf('st'),gap=raceGap(),n=G.st.hist.length;
+  let h='<div class="stock"><div class="stock-top"><div><div class="k">'+esc(c.ticker)+' share price'+(n?'':', at the start')+'</div><div class="px">'+fmtPx(m.px)+' <span class="'+(m.pct>=0?'up':'down')+'">'+(m.pct>=0?'▲ ':'▼ ')+fmtPct(m.pct).replace(/^[+−]/,'')+'</span></div></div>';
+  h+='<span class="pill '+(gap.d>=0?'up':'down')+'">'+(n?esc(gap.txt):'Neck and neck with '+esc(c.ceoLast))+'</span></div>';
+  h+='<div class="chartbox">'+stockChart()+'</div>';
+  h+='<div class="legend"><span><i style="border-color:var(--accent)"></i>You</span><span><i style="border-color:var(--ghost);border-top-style:dashed"></i>'+esc(c.ceo)+', what he really did</span><span><i style="border-color:var(--muted);border-top-style:dashed"></i>Starting price</span></div>';
+  return h+'</div>';
+}
+function stockNote(){return '<p class="note">Starting price is the real close on '+PX_ASOF+'. After that the price follows how your decisions play out in the game, so it is a score you can read like a stock, not a forecast. Dividends are not counted. Not investment advice.</p>'}
+function timelineHtml(){
+  const c=co(),N=D().quarters,hist=G.st.hist,gh=G.ghost.hist;
+  if(!hist.length)return '<p class="note">Your first quarter will show up here.</p>';
+  let h='<ol class="tl">';
+  hist.forEach((r,i)=>{
+    const g=gh[i],l=G.log[i],ev=G.plan.quarters[i].event,pu=stockPx(c,r.idx),pg=stockPx(c,g.idx),ahead=pu>=pg;
+    let same=0,tot=0,rows='';
+    if(l)for(const cid in l.ch.cards){
+      const cd=CARD[cid],yi=l.ch.cards[cid],gi=l.gch.cards[cid];tot++;if(yi===gi)same++;
+      rows+='<li><b>'+esc(cd.title)+'</b><span>You: '+esc(cd.opts[yi].l)+'</span><span>'+esc(c.ceoLast)+': '+(yi===gi?'<i>same call</i>':esc(cd.opts[gi].l))+'</span></li>';
+    }
+    h+='<li class="tl-i '+(ahead?'up':'down')+'"><details><summary><span class="tl-q">'+qLabel(i)+'</span><span class="tl-px">'+fmtPx(pu)+' <small class="'+(r.ret>=0?'up':'down')+'">'+fmtPct(r.ret)+'</small></span><span class="tl-gap '+(ahead?'up':'down')+'">'+(ahead?'You +':esc(c.ceoLast)+' +')+usd(Math.abs(pu-pg),2)+'</span></summary>';
+    h+='<div class="tl-body">';
+    if(ev)h+='<p class="tl-ev"><b>'+(EV[ev].opts?'Event: ':'Happened: ')+'</b>'+esc(EV[ev].title)+'</p>';
+    h+='<p class="note">'+esc(c.ceoLast)+' closed the quarter at '+fmtPx(pg)+'. '+(tot?'You made the same call as '+esc(c.ceoLast)+' on '+same+' of '+tot+' decisions.':'No big decisions this quarter.')+'</p>';
+    if(rows)h+='<ul class="tl-dec">'+rows+'</ul>';
+    h+='</div></details></li>';
+  });
+  const left=N-hist.length;
+  if(left>0&&G.status==='play')h+='<li class="tl-i now"><div class="tl-next"><span class="tl-q">'+qLabel(hist.length)+'</span><span>Next up, '+left+' quarter'+(left>1?'s':'')+' to go</span></div></li>';
+  return h+'</ol>';
+}
+function deskHtml(){
+  const c=co();
+  let h='<div class="desk-back" data-act="deskx"></div><div class="desk-panel" role="dialog" aria-modal="true" aria-labelledby="desk-t" tabindex="-1">';
+  h+='<div class="desk-head"><div class="dh-id">'+logo(c.id,'sm',1)+'<div><div class="kicker">Live tracker</div><h2 id="desk-t" class="h2">You vs '+esc(c.ceo)+'</h2></div></div><button class="btn sec" data-act="deskx" id="deskclose">Close</button></div>';
+  h+='<div class="stack">'+stockBlock()+'<section class="stack tight"><h3 class="h3">Your stock, if you had owned it</h3>'+pnlBlock()+stockNote()+'</section>';
+  h+='<section class="stack tight"><h3 class="h3">Live scoreboard</h3>'+raceTable()+'</section>';
+  h+='<section class="stack tight"><h3 class="h3">Timeline</h3><p class="note">Tap a quarter to see the decisions behind it.</p>'+timelineHtml()+'</section></div></div>';
+  return h;
+}
+let deskFrom=null;
+function renderDesk(){const el=document.getElementById('desk');if(!el)return;if(UI.desk&&G){el.innerHTML=deskHtml();el.hidden=false}else{el.innerHTML='';el.hidden=true}}
+function openDesk(){if(!G)return;deskFrom=document.activeElement;UI.desk=true;renderDesk();document.body.classList.add('noscroll');const p=document.querySelector('#desk .desk-panel');if(p)p.focus()}
+function closeDesk(){UI.desk=false;renderDesk();document.body.classList.remove('noscroll');if(deskFrom&&deskFrom.focus&&document.contains(deskFrom))deskFrom.focus();deskFrom=null}
+document.addEventListener('keydown',e=>{
+  if(!UI.desk)return;
+  if(e.key==='Escape'){closeDesk();return}
+  if(e.key==='Tab'){const f=[].slice.call(document.querySelectorAll('#desk button,#desk summary,#desk a,#desk [tabindex="-1"]')).filter(x=>x.offsetParent!==null);if(!f.length)return;const a=f[0],z=f[f.length-1];
+    if(e.shiftKey&&(document.activeElement===a||document.activeElement.classList.contains('desk-panel'))){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}}
+});
+function faceCredits(){
+  let h='<details class="fold"><summary>Photo and logo credits</summary><div class="stack tight"><ul class="list">';
+  for(const x of Object.values(CO)){
+    const f=FACE_CREDIT[x.id];
+    h+='<li><b>'+esc(x.ceo)+':</b> '+(f?'photo by '+esc(f.by)+', '+ext(f.url,esc(f.lic)):'no freely licensed photo is available, so initials are shown')+'. '+esc(x.name)+' logo: '+ext(LOGO_CREDIT[x.id],'file on Wikimedia Commons')+'.</li>';
+  }
+  return h+'</ul><p class="note">Company names and logos belong to their owners and appear here only to identify the companies. The people shown are the real leaders of each company; the executives and analysts who advise you in the game are fictional, and their portraits are illustrations.</p></div></details>';
+}
+
 
 /* ---------- scoreboard band ---------- */
 const MARK='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2.5" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 13h17M7 13v8M17 13v8M7 17.5h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"/></svg>';
@@ -143,7 +315,7 @@ function renderBar(){
   let h='<div class="wrap"><div class="row1"><button class="brand" data-act="home" aria-label="Pseudo CEO, home">'+MARK+'Pseudo CEO</button><span class="grow"></span>';
   if(!inGame&&NET.ok&&!onBoard)h+='<button class="bandbtn" data-act="board">Leaderboard</button>';
   if(onBoard)h+='<button class="bandbtn" data-act="home">Back</button>';
-  if(inGame)h+='<span style="font-size:13.5px;opacity:.75">'+esc(D().name)+'</span><button class="bandbtn" data-act="home">Exit</button>';
+  if(inGame)h+='<span class="dn" style="font-size:13.5px;opacity:.75">'+esc(D().name)+'</span><button class="bandbtn" data-act="desk">Tracker</button><button class="bandbtn" data-act="home">Exit</button>';
   h+='</div>';
   if(onBoard){
     h+='<div class="home-hero"><h1>Leaderboard</h1><p>Every score is replayed on the server before it counts. Ranked by points ahead of the real playbook in the same scenario. <b>Finish a game to post yours.</b></p></div>';
@@ -160,11 +332,12 @@ function stageLabel(){
   return ({strategy:'Strategy room',brief:'Briefing',card:'Decision '+(UI.card+1)+' of '+n,alloc:'Decision '+n+' of '+n,results:'Results',call:'Earnings call'})[UI.screen]||'';
 }
 function scoreboard(){
-  const c=co(),st=G.st,d=D(),P=isPlain(),F=isFull(),mg=curMargin(st);
+  const c=co(),st=G.st,d=D(),P=isSimple(),F=isFull(),mg=curMargin(st);
   const debrief=UI.screen==='debrief';
   const shownQ=Math.max(0,Math.min((UI.screen==='results'||UI.screen==='call')?G.q-1:G.q,d.quarters-1));
-  let h='<div class="co-line"><div><div class="co-name">'+c.name+'</div><div class="co-sub">'+(debrief?'Final results':qLabel(shownQ)+', '+qMonths(shownQ))+'</div></div>';
-  h+='<div class="score"><div class="n">'+st.idx.toFixed(F?1:0)+'</div><div class="k">'+(P?'company score':'value index')+', started at 100'+(d.ghostLive?'. Real playbook: '+G.ghost.idx.toFixed(0):'')+'</div></div></div>';
+  const pm=pnlOf('st'),gp=raceGap();
+  let h='<div class="co-line"><div class="co-id">'+logo(c.id,'md',1)+'<div><div class="co-name">'+c.name+'</div><div class="co-sub">'+(debrief?'Final results':qLabel(shownQ)+', '+qMonths(shownQ))+'</div></div></div>';
+  h+='<div class="score"><div class="n">'+fmtPx(pm.px)+'</div><div class="k">'+esc(c.ticker)+' stock, '+fmtPct(pm.pct)+' since you started</div>'+(st.hist.length?'<div class="k gap '+(gp.d>=0?'up':'down')+'">'+esc(gp.txt)+'</div>':'')+'</div></div>';
   /* quarter track: one block per quarter, filled as played, coral when the index fell */
   h+='<div class="track-wrap"><div class="track" aria-label="Quarter '+Math.min(G.q+1,d.quarters)+' of '+d.quarters+'">';
   for(let i=0;i<d.quarters;i++){
@@ -185,6 +358,7 @@ function scoreboard(){
   if(UI.dash){
     const cell=(t,v,sub)=>'<div><dt>'+t+'</dt><dd>'+v+'</dd>'+(sub?'<div class="sub">'+sub+'</div>':'')+'</div>';
     h+='<div class="dash"><dl class="dgrid">';
+    h+=cell('Company score',st.idx.toFixed(F?1:0),'Starts at 100. Stock price is the starting price times score divided by 100.');
     if(P){
       h+=cell('Sales this quarter',fmtB(st.rev),'Money customers paid');
       h+=cell(esc(c.kpi.plain),kpiFmt(c,st.kpi),esc(c.kpi.plainS));
@@ -252,14 +426,14 @@ function peoplePanel(c,jobs){
 function renderHome(){
   const s=UI.setup,sv=store.get(SAVE),c=CO[s.co];
   let h='<div class="stack enter">';
-  if(sv&&sv.G&&(sv.G.status==='play'||(sv.G.call&&!sv.G.call.done))){
+  if(saveOK(sv)&&(sv.G.status==='play'||(sv.G.call&&!sv.G.call.done))){
     const sc=CO[sv.G.coId];
     h+='<section class="section actions" style="justify-content:space-between"><div><h3 class="h3">Game in progress</h3><div><b>'+sc.name+'</b>, '+DIFF[sv.G.diffKey].name+', '+qLabel(Math.min(sv.G.q,DIFF[sv.G.diffKey].quarters-1))+'</div></div><div class="actions"><button class="btn" data-act="resume">Resume</button><button class="btn sec" data-act="discard">Discard</button></div></section>';
   }
   h+='<section class="stack tight"><div class="step"><span class="n">01</span><h2 class="h3">Choose a company</h2></div><div class="grid-co" role="radiogroup" aria-label="Company">';
   for(const x of Object.values(CO)){
     const best=(store.get(BEST)||{})[x.id+':'+s.diff];
-    h+='<button class="choice" style="--c:'+HUE[x.id]+'" role="radio" aria-checked="'+(s.co===x.id)+'" data-act="pickco" data-v="'+x.id+'"><span class="thumb th-'+x.id+'" aria-hidden="true"></span><span class="t"><span>'+esc(x.sector)+'</span>'+(best?'<span>best '+best.toFixed(0)+'</span>':'')+'</span><span class="n">'+x.name+'</span><span class="s">'+esc(x.dilemma)+'</span><span class="d">'+(x.workforce/1000).toFixed(0)+'k employees</span></button>';
+    h+='<button class="choice" style="--c:'+HUE[x.id]+'" role="radio" aria-checked="'+(s.co===x.id)+'" data-act="pickco" data-v="'+x.id+'"><span class="thumb th-'+x.id+'" aria-hidden="true">'+logo(x.id,'sm',1)+'</span><span class="t"><span>'+esc(x.sector)+'</span>'+(best?'<span>best '+best.toFixed(0)+'</span>':'')+'</span><span class="n">'+x.name+'</span><span class="s">'+esc(x.dilemma)+'</span><span class="d ceo">'+face(x.id,'xs')+'<span>'+esc(x.ceo)+', CEO</span></span><span class="d">'+(x.workforce/1000).toFixed(0)+'k employees</span></button>';
   }
   h+='</div></section>';
   h+='<section class="section stack tight"><h3 class="h3">'+c.name+' right now</h3><p class="body">'+esc(c.pitch)+'</p><ul class="facts">'+c.facts.map(f=>'<li>'+esc(f[0])+' '+ext(f[1],'Source')+'</li>').join('')+'</ul>'+sourcesBlock(c)+'</section>';
@@ -273,16 +447,18 @@ function renderHome(){
   h+='<div class="field"><label for="seed">Scenario code. Share it so a friend faces the same events.</label><input id="seed" value="'+esc(s.seed)+'" autocomplete="off" spellcheck="false"></div>';
   h+='<div class="actions"><button class="btn" data-act="start">Start as CEO of '+c.name+'</button></div></section>';
   h+='<details class="fold"><summary>How it works</summary><ul class="list">';
-  h+='<li>Each company starts from its latest 10-K and 10-Q, pulled from SEC filing data. Every starting figure links to its filing.</li>';
-  h+='<li>Before Quarter 1 you spend two minutes in the <b>Strategy room</b>: read the industry through Porter’s Five Forces, pick the two pressures that worry you most, and choose how you will win. Choices that fit your strategy are easier to execute, and shocks tied to a pressure you watched hit softer.</li>';
-  h+='<li>The right call depends on your position. A big bet is smart with cash to spare and reckless when cash is tight. Each option shows what your situation means for it.</li>';
-  h+='<li>Five named executives advise you. They remember when you overrule them, and an advisor who loses trust resigns. Advisors and analysts are fictional.</li>';
+  h+='<li>Each company starts from its latest annual and quarterly reports filed with the SEC. Every starting number links to its filing.</li>';
+  h+='<li>You play as the real CEO. You make the calls that CEO faced, one quarter at a time, and watch the company’s stock price react. A live tracker compares you with what the real CEO actually did.</li>';
+  h+='<li>Before quarter 1 you spend two minutes in the <b>Strategy room</b>. You pick the two pressures that worry you most, then how you plan to win. Choices that fit your plan are easier to carry out, and a shock that hits a pressure you were watching hurts less.</li>';
+  h+='<li>The right call depends on your situation. A big bet is smart when you have cash to spare and reckless when cash is tight. Each choice shows what your situation means for it.</li>';
+  h+='<li>Five named executives advise you. They remember when you overrule them, and an advisor who loses your trust resigns. The advisors and analysts are fictional.</li>';
   h+='<li>After each quarter you take questions on the earnings call. Overselling bad news buys a quarter of calm and costs you if the next quarter misses.</li>';
   h+='<li>Layoff decisions show the company’s real headcount, sites, unions and recent layoff rounds, with sources.</li>';
-  h+='<li>The <b>value index</b> starts at 100 and tracks a simplified equity value. It is not a stock forecast. The <b>real playbook</b> plays the same scenario with leadership’s announced choices.</li>';
-  h+='<li>Photos come from Wikimedia Commons under the licenses credited on each banner.</li>';
+  h+='<li>The <b>stock price</b> starts at the real closing price on '+PX_ASOF+'. After that it moves with how your decisions play out in a simplified model of the company, so it is a score you can read like a stock, not a forecast. The <b>real playbook</b> plays the same scenario using the choices leadership actually announced.</li>';
+  h+='<li>Photos and logos come from Wikimedia Commons. Credits are listed below.</li>';
   h+='<li>Leaderboard: after you finish a game you can post it under a name you choose. The server replays your choices to confirm the score, so numbers cannot be typed in. Only your name and result are saved.</li>';
   h+='<li>Privacy: the site counts anonymous plays (which company and difficulty were picked, how far games got) and unique players using a random ID kept in your browser. No names, emails or addresses are stored. Turn on Do Not Track in your browser to opt out. An hour-long abuse limit uses a scrambled form of your connection address that is not kept.</li><li>Simulation only; not investment advice.</li></ul></details>';
+  h+=faceCredits();
   h+='</div>';
   $app.innerHTML=h;
 }
@@ -295,7 +471,7 @@ function startGame(){
   UI.card=0;UI.picks={};UI.alloc=null;UI.last=null;UI.answers=[];UI.callRes=null;UI.dash=false;
   UI.strat={top:[],posture:null,step:0};
   NET.ev('start',{co:s.co,d:s.diff});
-  go('strategy');
+  go('welcome');
 }
 function quarterCards(){return G.plan.quarters[G.q].cards}
 function defaultAlloc(){return {reinvest:'hold',ret:G.st.div>0?'hold':'none',debt:'hold',guide:'maintain'}}
@@ -303,39 +479,56 @@ function defaultAlloc(){return {reinvest:'hold',ret:G.st.div>0?'hold':'none',deb
 /* ---------- STRATEGY ROOM ---------- */
 const FORCE_PLAIN={rivalry:'How hard competitors fight you for the same customers.',buyers:'How much power customers have to push your price down.',suppliers:'How much the companies you depend on can raise prices or hold up supply.',entrants:'How easily newcomers can show up and take a slice of your market.',substitutes:'Different products that could do the same job for your customers.'};
 const POSTURE_PLAIN={cost:'Be the cheapest to run and win on price.',differentiate:'Be worth paying more for.',focus:'Do fewer things and win those.',reinvent:'Change what the business is.'};
+const FORCE_LABEL={rivalry:'Rival companies',buyers:'Customers',suppliers:'Suppliers',entrants:'New competitors',substitutes:'Substitute products'};
+const POSTURE_LABEL={cost:'Win on price',differentiate:'Win on quality and brand',focus:'Win in a niche',reinvent:'Reinvent the business'};
 const PRESS=['','Weak','Moderate','Strong'];
-function forceName(k){return FORCES.find(f=>f[0]===k)[1]}
-function postureName(k){return POSTURES.find(f=>f[0]===k)[1]}
+function forceName(k){return FORCE_LABEL[k]}
+function postureName(k){return POSTURE_LABEL[k]}
+function faceLine(id){const f=FACE_CREDIT[id];return f?'<p class="note">Photo of '+esc(CO[id].ceo)+': '+esc(f.by)+', '+ext(f.url,esc(f.lic))+'.</p>':'<p class="note">No freely licensed photo of '+esc(CO[id].ceo)+' is available, so initials are shown.</p>'}
+/* ---------- WELCOME ---------- */
+function renderWelcome(){
+  const c=co(),d=D(),pxs=fmtPx(c.px0);
+  let h='<div class="stack enter welcome">';
+  h+='<div class="wl-hero">'+logo(c.id,'lg')+'<div class="kicker">Welcome to the corner office</div><h1 class="h1">Welcome, CEO '+esc(c.ceoLast)+'.</h1></div>';
+  h+='<div class="wl-card">'+face(c.id,'xl')+'<div><div class="wl-name">'+esc(c.ceo)+'</div><div class="wl-role">'+esc(c.ceoRole)+' since '+esc(c.ceoSince)+'</div><div class="wl-stock">'+esc(c.ticker)+' closed at <b>'+pxs+'</b> on '+PX_ASOF+'</div></div></div>';
+  h+='<p class="lede">For the next '+d.quarters+' quarters, <b>you are '+esc(c.ceo)+'</b>. Same company, same starting numbers, same problems. You make the calls, and we play them forward.</p>';
+  h+='<ul class="wl-list"><li><b>Your scoreboard is the stock price.</b> It starts at '+pxs+'. Put $10,000 in on day one and watch it grow or shrink with your decisions.</li>';
+  h+='<li><b>A live tracker shows how you compare</b> with what '+esc(c.ceoLast)+' really did in the same situation, quarter by quarter.</li>';
+  h+='<li><b>It takes '+d.time.replace('About ','about ')+'.</b> First you pick a strategy, then you run the company one quarter at a time.</li></ul>';
+  h+='<p class="note">'+esc(c.pitch)+'</p>';
+  h+='<div class="actions stick"><button class="btn" data-act="enter">Take the chair</button></div>';
+  h+=faceLine(c.id)+'</div>';
+  $app.innerHTML=h;
+}
 function renderStrategy(){
-  const c=co(),S=c.strategy,P=isPlain(),F=isFull(),T=UI.strat;
+  const c=co(),S=c.strategy,F=isFull(),T=UI.strat;
   let h='<div class="stack enter">';
   h+='<div class="prog" aria-hidden="true"><span class="on"></span><span class="'+(T.step>=1?'on':'')+'"></span></div>';
   if(T.step===0){
-    h+='<div class="stack tight"><div class="kicker">Strategy room. Step 1 of 2. <b>'+(P?'Who has the power':'Industry read, Porter’s Five Forces')+'</b></div><h1 class="h1">'+(P?'What is squeezing '+esc(c.name)+'?':'Where is the pressure on '+esc(c.name)+'?')+'</h1></div>';
-    h+='<p class="lede">'+(P?'Every industry has five pressures that decide who keeps the profit. Read them, then pick the <b>two that worry you most</b>. A shock tied to a pressure you picked will hit about a third softer, because you saw it coming.'
-       :'Pick the <b>two forces</b> that bite hardest. A shock tied to a force you pick lands about a third softer.'+(F?' Pressure ratings are hidden on Hot Seat: judge from the evidence.':''))+'</p>';
-    h+='<div class="opts" role="group" aria-label="Pick two forces">';
-    FORCES.forEach(([k,nm],i)=>{
+    h+='<div class="stack tight"><div class="kicker">'+LG()+'Strategy room. Step 1 of 2. <b>Who has the power</b></div><h1 class="h1">What is squeezing '+esc(c.name)+'?</h1></div>';
+    h+='<p class="lede">Every industry has five pressures that decide who keeps the profit. Read them, then pick the <b>two that worry you most</b>. If a shock hits one of those later, it hurts about a third less, because you saw it coming.'+(F?' On Hot Seat the ratings are hidden, so judge from the evidence.':'')+'</p>';
+    h+='<div class="opts" role="group" aria-label="Pick two pressures">';
+    FORCES.forEach(([k],i)=>{
       const f=S.forces[k],on=T.top.indexOf(k)>=0;
-      h+='<button class="opt" role="checkbox" aria-checked="'+on+'" data-act="sforce" data-v="'+k+'"><span class="lt">'+(i+1)+'</span><span><span class="ol">'+esc(nm)+'</span>';
-      if(P)h+='<span class="od" style="display:block">'+esc(FORCE_PLAIN[k])+'</span>';
+      h+='<button class="opt" role="checkbox" aria-checked="'+on+'" data-act="sforce" data-v="'+k+'"><span class="lt">'+(i+1)+'</span><span><span class="ol">'+esc(forceName(k))+'</span>';
+      h+='<span class="od" style="display:block"><i>'+esc(FORCE_PLAIN[k])+'</i></span>';
       h+='<span class="od" style="display:block">'+esc(f.line)+'</span>';
       if(!F)h+='<span class="chips"><span class="chip '+(f.p===3?'down':f.p===1?'up':'')+'">'+PRESS[f.p]+' pressure</span></span>';
       h+='</span></button>';
     });
-    h+='</div><p class="note">Evidence from '+esc(c.name)+'’s latest 10-K and recent earnings commentary: '+FORCES.map(([k])=>ext(S.forces[k].src,forceName(k))).join(', ')+'.</p>';
+    h+='</div><p class="note">Evidence from '+esc(c.name)+'’s latest annual report and recent earnings commentary: '+FORCES.map(([k])=>ext(S.forces[k].src,forceName(k))).join(', ')+'. Business classes call this tool Porter’s Five Forces.</p>';
     h+='<div class="actions stick"><span class="note">'+T.top.length+' of 2 picked</span><span class="grow"></span><button class="btn" data-act="snext" '+(T.top.length===2?'':'disabled')+'>Next: how will you win?</button></div>';
   }else{
-    h+='<div class="stack tight"><div class="kicker">Strategy room. Step 2 of 2. <b>'+(P?'How you will win':'Where to play, how to win')+'</b></div><h1 class="h1">How will '+esc(c.name)+' win?</h1></div>';
-    h+='<p class="lede">Choices that <b>fit</b> your strategy are easier to execute and investors reward them. Choices that <b>fight</b> it confuse the company. Pick the one you can live with for the whole run.</p>';
-    h+='<div class="opts" role="radiogroup" aria-label="Your strategy">';
-    POSTURES.forEach(([k,nm],i)=>{
-      h+='<button class="opt" role="radio" aria-checked="'+(T.posture===k)+'" data-act="sposture" data-v="'+k+'"><span class="lt">'+LET[i]+'</span><span><span class="ol">'+esc(nm)+'</span>';
-      if(P)h+='<span class="od" style="display:block"><i>'+esc(POSTURE_PLAIN[k])+'</i></span>';
+    h+='<div class="stack tight"><div class="kicker">'+LG()+'Strategy room. Step 2 of 2. <b>How you will win</b></div><h1 class="h1">How will '+esc(c.name)+' win?</h1></div>';
+    h+='<p class="lede">Pick the plan you can stick with for the whole game. Choices that <b>fit</b> your plan are easier to carry out, and investors reward them. Choices that <b>fight</b> it confuse the company.</p>';
+    h+='<div class="opts" role="radiogroup" aria-label="Your plan">';
+    POSTURES.forEach(([k],i)=>{
+      h+='<button class="opt" role="radio" aria-checked="'+(T.posture===k)+'" data-act="sposture" data-v="'+k+'"><span class="lt">'+LET[i]+'</span><span><span class="ol">'+esc(postureName(k))+'</span>';
+      h+='<span class="od" style="display:block"><i>'+esc(POSTURE_PLAIN[k])+'</i></span>';
       h+='<span class="od" style="display:block">'+esc(S.pl[k])+'</span></span></button>';
     });
     h+='</div>';
-    h+='<p class="note">You picked '+T.top.map(forceName).join(' and ')+' as the pressures to watch. You can see how that compares with our read in the debrief.</p>';
+    h+='<p class="note">You picked '+T.top.map(forceName).join(' and ')+' as the pressures to watch. The debrief shows how that compares with our read.</p>';
     h+='<div class="actions stick"><button class="btn sec" data-act="sback">Back</button><span class="grow"></span><button class="btn" data-act="sgo" '+(T.posture?'':'disabled')+'>Start Quarter 1</button></div>';
   }
   h+='</div>';
@@ -352,9 +545,9 @@ function strategyDebrief(){
   const row=(k,v,n)=>'<div class="srow"><span class="sk">'+k+'</span><b class="sv">'+v+'</b>'+(n?'<p class="sn">'+n+'</p>':'')+'</div>';
   let h='<div class="section stack tight"><h3 class="h3">Strategy</h3><div class="slist">';
   h+=row('Your strategy',esc(postureName(sm.posture)),esc(S.pl[sm.posture]));
-  h+=row('Real leadership’s strategy',esc(postureName(sm.refPosture)),esc(S.lead.line)+' '+ext(S.lead.src,'Source'));
+  h+=row(esc(c.ceoLast)+'’s real strategy',esc(postureName(sm.refPosture)),esc(S.lead.line)+' '+ext(S.lead.src,'Source'));
   h+=row('Pressures you watched',sm.top.map(forceName).map(esc).join(' and '),sm.match===2?'Both match our read.':sm.match===1?'One matches our read.':'Neither matches our read.');
-  h+=row('Our read',sm.ref.map(forceName).map(esc).join(' and '),esc(S.refWhy));
+  h+=row('Our read of the biggest pressures',sm.ref.map(forceName).map(esc).join(' and '),esc(S.refWhy));
   h+=row('Decisions that fit your strategy',sm.aligned+' of '+tot,sm.fought+' fought it, '+sm.neutral+' were neutral.');
   h+=row('Shocks softened',String(sm.hedged),'Quarters where a shock hit a pressure you were watching.');
   h+='</div><p class="note">The pressure read and the leadership label are our reading of '+esc(c.name)+'’s filings and public statements, not a ruling. Fit comes from our own tagging of each option. '+(P?'':'Fits add execution and investor confidence; fights subtract them.')+'</p></div>';
@@ -363,16 +556,16 @@ function strategyDebrief(){
 
 /* ---------- BRIEFING ---------- */
 function renderBrief(){
-  const c=co(),q=G.q,pq=G.plan.quarters[q],d=D(),P=isPlain();
+  const c=co(),q=G.q,pq=G.plan.quarters[q],d=D(),P=isPlain(),SM=isSimple();
   let agendaHtml='<div class="section stack tight"><h3 class="h3">Agenda for this quarter</h3><ol class="agenda">';
   for(const cid of pq.cards){const cd=CARD[cid];agendaHtml+='<li><span>'+esc(cd.title)+'</span><span class="c">'+esc(cd.isEvent?'Response':cd.cat)+'</span></li>'}
-  agendaHtml+='<li><span>'+(P?'Money plan and promise to Wall Street':'Capital plan and guidance')+'</span><span class="c">Allocation</span></li><li><span>Earnings call</span><span class="c">Investors</span></li></ol></div>';
+  agendaHtml+='<li><span>'+(SM?'Money plan and what you tell Wall Street':'Capital plan and guidance')+'</span><span class="c">'+(SM?'Money plan':'Allocation')+'</span></li><li><span>Earnings call</span><span class="c">'+(SM?'Wall Street':'Investors')+'</span></li></ol></div>';
   let h='<div class="stack enter">';
-  h+='<div class="kicker">Board briefing for <b>'+qLabel(q)+'</b>, '+qMonths(q)+'</div>';
+  h+='<div class="kicker">'+LG()+'Board briefing for <b>'+qLabel(q)+'</b>, '+qMonths(q)+'</div>';
   if(q===0){
     h+='<h1 class="h1">You are the new CEO of '+c.name+'.</h1><p class="lede">'+esc(c.pitch)+'</p>'+strategyLine();
     h+='<div class="section stack tight"><h3 class="h3">Where it stands</h3><ul class="facts">'+c.facts.map(f=>'<li>'+esc(f[0])+' '+ext(f[1],'Source')+'</li>').join('')+'</ul>';
-    h+=P?'<p class="note">Your key number is <b>'+esc(c.kpi.plain)+'</b>: '+esc(c.kpi.plainD)+' It is '+kpiFmt(c,G.st.kpi)+' today.</p>':'<p class="note">Key number: <b>'+esc(c.kpi.name)+'</b> ('+esc(c.kpi.unit)+'), now '+kpiFmt(c,G.st.kpi)+'.</p>';
+    h+=SM?'<p class="note">Your key number is <b>'+esc(c.kpi.plain)+'</b>: '+esc(c.kpi.plainD)+' It is '+kpiFmt(c,G.st.kpi)+' today.</p>':'<p class="note">Key number: <b>'+esc(c.kpi.name)+'</b> ('+esc(c.kpi.unit)+'), now '+kpiFmt(c,G.st.kpi)+'.</p>';
     h+=sourcesBlock(c)+'</div>';
     h+=agendaHtml;
     h+=filingsTable(c,false);
@@ -390,9 +583,10 @@ function renderBrief(){
   }else{
     const r=lastRec(G.st);
     h+='<h1 class="h1">'+esc(briefHeadline(c,r))+'</h1>';
-    h+=P?'<p class="lede">Last quarter you sold '+fmtB(r.rev)+', '+(r.g>=0?'up ':'down ')+Math.abs(r.g).toFixed(1)+'%. You '+(r.op>=0?'kept '+fmtB(r.op)+' in operating profit':'lost '+fmtB(Math.abs(r.op))+' running the business')+' and have '+fmtB(r.cash)+' in the bank. Company score: '+r.idx.toFixed(1)+'.</p>'
-         :'<p class="lede">Last quarter: revenue '+fmtB(r.rev)+' ('+fmtPct(r.g)+' q/q), operating margin '+r.margin.toFixed(1)+'%, cash '+fmtB(r.cash)+', value index '+r.idx.toFixed(1)+'.</p>';
+    h+=SM?'<p class="lede">Last quarter you sold '+fmtB(r.rev)+', '+(r.g>=0?'up ':'down ')+Math.abs(r.g).toFixed(1)+'%. You '+(r.op>=0?'kept '+fmtB(r.op)+' in operating profit':'lost '+fmtB(Math.abs(r.op))+' running the business')+' and have '+fmtB(r.cash)+' in the bank. The stock closed at '+fmtPx(stockPx(c,r.idx))+'.</p>'
+         :'<p class="lede">Last quarter: revenue '+fmtB(r.rev)+' ('+fmtPct(r.g)+' q/q), operating margin '+r.margin.toFixed(1)+'%, cash '+fmtB(r.cash)+', stock '+fmtPx(stockPx(c,r.idx))+'.</p>';
     h+=strategyLine();
+    h+=raceStrip();
   }
   // news: cabinet changes from last quarter
   const lastLog=G.log.length?G.log[G.log.length-1]:null;
@@ -430,6 +624,10 @@ function renderBrief(){
   if(q!==0)h+=agendaHtml;
   h+='<div class="actions stick"><button class="btn" data-act="agenda">'+(pq.cards.length?'Open the first decision':'Go to the capital plan')+'</button></div></div>';
   $app.innerHTML=h;
+}
+function raceStrip(){
+  const c=co(),m=pnlOf('st'),gp=raceGap();
+  return '<div class="section racestrip"><div><div class="k">'+esc(c.ticker)+' stock</div><div class="px">'+fmtPx(m.px)+' <span class="'+(m.pct>=0?'up':'down')+'">'+fmtPct(m.pct)+'</span></div></div><div class="rs-mid"><span class="pill '+(gp.d>=0?'up':'down')+'">'+esc(gp.txt)+'</span><span class="note">Your $10,000 from day one is now '+usd(m.val)+'.</span></div><button class="btn sec" data-act="desk">Open the tracker</button></div>';
 }
 function briefHeadline(c,r){
   if(r.rescue>0)return c.name+' needed emergency financing last quarter.';
@@ -519,7 +717,7 @@ function renderCard(){
   const best=Math.max.apply(null,grades);
   let h='<div class="stack enter">';
   h+='<div class="prog" aria-hidden="true">'+Array.from({length:total},(_,i)=>'<span class="'+(i<=UI.card?'on':'')+'"></span>').join('')+'</div>';
-  h+='<div class="stack tight"><div class="kicker">Decision '+(UI.card+1)+' of '+total+'. <b>'+esc(cd.isEvent?'Response to events':cd.cat)+'</b></div><h2 class="h2">'+esc(cd.title)+'</h2></div>';
+  h+='<div class="stack tight"><div class="kicker">'+LG()+'Decision '+(UI.card+1)+' of '+total+'. <b>'+esc(cd.isEvent?'Response to events':cd.cat)+'</b></div><h2 class="h2">'+esc(cd.title)+'</h2></div>';
   h+='<p class="body">'+esc(cd.body)+(cd.src?' '+ext(cd.src,'Source'):'')+'</p>';
   // advisors
   let advIdx=cd.opts.map((o,i)=>i);
@@ -545,12 +743,12 @@ function renderCard(){
   });
   h+='</div>';
   if(cd.opts.some(o=>o.jobs))h+=peoplePanel(c,Math.max.apply(null,cd.opts.map(o=>o.jobs||0)));
-  if(isPlain()){
+  if(isSimple()){
     const words=glossFor(cd.title+' '+cd.body+' '+cd.opts.map(o=>o.l+' '+o.d).join(' '));
     if(words.length)h+='<div class="section gloss stack tight"><h3 class="h3">Words to know</h3><dl>'+words.map(w=>'<div><dt>'+esc(w[1])+'</dt><dd>'+esc(w[2])+'</dd></div>').join('')+'</dl></div>';
   }
   if(isFull())h+='<p class="note">Sizes are averages; each is drawn at random within roughly ±'+Math.round(35*d.sd)+'%. Delays include Hot Seat’s slower payoffs. Growth and margin are percentage points; meters run 0 to 100.</p>';
-  h+='<div class="actions stick"><button class="btn sec" data-act="back">Back</button><span class="grow"></span><button class="btn" data-act="nextcard" '+(UI.picks[cid]==null?'disabled':'')+'>'+(UI.card+1<cards.length?'Next decision':(isPlain()?'Go to the money plan':'Go to the capital plan'))+'</button></div></div>';
+  h+='<div class="actions stick"><button class="btn sec" data-act="back">Back</button><span class="grow"></span><button class="btn" data-act="nextcard" '+(UI.picks[cid]==null?'disabled':'')+'>'+(UI.card+1<cards.length?'Next decision':(isSimple()?'Go to the money plan':'Go to the capital plan'))+'</button></div></div>';
   $app.innerHTML=h;
 }
 
@@ -561,7 +759,7 @@ function renderAlloc(){
   const c=co(),st=G.st,d=D(),m=allocMenu(c,st);
   const cards=quarterCards(),total=cards.length+1;
   const a=assess(G,choicesNow());
-  const P=isPlain(),F=isFull(),lev=leverage(st,c);
+  const P=isSimple(),F=isFull(),lev=leverage(st,c);
   const groups=P?[
     ['reinvest','Spend on the future?','Extra money for research, factories and marketing. It costs cash now and grows sales a few quarters later.'],
     ['ret','Pay shareholders?',st.div>0?'You pay owners '+fmtB(st.div)+' every quarter. Cutting it saves cash but upsets investors.':'You pay owners nothing right now.'],
@@ -582,7 +780,7 @@ function renderAlloc(){
   }
   let h='<div class="stack enter">';
   h+='<div class="prog" aria-hidden="true">'+Array.from({length:total},()=>'<span class="on"></span>').join('')+'</div>';
-  h+='<div class="stack tight"><div class="kicker">Decision '+total+' of '+total+'. <b>'+(P?'Money':'Capital allocation')+'</b></div><h2 class="h2">'+(P?'Set the money plan':'Set the capital plan')+'</h2><p class="lede">Each choice starts on <b>keep things as they are</b>. Change only what you want to, then close the quarter.'+(isFull()?'':' Your CFO, '+G.cab.cfo.name.split(' ')[0]+', flags any risk at the bottom.')+'</p></div>';
+  h+='<div class="stack tight"><div class="kicker">'+LG()+'Decision '+total+' of '+total+'. <b>'+(P?'Money':'Capital allocation')+'</b></div><h2 class="h2">'+(P?'Set the money plan':'Set the capital plan')+'</h2><p class="lede">Each choice starts on <b>keep things as they are</b>. Change only what you want to, then close the quarter.'+(isFull()?'':' Your CFO, '+G.cab.cfo.name.split(' ')[0]+', flags any risk at the bottom.')+'</p></div>';
   h+='<div class="section stack">';
   groups.forEach(([k,t,desc],gi)=>{
     if(gi)h+='<hr class="sep">';
@@ -637,6 +835,10 @@ function recordBest(){
 }
 
 /* ---------- RESULTS ---------- */
+function resultsStock(r,chg){
+  const c=co(),m=pnlOf('st'),gp=raceGap(),prev=stockPx(c,UI.prevIdx);
+  return '<div class="section racestrip"><div><div class="k">'+esc(c.ticker)+' stock this quarter</div><div class="px">'+fmtPx(prev)+' → '+fmtPx(m.px)+' <span class="'+(chg>=0?'up':'down')+'">'+fmtPct(chg)+'</span></div></div><div class="rs-mid"><span class="pill '+(gp.d>=0?'up':'down')+'">'+esc(gp.txt)+'</span><span class="note">Your $10,000 from day one is now '+usd(m.val)+' ('+sUsd(m.pl)+').</span></div><button class="btn sec" data-act="desk">Open the tracker</button></div>';
+}
 function resultsStandard(c,r,beat,miss,chg,q){
   let h='<div class="section"><div class="tblwrap"><table class="tbl"><thead><tr><th>'+qLabel(q)+', $ billions</th><th>Amount</th><th>Note</th></tr></thead><tbody>';
   const row=(l,v,n,cls)=>'<tr><td>'+l+'</td><td class="n">'+v+'</td><td class="n '+(cls||'')+'">'+n+'</td></tr>';
@@ -665,7 +867,7 @@ function resultsPlain(c,r,beat,miss,chg){
   h+=row('Cash in the bank',fmtB(r.cash),r.rescue>0?'Ran too low; banks forced a '+fmtB(r.rescue)+' emergency loan.':'Your safety cushion.',r.rescue>0?'down':'');
   h+=row('Debt',fmtB(r.debt),'What you owe lenders.');
   h+=row(esc(c.kpi.plain),kpiFmt(c,r.kpi),esc(c.kpi.plainS)+'.');
-  h+=row('Company score',r.idx.toFixed(1),(chg>=0?'Up ':'Down ')+Math.abs(chg).toFixed(1)+'%. 100 is where you started.',chg>=0?'up':'down');
+  h+=row('Stock price',fmtPx(stockPx(c,r.idx)),(chg>=0?'Up ':'Down ')+Math.abs(chg).toFixed(1)+'% this quarter. It started at '+fmtPx(c.px0)+'.',chg>=0?'up':'down');
   return h+'</tbody></table></div></div>';
 }
 function resultsFull(c,r,beat,miss,chg,q){
@@ -694,18 +896,20 @@ function resultsFull(c,r,beat,miss,chg,q){
   h+=sec('Market');
   h+=row('Street expected',fmtB(r.exp));
   h+=row('Surprise',(sur>=0?'+':'−')+Math.abs(sur).toFixed(1)+'%',beat?'beat':miss?'miss':'in line',beat?'up':miss?'down':'');
-  h+=row('Value index',r.idx.toFixed(2),fmtPct(chg,2),chg>=0?'up':'down');
+  h+=row('Stock price',fmtPx(stockPx(c,r.idx)),fmtPct(chg,2),chg>=0?'up':'down');
+  h+=row('Company score',r.idx.toFixed(2),'start = 100');
   h+=row('Next quarter’s Street target',fmtB(r.expNext),'guidance: '+r.guide);
   h+=row(esc(c.kpi.name),kpiFmt(c,r.kpi),esc(c.kpi.unit));
   return h+'</tbody></table></div></div>';
 }
 function renderResults(){
-  const c=co(),r=UI.last,d=D(),q=G.q-1,F=isFull(),P=isPlain();
+  const c=co(),r=UI.last,d=D(),q=G.q-1,F=isFull(),P=isSimple();
   const beat=r.s>0.02,miss=r.s<-0.02,chg=(r.idx/UI.prevIdx-1)*100;
   let h='<div class="stack enter">';
-  h+='<div class="kicker">Simulated earnings release for <b>'+qLabel(q)+'</b></div>';
+  h+='<div class="kicker">'+LG()+'Simulated earnings release for <b>'+qLabel(q)+'</b></div>';
   h+='<div class="verdict"><h1 class="h1">'+esc(c.name+(beat?' beats':miss?' misses':' meets')+' expectations')+'</h1><span class="stamp '+(beat?'up':miss?'down':'flat')+'">'+(beat?'Beat':miss?'Miss':'In line')+'</span></div>';
-  h+=P?resultsPlain(c,r,beat,miss,chg):F?resultsFull(c,r,beat,miss,chg,q):resultsStandard(c,r,beat,miss,chg,q);
+  h+=resultsStock(r,chg);
+  h+=F?resultsFull(c,r,beat,miss,chg,q):resultsPlain(c,r,beat,miss,chg);
   const news=[];
   for(const k in (r.outs||{}))news.push(['risk',r.outs[k]]);
   if(r.callNote==='bad')news.push(['bad','Analysts remembered your confident answers on the last call. The miss cost extra trust.']);
@@ -745,9 +949,9 @@ function renderCall(){
   const c=co(),q=G.q-1,call=G.call,P=isPlain(),F=isFull();
   const done=!!UI.callRes;
   let h='<div class="stack enter">';
-  h+='<div class="kicker">'+c.name+' '+qLabel(q)+' earnings call, live questions</div>';
+  h+='<div class="kicker">'+LG()+''+c.name+' '+qLabel(q)+' earnings call, live questions</div>';
   h+='<h1 class="h1">Analysts have questions.</h1>';
-  h+='<p class="lede">'+(P?'Pick how you answer each one. Confident works when the news is good. When the news is bad, being candid usually builds more trust; overselling can come back to bite you next quarter.':'Choose a tone for each answer. Overselling bad news buys calm now and costs you if next quarter misses.')+'</p>';
+  h+='<p class="lede">'+(isSimple()?'Pick how you answer each one. Confident works when the news is good. When the news is bad, being candid usually builds more trust; overselling can come back to bite you next quarter.':'Choose a tone for each answer. Overselling bad news buys calm now and costs you if next quarter misses.')+'</p>';
   h+='<div class="section stack">';
   call.qs.forEach((x,i)=>{
     const a=UI.answers[i];
@@ -799,16 +1003,18 @@ function renderDebrief(){
   const dv=G.st.idx-G.ghost.idx,ds=me.overall-gh.overall;
   const title=fired?'The board replaced you after '+qLabel(G.firedAt)+'.':ds>=3?'You beat the real playbook.':ds<=-3?'The real playbook beat you.':'You finished close to the real playbook.';
   let h='<div class="stack enter">';
-  h+='<div class="kicker">Debrief for '+c.name+' on '+d.name+', scenario '+esc(G.seed)+'</div><h1 class="h1">'+esc(title)+'</h1>';
-  h+='<p class="lede">You ran '+c.name+' for '+n+' quarter'+(n>1?'s':'')+'. Your '+(P?'company score':'value index')+' finished at '+G.st.idx.toFixed(1)+'; the real playbook finished at '+G.ghost.idx.toFixed(1)+' in the same scenario ('+(dv>=0?'+':'−')+Math.abs(dv).toFixed(1)+').</p>';
+  h+='<div class="kicker">'+LG()+'Debrief for '+c.name+' on '+d.name+', scenario '+esc(G.seed)+'</div><h1 class="h1">'+esc(title)+'</h1>';
+  h+='<p class="lede">You ran '+c.name+' for '+n+' quarter'+(n>1?'s':'')+'. Your stock finished at <b>'+fmtPx(pxOf('st'))+'</b>, '+fmtPct(pnlOf('st').pct)+' from where you started. '+esc(c.ceo)+'’s real playbook would have finished at '+fmtPx(pxOf('ghost'))+' in the same scenario.</p>';
   h+=shareBlock();
   h+='<div class="section scores">';
   h+='<div class="big"><span class="k">Overall score</span><span class="v">'+me.overall.toFixed(0)+'</span><span class="k">real playbook '+gh.overall.toFixed(0)+'</span></div>';
   h+='<div class="big"><span class="k">Decision quality</span><span class="v">'+gr+'</span><span class="k">'+(P?'How well your choices fit your situation at the time. A is best.':ps.toFixed(2)+' of 3, judged on what you knew')+'</span></div>';
   h+='<div class="big"><span class="k">Luck</span><span class="v '+(luck>=0?'up':'down')+'">'+(luck>=0?'+':'−')+Math.abs(luck).toFixed(1)+'</span><span class="k">'+(P?(luck>=0?'Points gained from good breaks':'Points lost to bad breaks'):'index points from breaks you did not control')+'</span></div></div>';
-  h+='<div class="section stack tight chart"><h3 class="h3">Value index by quarter</h3>';
-  h+=lineChart([{v:exp.idxHist,c:'var(--faint)',dash:'2 4',w:1.5},{v:G.ghost.idxHist,c:'var(--brass)',dash:'6 4'},{v:G.st.idxHist,c:'var(--accent)',w:2.5}],n);
-  h+='<div class="legend"><span><i style="border-color:var(--accent)"></i>You</span><span><i style="border-color:var(--brass);border-top-style:dashed"></i>Real playbook</span><span><i style="border-color:var(--faint);border-top-style:dotted"></i>Your choices without luck</span></div></div>';
+  h+='<section class="section stack tight"><h3 class="h3">Your run as a stock</h3>'+stockBlock()+pnlBlock()+stockNote()+'</section>';
+  h+='<section class="section stack tight"><h3 class="h3">Timeline against '+esc(c.ceo)+'</h3><p class="note">Tap a quarter to see the decisions behind it.</p>'+timelineHtml()+'</section>';
+  h+='<div class="section stack tight chart"><h3 class="h3">Company score by quarter, 100 is where you started</h3>';
+  h+=lineChart([{v:exp.idxHist,c:'var(--faint)',dash:'2 4',w:1.5},{v:G.ghost.idxHist,c:'var(--ghost)',dash:'6 4'},{v:G.st.idxHist,c:'var(--accent)',w:2.5}],n);
+  h+='<div class="legend"><span><i style="border-color:var(--accent)"></i>You</span><span><i style="border-color:var(--ghost);border-top-style:dashed"></i>Real playbook</span><span><i style="border-color:var(--faint);border-top-style:dotted"></i>Your choices without luck</span></div></div>';
   const rows=[['value','Shareholder value'],['balance','Balance sheet'],['customers','Customers'],['people','People and execution'],['trust','Stakeholder trust']];
   h+='<div class="section stack tight"><h3 class="h3">Scorecard, 0 to 100</h3><div class="bars">';
   for(const [k,l] of rows)h+='<div class="brow"><span>'+l+'</span><div class="pair"><div class="pb"><b style="width:'+me[k].toFixed(0)+'%"></b></div><div class="pb gh"><b style="width:'+gh[k].toFixed(0)+'%"></b></div><div class="nums"><span>you '+me[k].toFixed(0)+'</span><span>real playbook '+gh[k].toFixed(0)+'</span></div></div></div>';
@@ -898,9 +1104,9 @@ async function drawCard(cv){
   const big=i.fired?'Fired':fmtEdge(i.ds);
   x.fillText(big,56,360);
   x.font=F(500,36);x.globalAlpha=.92;
-  x.fillText(i.fired?'after '+qLabel(G.firedAt)+'. The board lost patience.':'points vs the real '+i.c.name+' playbook',64,425);x.globalAlpha=1;
+  x.fillText(i.fired?'after '+qLabel(G.firedAt)+'. The board lost patience.':'points vs the real '+i.c.ceo+' playbook',64,425);x.globalAlpha=1;
   x.font=F(600,30);
-  x.fillText((i.fired?'Value index '+G.st.idx.toFixed(0):'Value index '+G.st.idx.toFixed(0)+' vs '+G.ghost.idx.toFixed(0))+',  decision grade '+i.grade,64,490);
+  x.fillText('Stock '+fmtPx(pxOf('st'))+(i.fired?'':' vs '+fmtPx(pxOf('ghost')))+',  decision grade '+i.grade,64,490);
   x.font=F(700,34);x.fillText(siteUrl().replace(/^https?:\/\//,''),64,574);
   x.globalAlpha=.7;x.font=F(500,17);x.textAlign='right';
   const p=PHOTO[G.coId];x.fillText('Photo: '+p.by+', '+p.lic,W-48,590);x.textAlign='left';x.globalAlpha=1;
@@ -962,7 +1168,7 @@ async function loadBoard(top){
 function renderBoard(){
   const B=UI.board,mine=store.get('pseudoceo.mine')||[];
   let h='<div class="stack enter"><div class="section stack tight" style="border-top:0;padding-top:0"><h2 class="h3">Company</h2><div class="tabs" role="group" aria-label="Company">';
-  for(const x of Object.values(CO))h+='<button class="tab" aria-pressed="'+(B.co===x.id)+'" data-act="bco" data-v="'+x.id+'" style="--c:'+HUE[x.id]+'">'+esc(x.name)+'</button>';
+  for(const x of Object.values(CO))h+='<button class="tab" aria-pressed="'+(B.co===x.id)+'" data-act="bco" data-v="'+x.id+'" style="--c:'+HUE[x.id]+'">'+logo(x.id,'xs',1)+esc(x.name)+'</button>';
   h+='</div><h2 class="h3" style="margin-top:6px">Difficulty</h2><div class="tabs" role="group" aria-label="Difficulty">';
   for(const d of Object.values(DIFF))h+='<button class="tab" aria-pressed="'+(B.d===d.key)+'" data-act="bd" data-v="'+d.key+'">'+d.name+' <span class="faint">'+d.quarters+'q</span></button>';
   h+='</div></div>';
@@ -983,18 +1189,22 @@ function renderBoard(){
 function render(){
   document.body.dataset.co=UI.screen==='board'?UI.board.co:(G&&UI.screen!=='home')?G.coId:UI.setup.co;
   renderBar();renderHud();
-  ({home:renderHome,strategy:renderStrategy,brief:renderBrief,card:renderCard,alloc:renderAlloc,results:renderResults,call:renderCall,debrief:renderDebrief,board:renderBoard})[UI.screen]();
+  ({home:renderHome,welcome:renderWelcome,strategy:renderStrategy,brief:renderBrief,card:renderCard,alloc:renderAlloc,results:renderResults,call:renderCall,debrief:renderDebrief,board:renderBoard})[UI.screen]();
+  renderDesk();
 }
 function keepSeed(){const inp=document.getElementById('seed');if(inp)UI.setup.seed=inp.value}
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]');if(!b||b.disabled)return;
   const act=b.dataset.act,v=b.dataset.v;
   switch(act){
-    case 'home':keepSeed();UI.screen='home';render();window.scrollTo(0,0);break;
+    case 'home':keepSeed();if(UI.desk)closeDesk();UI.screen='home';render();window.scrollTo(0,0);break;
     case 'pickco':keepSeed();UI.setup.co=v;render();break;
     case 'pickdiff':keepSeed();UI.setup.diff=v;render();break;
     case 'start':startGame();break;
-    case 'resume':{const sv=store.get(SAVE);if(sv&&sv.G){G=sv.G;Object.assign(UI,sv.UI);if(UI.screen==='home')UI.screen='brief';if(G.coId&&CO[G.coId].strategy&&!G.strategy&&G.q===0){UI.screen='strategy';if(!UI.strat||!Array.isArray(UI.strat.top))UI.strat={top:[],posture:null,step:0}}render();window.scrollTo(0,0)}break}
+    case 'enter':go('strategy');break;
+    case 'desk':openDesk();break;
+    case 'deskx':closeDesk();break;
+    case 'resume':{const sv=store.get(SAVE);if(saveOK(sv)){G=sv.G;Object.assign(UI,sv.UI);if(UI.screen==='home')UI.screen='brief';if(G.coId&&CO[G.coId].strategy&&!G.strategy&&G.q===0){UI.screen='strategy';if(!UI.strat||!Array.isArray(UI.strat.top))UI.strat={top:[],posture:null,step:0}}render();window.scrollTo(0,0)}break}
     case 'discard':store.del(SAVE);G=null;render();break;
     case 'dash':UI.dash=!UI.dash;renderHud();break;
     case 'sforce':{const t=UI.strat.top,i=t.indexOf(v);if(i>=0)t.splice(i,1);else{t.push(v);if(t.length>2)t.shift()}renderStrategy();save();break}
@@ -1031,6 +1241,6 @@ document.addEventListener('click',e=>{
 });
 
 /* ---------- boot ---------- */
-function boot(data){if(data&&data.G){G=data.G;UI=Object.assign(UI,data.UI)}if(UI.screen==='board')UI.screen='home';render();NET.ev('view')}
+function boot(data){{const sv=store.get(SAVE);if(sv&&!saveOK(sv))store.del(SAVE)}if(data&&data.G&&saveOK(data)){G=data.G;UI=Object.assign(UI,data.UI)}if(UI.screen==='board')UI.screen='home';render();NET.ev('view')}
 if(window.claude&&window.claude.hot&&window.claude.hot.snapshot)window.claude.hot.snapshot(()=>({G,UI}));
 if(window.claude&&window.claude.hot&&window.claude.hot.ready)window.claude.hot.ready(boot);else boot((window.claude&&window.claude.hot&&window.claude.hot.data)||{});

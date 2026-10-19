@@ -14,12 +14,12 @@ const clone=o=>JSON.parse(JSON.stringify(o));
 
 /* ---------- difficulty ---------- */
 const DIFF={
-  easy:{key:'easy',name:'Guided',quarters:8,time:'About 15 min',sd:0.6,lag:0.5,ev:0.35,evMul:1,hints:'plain',fire:null,rewinds:3,ghostLive:true,fog:false,advisors:'rec',
+  easy:{key:'easy',name:'Guided',quarters:6,time:'About 10 min',sd:0.6,lag:0.5,ev:0.35,evMul:1,hints:'plain',fire:null,rewinds:3,ghostLive:true,fog:false,advisors:'rec',
     blurb:'Plain English. Every number is explained, every term is defined, each choice shows what it helps or hurts, and an advisor flags the strongest option. The board cannot fire you. 3 rewinds.'},
-  medium:{key:'medium',name:'Standard',quarters:12,time:'About 30 min',sd:1,lag:1,ev:0.5,evMul:1,hints:'tags',fire:{below:28,streak:2},rewinds:1,ghostLive:false,fog:false,advisors:'all',
-    blurb:'Standard finance terms, no definitions. You see what each choice touches, not which way it moves. Advisors disagree. Two bad board quarters in a row and you are out. 1 rewind.'},
-  hard:{key:'hard',name:'Hot Seat',quarters:16,time:'About 45–60 min',sd:1.4,lag:1.5,ev:0.7,evMul:1.3,hints:'numbers',fire:{below:32,streak:1},rewinds:0,ghostLive:false,fog:false,advisors:'all',
-    blurb:'Everything on the table: full financial statements, exact effect sizes, odds and timing, and the effects still in your pipeline. Slower payoffs, bigger shocks, and one bad board quarter ends it. No rewinds.'}
+  medium:{key:'medium',name:'Standard',quarters:8,time:'About 20 min',sd:1,lag:1,ev:0.5,evMul:1,hints:'tags',fire:{below:28,streak:2},rewinds:1,ghostLive:false,fog:false,advisors:'all',
+    blurb:'Fewer hints. Each choice shows what it touches, but not whether it helps or hurts. Your advisors disagree with each other. Two bad board quarters in a row and you are fired. 1 rewind.'},
+  hard:{key:'hard',name:'Hot Seat',quarters:12,time:'About 30 min',sd:1.4,lag:1.5,ev:0.7,evMul:1.3,hints:'numbers',fire:{below:32,streak:1},rewinds:0,ghostLive:false,fog:false,advisors:'all',
+    blurb:'No hints. Full financial statements, exact numbers on every choice, and nothing flagged for you. Slower payoffs, bigger shocks, and one bad board quarter gets you fired. No rewinds.'}
 };
 
 /* ---------- labels ---------- */
@@ -449,6 +449,21 @@ khc:{employees:35000,asof:'Dec 2025',src:'https://www.sec.gov/Archives/edgar/dat
  earnings:['Nov 4, 2026','https://finviz.com/news/401206/the-kraft-heinz-company-to-report-third-quarter-2026-results-on-november-4-2026'],ir:'https://ir.kraftheinzcompany.com',cik:'1637459'}
 };
 for(const k in PEOPLE){CO[k].workforce=PEOPLE[k].employees;CO[k].people=PEOPLE[k]}
+
+/* ---------- market and leadership facts (display only: the simulation never reads these) ----------
+   px = closing share price on pxAsOf. The game's value index is a per-share index that starts at 100,
+   so a game price is px * index / 100. */
+const MKT={
+intc:{px:89.85,last:'Tan',since:'March 2025',role:'CEO of Intel'},
+ba:{px:190.21,last:'Ortberg',since:'August 2024',role:'CEO of Boeing'},
+unh:{px:401.43,last:'Hemsley',since:'May 2025',role:'CEO of UnitedHealth Group'},
+nke:{px:37.13,last:'Hill',since:'October 2024',role:'President and CEO of Nike'},
+khc:{px:23.68,last:'Cahillane',since:'January 2026',role:'CEO of Kraft Heinz'}
+};
+const PX_ASOF='Oct 16, 2026';
+for(const k in MKT)Object.assign(CO[k],{px0:MKT[k].px,ceoLast:MKT[k].last,ceoSince:MKT[k].since,ceoRole:MKT[k].role});
+const stockPx=(co,idx)=>co.px0*idx/100;
+function fmtPx(v){return '$'+(v>=100?v.toFixed(2):v.toFixed(2))}
 
 
 /* ---------- starting figures pulled from SEC filings (XBRL data, Oct 2026) ---------- */
