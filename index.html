@@ -2358,7 +2358,7 @@ function renderHome(){
   h+='<section class="stack tight"><div class="step"><span class="n">03</span><h2 class="h3">Take the job</h2></div>';
   h+='<div class="field"><label for="seed">Scenario code. Share it so a friend faces the same events.</label><input id="seed" value="'+esc(s.seed)+'" autocomplete="off" spellcheck="false"><p class="note" id="seednote" aria-live="polite"></p></div>';
   {const p=PL();
-  h+='<p class="who">'+(p?'You are <b>'+esc(p.name)+'</b>, taking the chair at <b>'+esc(c.name)+'</b>. <button class="link" data-act="plclear">Not you?</button>':'You will enter your name next, then take the chair at <b>'+esc(c.name)+'</b>.')+'</p>';}
+  h+='<p class="who">'+(p?'You are <b>'+esc(p.name)+'</b>, taking the chair at <b>'+esc(c.name)+'</b>. <button class="link" data-act="plclear">Not you?</button>':'You will enter your name and email next, then take the chair at <b>'+esc(c.name)+'</b>.')+'</p>';}
   h+='<div class="actions"><button class="btn" data-act="start">'+(PL()?esc(plFirst(PL().name))+', start as CEO of '+c.name:'Start as CEO of '+c.name)+'</button></div></section>';
   h+='<details class="fold"><summary>How it works</summary><ul class="list">';
   h+='<li>Each company starts from its latest annual and quarterly reports filed with the SEC. Every starting number links to its filing.</li>';
@@ -2371,7 +2371,7 @@ function renderHome(){
   h+='<li>The <b>stock price</b> starts at the real closing price on '+PX_ASOF+'. After that it moves with how your decisions play out in a simplified model of the company, so it is a score you can read like a stock, not a forecast. The <b>real playbook</b> plays the same scenario using the choices leadership actually announced.</li>';
   h+='<li>Photos and logos come from Wikimedia Commons. Credits are listed below.</li>';
   h+='<li>Leaderboard: after you finish a game you can post it under a name you choose. The server hands out each ranked scenario code and replays your choices to confirm the score, so numbers cannot be typed in. Only your name and result are saved.</li>';
-  h+='<li>Privacy: the site counts anonymous plays (which company and difficulty were picked, how far games got) and unique players using a random ID kept in your browser. These counts hold no names or emails. Separately, after a game you can choose to leave your email. It is stored privately for the site owner, who may write to you about his work. It is never shown to other players, sold or shared, and you can have it removed on the <a href="/privacy" target="_blank" rel="noopener">privacy page</a>. Do Not Track turns off the anonymous counts only. An hour-long abuse limit uses a scrambled form of your connection address that is not kept.</li><li>Simulation only; not investment advice.</li></ul></details>';
+  h+='<li>Privacy: the site counts anonymous plays (which company and difficulty were picked, how far games got) and unique players using a random ID kept in your browser. These counts hold no names or emails. Separately, the welcome screen asks for your name and email. They are stored privately for the site owner, who may write to you about his work. It is never shown to other players, sold or shared, and you can have it removed on the <a href="/privacy" target="_blank" rel="noopener">privacy page</a>. Do Not Track turns off the anonymous counts only. An hour-long abuse limit uses a scrambled form of your connection address that is not kept.</li><li>Simulation only; not investment advice.</li></ul></details>';
   h+='<p class="note">Intel, Boeing, UnitedHealth Group, Nike and Kraft Heinz are real companies used as settings. They are not affiliated with this game and have not endorsed it. Logos belong to their owners. The newspaper, advisors and analysts are fictional. Simulation only; not investment advice.</p>';
   h+='<p class="note"><a href="/method" target="_blank" rel="noopener">How the model works</a> &middot; <a href="/privacy" target="_blank" rel="noopener">Privacy</a></p>';
   h+=faceCredits();
@@ -2419,7 +2419,7 @@ function contactBlock(){
   if(!NET.ok)return '';
   const p=store.get(PKEY)||{};
   let h='<section class="section stack tight" id="contact"><h3 class="h3">A note from the developer</h3>';
-  if(p.email&&p.sent){
+  if(p.email){
     return h+'<p class="body">Thanks, your email is saved. You can have it removed any time on the <a href="/privacy" target="_blank" rel="noopener">privacy page</a>.</p></section>';
   }
   h+='<p class="body">I’m Cortland Clarke. I built this game on my own while I look for work in finance. If you leave your email, I may write to you once or twice about my work or roles I’m after. I will not sell or share it, and you can have it removed any time on the <a href="/privacy" target="_blank" rel="noopener">privacy page</a>. Leaving it is entirely optional. Here is <a href="https://cortlandclarke.com" target="_blank" rel="noopener">my site</a>.</p>';
@@ -2449,9 +2449,14 @@ function renderWelcome(){
   let h='<div class="stack enter welcome">';
   h+='<div class="wl-hero">'+logo(c.id,'lg')+'<div class="kicker">Welcome to the corner office</div><h1 class="h1" id="wl-h">'+(p?'Welcome, CEO '+esc(plLast(p.name))+'.':'Welcome, future CEO.')+'</h1></div>';
   h+='<p class="lede">For the next '+d.quarters+' quarters you run '+esc(c.name)+' from today’s numbers. '+esc(c.ceoLast)+'’s announced plan plays through the same scenario beside you, so you can see who does better.</p>';
-  h+='<form id="lead" class="wl-form" novalidate autocomplete="on"><p class="wl-ask">'+(p?'Welcome back. Check your name, then take the chair.':'Before you take the job, tell us who is taking it.')+'</p>';
+  const needMail=NET.ok;
+  h+='<form id="lead" class="wl-form" novalidate autocomplete="on"><p class="wl-ask">'+(p?'Welcome back. Check your details, then take the chair.':'Before you take the job, tell us who is taking it.')+'</p>';
   h+='<div class="field"><label for="plname">Your name</label><input id="plname" name="name" maxlength="40" autocomplete="name" autocapitalize="words" spellcheck="false" aria-describedby="plname-e" value="'+esc(p?p.name:'')+'" placeholder="First and last name"><p class="ferr" id="plname-e" role="alert"></p></div>';
-  h+='<p class="note">Your name goes on your scorecard and in the newspaper if the board fires you. It stays on this device. Nothing else is asked before you play.</p>';
+  if(needMail){
+    h+='<div class="field"><label for="plemail">Your email</label><input id="plemail" name="email" type="email" inputmode="email" maxlength="120" autocomplete="email" autocapitalize="off" spellcheck="false" aria-describedby="plemail-e" value="'+esc(p&&p.email?p.email:'')+'" placeholder="you@example.com"><p class="ferr" id="plemail-e" role="alert"></p></div>';
+    h+='<label class="chk"><input type="checkbox" id="plupd"'+(p&&p.updates?' checked':'')+'><span>Also email me when new companies and features are added.</span></label>';
+    h+='<p class="note">Your name goes on your scorecard and in the newspaper if the board fires you. I’m Cortland Clarke, a developer who built this game while looking for work in finance. I save your name and email privately and may write to you about my work or roles I’m after. I won’t sell or share them, and you can have them removed any time on the <a href="/privacy" target="_blank" rel="noopener">privacy page</a>.</p>';
+  }else h+='<p class="note">Your name goes on your scorecard and in the newspaper if the board fires you. It stays on this device.</p>';
   h+='<button class="btn" type="submit">Take the chair</button></form>';
   h+='<div class="wl-card">'+face(c.id,'xl')+'<div><div class="kicker" style="margin:0 0 4px">You take the chair of</div><div class="wl-name">'+esc(c.ceo)+'</div><div class="wl-role">'+esc(c.ceoRole)+' since '+esc(c.ceoSince)+'</div><div class="wl-stock">'+esc(c.ticker)+' closed at <b>'+pxs+'</b> on '+PX_ASOF+'</div></div></div>';
   h+='<ul class="wl-list"><li><b>The stock price shows how you are doing.</b> It starts at '+pxs+'. Put $10,000 in on day one and watch it grow or shrink with your decisions. Your final score also counts cash and debt, customers, people and trust, and stock is the biggest piece at 35%.</li>';
@@ -2468,7 +2473,17 @@ function enterGame(){
   n.setAttribute('aria-invalid',badN);
   if(badN){n.focus();return}
   const old=store.get(PKEY)||{};
-  store.set(PKEY,Object.assign({},old,{name}));
+  const m=document.getElementById('plemail');
+  if(m){
+    const email=m.value.trim(),em=document.getElementById('plemail-e'),bad=!plEmailOK(email);
+    em.textContent=bad?'Enter a valid email, like you@example.com.':'';
+    m.setAttribute('aria-invalid',bad);
+    if(bad){m.focus();return}
+    const upd=!!(document.getElementById('plupd')||{}).checked;
+    const same=old.email&&old.email.toLowerCase()===email.toLowerCase()&&old.name===name&&!!old.updates===upd;
+    store.set(PKEY,Object.assign({},old,{name,email,updates:upd,sent:same?!!old.sent:false}));
+    sendLead();/* sent in the background; if it fails it is retried on the next page load */
+  }else store.set(PKEY,Object.assign({},old,{name}));
   go('story');
 }
 /* ---------- WHY IS THE COMPANY STRUGGLING (replaces the old Strategy room) ---------- */
