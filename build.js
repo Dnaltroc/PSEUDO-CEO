@@ -33,4 +33,7 @@ for (const f of ['stats.html', 'og.png', 'privacy.html', 'method.html', 'robots.
   if (fs.existsSync(src(f))) fs.copyFileSync(src(f), out(f));
 }
 for (const f of fs.existsSync(src('fonts')) ? fs.readdirSync(src('fonts')) : []) fs.copyFileSync(src('fonts/' + f), out('fonts/' + f));
+/* short clips other sites embed (for example the preview on cortlandclarke.com) */
+fs.mkdirSync(out('media'), { recursive: true });
+for (const f of fs.existsSync(src('media')) ? fs.readdirSync(src('media')) : []) fs.copyFileSync(src('media/' + f), out('media/' + f));
 console.log('Built public/index.html', (html.length / 1024).toFixed(0) + ' KB;', fs.readdirSync(out('img')).length + ' photos in public/img');
