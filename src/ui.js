@@ -591,17 +591,17 @@ function enterGame(){
 /* Each point is [title, plain-English text, source refs, optional extra]. 'f0'.. point at c.facts; 'r:<force>' at the five-forces evidence links. */
 const STORY={
   intc:{head:'Intel’s chips are selling again, but the factories it built to make chips for other companies lose billions.',pts:[
-    ['The chip business is coming back.','Intel made $16.1 billion in the quarter ended June 27, up 25% from a year ago.',['f0']],
-    ['Making chips for other companies is the money pit.','Intel Foundry, the part that runs the factories, lost $2.1 billion in one quarter on $5.8 billion of sales.',['f1']],
-    ['Almost nobody outside Intel is buying.','Only about $293 million of that factory revenue came from outside customers. Nearly all the rest came from Intel’s own chip designers.',['f2']],
-    ['The next big bet has no announced volume customer.','Intel’s next chip-making process, called 14A, is aimed at 2028. Intel has not announced a signed volume commitment from an outside customer.',['f3']],
+    ['The chip business is coming back, for now.','Intel made $16.5 billion in the quarter ended Sept 26, up 21% from a year ago. It guided the next quarter down to $15 billion to $16 billion.',['f0']],
+    ['Making chips for other companies is the money pit.','Intel Foundry, the part that runs the factories, lost $1.9 billion in one quarter on $6.7 billion of sales.',['f1']],
+    ['Almost nobody outside Intel is buying.','Only about $411 million of that factory revenue came from outside customers, helped by a one-time contract. Nearly all the rest came from Intel’s own chip designers.',['f2']],
+    ['The next big bet has no announced volume customer.','Intel’s next chip-making process, called 14A, was aimed at 2028 on the last two earnings calls. Intel has not announced a signed volume commitment from an outside customer.',['f3']],
     ['Rivals are strong on every side.','AMD fights for PC and server chips, Nvidia leads in AI, and TSMC leads in making chips for other companies. Intel also buys its most advanced machines from a single supplier, ASML.',['r:rivalry','r:suppliers']]],
     job:'Keep spending billions on factories that lose money, or protect cash for the chip products that are finally selling?'},
   ba:{head:'Boeing is building planes faster again, but it still loses money and one quality slip could undo the progress.',pts:[
-    ['It is still losing money.','Boeing had $24.56 billion in sales in the quarter ended June 30 and still lost money: $0.76 a share on a core (adjusted) basis, or $0.67 under standard accounting rules.',['f0']],
-    ['Production is climbing.','Boeing began moving the 737 MAX to 47 planes a month in the quarter ended June 30.',['f1']],
-    ['Cash is the scoreboard.','Boeing expects to keep only $1 billion to $3 billion of free cash this year, which is the cash left after paying its bills and buying equipment. It calls $10 billion attainable as it works through its backlog.',['f2']],
-    ['Customers are waiting, but not forever.','Commercial orders on hand come to $597 billion, more than 6,200 planes. Delays let airlines ask for payback or cancel. The first 777X is not due until 2027.',['f3','r:buyers']],
+    ['It is still losing money.','Boeing had $24.19 billion in sales in the quarter ended Sept 30 and still lost money: $0.34 a share on a core (adjusted) basis, or $0.26 under standard accounting rules.',['f0']],
+    ['Production is climbing, slower than hoped.','Boeing is still working to steady the 737 MAX at 47 planes a month and now expects that to take into 2027.',['f1']],
+    ['Cash is the scoreboard.','Boeing expects to keep only about $2 billion of free cash this year, which is the cash left after paying its bills and buying equipment. It targets $10 billion in 2029 as it works through its backlog.',['f2']],
+    ['Customers are waiting, but not forever.','Commercial orders on hand come to $612 billion, more than 6,300 planes. Delays let airlines ask for payback or cancel. The first 777X is not due until 2027.',['f3','r:buyers']],
     ['Boeing depends on a few suppliers.','Many parts come from a single source and take a long time to approve. Engine delays hold up the 787, and Boeing bought Spirit to get more control.',['r:suppliers']]],
     job:'Build faster to bring in cash, or slow down to protect quality?'},
   unh:{head:'UnitedHealth is recovering from a cyberattack and missed targets. Its profit is coming back, partly because it let customers go.',pts:[
